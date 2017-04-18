@@ -5,6 +5,7 @@ module.exports = {
     help: 'Reload the commands',
     func: (client, msg, args) => {
         console.time('reload');
+        msg.delete();
         if(msg.author.id!==config.discord.owner) {
             msg.channel.sendMessage('Papi <@'+config.discord.owner+'> (づ⍜⍘⍜)づ, <@' + msg.author.id + '> tried to abuse me, ban him pls!');
             return;

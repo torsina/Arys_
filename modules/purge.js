@@ -13,7 +13,7 @@ module.exports = {
             msg.channel.sendMessage("You can't do that in a DM, dummy!");
             return;
         }
-        if (!args){
+        if (!args.length){
             msg.channel.sendMessage("Please define an ammount of messages for me to delete!");
             return;
         }
@@ -54,7 +54,7 @@ module.exports = {
             msg.channel.sendMessage("I can't delete that much messages of that user in safe-mode, add `--force` to your message to force me to delete.");
             return;
         }
-        if (args[0] === "user" && args[3] === "--force") { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
+        if (args[0] === "user" && args[2] < config.purge.max && args[3] === "--force") { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
 
             let messagecount = parseInt(args[2]);
             msg.channel.fetchMessages({
@@ -77,7 +77,7 @@ module.exports = {
             msg.channel.sendMessage("I can't delete that much messages in safe-mode, add `--force` to your message to force me to delete.");
             return;
         }
-        if (args[0] == "--force"){
+        if (args[0] === "--force"){
             msg.channel.sendMessage("Please put `--force` at the end of your message.");
             return;
         }
