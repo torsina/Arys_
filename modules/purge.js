@@ -8,20 +8,22 @@ module.exports = {
         }
 
 
-        var user_permissions = msg.channel.permissionsFor(client.user);
-        if (msg.channel.server) {
+
+        if (msg.channel.type === 'dm') {
             msg.channel.sendMessage("You can't do that in a DM, dummy!");
             return;
         }
-        if (args[0] == ''){
+        if (!args){
             msg.channel.sendMessage("Please define an ammount of messages for me to delete!");
             return;
         }
-        if (!user_permissions.hasPermission("MANAGE_MESSAGES")) {
+        let bot_permissions = msg.channel.permissionsFor(client.user);
+        let user_permissions = msg.channel.permissionsFor(msg.author);
+        if (!user_permissions.hasPermission("MANAGE_MESSAGES") && msg.author.id!==config.discord.owner) {
             msg.channel.sendMessage("Sorry, your permissions doesn't allow that.");
             return;
         }
-        if (!user_permissions.hasPermission("MANAGE_MESSAGES")) {
+        if (!bot_permissions.hasPermission("MANAGE_MESSAGES")) {
             msg.channel.sendMessage("I don't have permission to do that!");
             return;
         }
@@ -96,4 +98,4 @@ module.exports = {
 
             });
     }
-}
+};

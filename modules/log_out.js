@@ -12,4 +12,4 @@ module.exports = {
             client.destroy((err) => {console.log(err);});
         }
     }
-}
+};

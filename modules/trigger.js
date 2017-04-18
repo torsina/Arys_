@@ -4,4 +4,4 @@ module.exports = {
         msg.channel.sendMessage('pong ' + args[0]);
 
     }
-}
+};

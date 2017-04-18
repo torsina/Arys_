@@ -75,6 +75,6 @@ module.exports = {
             return;
         }
     }
-}
+};
 
 module.exports.line = line.length;

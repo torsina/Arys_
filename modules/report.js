@@ -67,10 +67,4 @@ module.exports = {
             });
         });
     }
-}
-//"file : " + args[0] + " id : " + args[1] + "was deleted"
-
-
-/*msg.channel.fetchMessage(post.report_count)
- .then(message => console.log(message.content))
- .catch(console.error);*/
+};
