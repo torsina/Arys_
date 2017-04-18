@@ -58,19 +58,28 @@ module.exports = {
 
             let messagecount = parseInt(args[2]);
             msg.channel.fetchMessages({
-                limit: config.purge.max
+                limit: config.purge.max,
             })
                 .then(messages => {
                     let msg_array = messages.array();
                     // filter the message to only your own
                     msg_array = msg_array.filter(m => m.author.id === msg.mentions.users.first().id);
                     // limit to the requested number + 1 for the command message
-                    msg_array.length = messagecount + 1;
+                    while (msg_array  < args[2]) {
+                        msg.channel.fetchMessages({
+                            limit: config.purge.max,
+                            before: messages
+                        })
+                            .then(m => {
+                                msg_array += m.filter(m => m.author.id === msg.mentions.users.first().id);
+                            });
+                        console.log("test");
+                    }
                     // Has to delete messages individually. Cannot use `deleteMessages()` on selfbots.
                     //msg_array.map(m => m.delete().catch(console.error));
                     msg.channel.bulkDelete(msg_array);
-
-                });
+                })
+                .catch(console.error);
             return;
         }
         if (args[0] > config.purge.safe && args[1] !== "--force"){
