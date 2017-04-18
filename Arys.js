@@ -8,10 +8,9 @@ const Client = new Discord.Client();
 //const hexColor = 0xE16699;
 
 const db = new sqlite3.Database(config.db.file);
-var post_id;
 Client.login(config.discord.token.bot);
 
-
+console.log("test");
 // Au chargement du programme
 Client.on('ready', () => {
     console.time('loading');
