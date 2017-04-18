@@ -5,12 +5,8 @@ const path = require('path');
 const config = require('./config/config');
 const sqlite3 = require('sqlite3').verbose();
 const Client = new Discord.Client();
-//const hexColor = 0xE16699;
-
 const db = new sqlite3.Database(config.db.file);
 Client.login(config.discord.token.bot);
-
-console.log("test");
 // Au chargement du programme
 Client.on('ready', () => {
     console.time('loading');
@@ -45,6 +41,7 @@ Client.load = (command) => {
 Client.on('message', message => {
 
     //if(message.author.id=='245614884786667520') {
+        if(message.channel.id==="257541472772030464") {return;}
         if (message.content.startsWith(config.discord.prefix)) {
             if (message.author.bot) return;
 

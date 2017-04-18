@@ -22,16 +22,15 @@ module.exports = {
 
             db.each("SELECT id_message, report_count FROM post WHERE id_image='"+args[0]+"'", function(err, post) { // SELECT id_image, id_message, id_file WHERE id_file="file_name" FROM post
                 let report = parseInt(post.report_count) + 1;
-                if(msg.author.id===config.discord.owner){
-                    if(args[1] = 'force'){
-                        msg.channel.fetchMessage(post.id_message)
-                            .then(m => {
-                                m.delete()
-                                msg.channel.sendMessage("id : "+args[0]+" was deleted")
-                            })
-                            .catch(console.error);
+                if(msg.author.id===config.discord.owner && args[1]==='--force'){
+                    msg.channel.fetchMessage(post.id_message)
+                        .then(m => {
+                            m.delete()
+                            msg.channel.sendMessage("id : "+args[0]+" was deleted")
+                        })
+                        .catch(console.error);
                         return;
-                    }
+
                 }
                 else if(!image[args[0]].includes(msg.author.id)){
                     image[args[0]][report-1] = msg.author.id;
@@ -52,7 +51,7 @@ module.exports = {
                 msg.channel.fetchMessage(post.id_message)
                     .then(m => {
                         let edit = m.content.split("-");
-                        edit[0] += "-" + "\n" + "report count : " + report;
+                        edit[0] += "\n" + "-" + "\n" + "report count : " + report;
                         m.edit(edit[0])
                             .catch(console.error);
                     })

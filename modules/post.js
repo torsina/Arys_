@@ -1,17 +1,12 @@
-//import
 const fs = require('fs');
 const Arys = require('../Arys');
-const Client = Arys.Client;
-const Discord = require('discord.js');
+const config = require('../config/config');
 
 const db = Arys.db;
 const wait = Arys.wait;
 
-const file = "hentai";
-const line = fs.readFileSync(file + '.txt').toString().split("\n");
-const n_line = line.length;
+const line = fs.readFileSync(config.post.file + '.txt').toString().split("\n");
 
-console.log(n_line);
 function save(value) {
     fs.writeFile("save.txt", value, function(err) {
         if(err) {
@@ -32,7 +27,7 @@ module.exports = {
         setTimeout(function() {
             msg.delete();
         }, wait);
-        if(msg.channel.id=='275280722531581952' || msg.author.id==='245614884786667520'){
+        if(msg.channel.id==='275280722531581952' || msg.author.id===config.discord.owner){
             if (args.length < 1){
                 msg.reply("please add the number of image you want (._. )").then(m => {
                     setTimeout(function() {
@@ -41,8 +36,8 @@ module.exports = {
                 });
                 return;
             }
-            if (args[0] > 5 && msg.author.id!='245614884786667520'){
-                msg.reply("don't make me use all of my material you horny fuck !"+"\n\n" + "Go fap to your girlfriend, Oh wait..").then(m => {
+            if (args[0] > 5 && msg.author.id!==config.discord.owner){
+                msg.reply("don't make me use all of my material you horny fuck !"+"\n" + "Go fap to your girlfriend, Oh wait..").then(m => {
                     setTimeout(function() {
                         m.delete();
                     }, wait);
@@ -66,7 +61,7 @@ module.exports = {
                 msg.channel.sendMessage('id : ' + i + "\n" + line[i]).then(m => {
                     db.serialize(function () {
                         let stmt = db.prepare("INSERT INTO post VALUES (?,?,?,?)");  // ? --->var.run(i)  // db.run("CREATE TABLE post(id_image smallint, id_message varchar(18), id_file varchar(20))");
-                        stmt.run(start, m.id, file, 0); //id_image, id_message, id_file, report_count
+                        stmt.run(start, m.id, config.post.file, 0); //id_image, id_message, id_file, report_count
                         start++;
                         stmt.finalize();
                     });
@@ -82,4 +77,4 @@ module.exports = {
     }
 }
 
-module.exports.line = n_line;
+module.exports.line = line.length;

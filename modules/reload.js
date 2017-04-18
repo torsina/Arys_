@@ -1,17 +1,18 @@
 const Arys = require('../Arys');
 const wait = Arys.wait;
+const config = require('../config/config');
 module.exports = {
     help: 'Reload the commands',
     func: (client, msg, args) => {
         console.time('reload');
-        if(msg.author.id!='245614884786667520') {
-            msg.channel.sendMessage('Papi <@245614884786667520> (づ⍜⍘⍜)づ, <@' + msg.author.id + '> tried to abuse me, ban him pls!');
+        if(msg.author.id!==config.discord.owner) {
+            msg.channel.sendMessage('Papi <@'+config.discord.owner+'> (づ⍜⍘⍜)づ, <@' + msg.author.id + '> tried to abuse me, ban him pls!');
             return;
         }
 
         if (args.length > 0){
             client.load(args[0]);
-            msg.channel.sendMessage('Command '+ args[0] + ' loaded').then(m => {
+            msg.channel.sendMessage('Command '+ args[0] + ' reloaded').then(m => {
                 setTimeout(function() {
                     m.delete();
                 }, wait);

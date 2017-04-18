@@ -13,10 +13,11 @@ module.exports = {
         file: "Arys.db"
     },
     purge: {
-        max: 20
+        safe: 20,
+        max: 100
     },
     post: {
-        max: 5,
+        safe: 5,
         file: "hentai"
     }
 }

@@ -1,8 +1,9 @@
+const config = require('../config/config');
 module.exports = {
     help: 'Disconect the bot',
     func: (client, msg, args) => {
-        if(msg.author.id!='245614884786667520') {
-            msg.channel.sendMessage('Papi <@245614884786667520> (づ⍜⍘⍜)づ, <@' + msg.author.id + '> tried to abuse me, ban him pls!');
+        if(msg.author.id!==config.discord.owner) {
+            msg.channel.sendMessage('Papi <@' + config.discord.owner + '> (づ⍜⍘⍜)づ, <@' + msg.author.id + '> tried to abuse me, ban him pls!');
             return;
         }
 

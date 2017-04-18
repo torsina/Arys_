@@ -4,13 +4,9 @@ const config = require('../config/config');
 module.exports = {
     help: 'Ping, Pong',
     func: (client, msg, args) => {
-       msg.channel.sendMessage('pong ' + msg.author.id);
-       if(msg.author.id===config.discord.owner){
-           msg.reply("ffs understand how this work")
-       }
-       else{
-           msg.reply("please..");
-       }
+       msg.channel.sendMessage('pong ' + msg.mentions.users.first().id);
+
+
     }
 }
 
