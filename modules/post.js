@@ -26,13 +26,13 @@ module.exports = {
     func: (client, msg, args) => {
         setTimeout(function() {
             msg.delete();
-        }, wait);
+        }, config.discord.wait);
         if(msg.channel.id==='275280722531581952' || msg.author.id===config.discord.owner){
             if (args.length < 1){
                 msg.reply("please add the number of image you want (._. )").then(m => {
                     setTimeout(function() {
                         m.delete();
-                    }, wait+2000);
+                    }, config.discord.wait+2000);
                 });
                 return;
             }
@@ -40,7 +40,7 @@ module.exports = {
                 msg.reply("don't make me use all of my material you horny fuck !"+"\n" + "Go fap to your girlfriend, Oh wait..").then(m => {
                     setTimeout(function() {
                         m.delete();
-                    }, wait);
+                    }, config.discord.wait);
                 });
                 return;
             }
@@ -49,7 +49,7 @@ module.exports = {
                 msg.channel.sendMessage('The list start from the beginning again papi <@245614884786667520>').then(m => {
                     setTimeout(function() {
                         m.delete();
-                    }, wait);
+                    }, config.discord.wait);
                 });
                 save(0);
                 return;
