@@ -55,18 +55,18 @@ module.exports.rolePerm = {
 module.exports.load = function() {
     const perm = require('./roles').rolePerm;
     const id = require('./roles').id;
-    perm.trending = Object.assign({}, perm.fresh);
-    perm.nsfw_god = Object.assign({}, perm.trending);
-    perm.eye = Object.assign({}, perm.nsfw_god);
-    perm.smurf = Object.assign({}, perm.eye);
-    perm.admin = Object.assign({}, perm.smurf);
-    perm.bot_owner = Object.assign({}, perm.admin);
+    perm.trending = Object.assign(perm.trending, perm.fresh);
+    perm.nsfw_god = Object.assign(perm.nsfw_god, perm.trending);
+    perm.eye = Object.assign(perm.eye, perm.nsfw_god);
+    perm.smurf = Object.assign(perm.smurf, perm.eye);
+    perm.admin = Object.assign(perm.admin, perm.smurf);
+    perm.bot_owner = Object.assign(perm.bot_owner, perm.admin);
     perm.fresh.id = id.fresh;
     perm.trending.id = id.trending;
     perm.nsfw_god.id = id.nsfw_god;
     perm.eye.id = id.eye;
     perm.smurf.id = id.smurf;
     perm.admin.id = id.admin;
-    console.log("perm : " + perm.bot_owner.help.base);
+    console.log("perm : " + perm.bot_owner.logout.base);
     console.log("id : " + perm.admin.id);
 };

@@ -49,14 +49,21 @@ module.exports.perm = {
         }
     },
 };
-const perm = require("./perms");
-module.exports.getPermission = function (path) {
+const basePerm = require("./perms").perm;
+const perms = require('./perms');
+const rolesPerm = require("./roles");
 
+module.exports.getPermission = function (path, source) {
+    console.log("I am here, " + rolesPerm.rolePerm.admin.reload.base);
     if (!path)
         return path;
 
     const pathComponents = path.trim().split(/\./);
-    let base = perm[pathComponents[0]];
+    if (source === "role") {
+        var base = rolesPerm.rolePerm[pathComponents[0]];
+    } else {
+        var base = basePerm[pathComponents[0]];
+    }
 
     if (base === undefined) {
         return "ERROR: " + pathComponents[0] + " is undefined";
@@ -102,4 +109,7 @@ function getBase(base, path, list) {
         }
     }
 }
-
+// perm, role
+module.exports.check = function (perm, role) {
+    perms.getPermission();
+}
