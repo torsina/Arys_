@@ -24,9 +24,6 @@ function load() {
 module.exports = {
     help: 'usage: $post (number of image, the number cant be more than 5 for obvious reasons)',
     func: (client, msg, args) => {
-        setTimeout(function() {
-            msg.delete();
-        }, config.discord.wait);
         if(msg.channel.id==='275280722531581952' || msg.author.id===config.discord.owner){
             if (args.length < 1){
                 msg.reply("please add the number of image you want (._. )").then(m => {
