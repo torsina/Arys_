@@ -36,7 +36,7 @@ Client.load = (command) => {
             }
         }
     }
-}
+};
 
 Client.on('message', message => {
 
@@ -56,7 +56,7 @@ Client.on('message', message => {
                 console.log(args);
             }
         }
-    else{return;}
+    else{}
 });
 
 process.on("unhandledRejection", err => {
