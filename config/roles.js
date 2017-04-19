@@ -1,4 +1,3 @@
-const config = require('./config');
 module.exports.id = {
     fresh: "276647021790887937",
     trending: "248176040428437504",
@@ -8,7 +7,7 @@ module.exports.id = {
     admin: "242684239223455755"
 };
 
-module.exports.perm = {
+module.exports.rolePerm = {
     fresh: {
         help: {
             base: true
@@ -52,4 +51,22 @@ module.exports.perm = {
     },
     bot_owner: {
     }
+};
+module.exports.load = function() {
+    const perm = require('./roles').rolePerm;
+    const id = require('./roles').id;
+    perm.trending = Object.assign({}, perm.fresh);
+    perm.nsfw_god = Object.assign({}, perm.trending);
+    perm.eye = Object.assign({}, perm.nsfw_god);
+    perm.smurf = Object.assign({}, perm.eye);
+    perm.admin = Object.assign({}, perm.smurf);
+    perm.bot_owner = Object.assign({}, perm.admin);
+    perm.fresh.id = id.fresh;
+    perm.trending.id = id.trending;
+    perm.nsfw_god.id = id.nsfw_god;
+    perm.eye.id = id.eye;
+    perm.smurf.id = id.smurf;
+    perm.admin.id = id.admin;
+    console.log("perm : " + perm.bot_owner.help.base);
+    console.log("id : " + perm.admin.id);
 };

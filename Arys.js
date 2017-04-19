@@ -6,12 +6,13 @@ const config = require('./config/config');
 const sqlite3 = require('sqlite3').verbose();
 const Client = new Discord.Client();
 const db = new sqlite3.Database(config.db.file);
+const roles = require('./config/roles');
 Client.login(config.discord.token.bot);
 // Au chargement du programme
 Client.on('ready', () => {
     console.time('loading');
     Client.load();
-
+    roles.load();
     console.timeEnd('loading');
     console.log('I am ready!');
 });
