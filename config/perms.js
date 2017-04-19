@@ -66,7 +66,8 @@ module.exports.getPermission = function (path, source) {
     }
 
     if (base === undefined) {
-        return "ERROR: " + pathComponents[0] + " is undefined";
+        console.error("ERROR: " + pathComponents[0] + " is undefined");
+        return -1;
     }
 
     // Check if only the base is needed
@@ -77,7 +78,8 @@ module.exports.getPermission = function (path, source) {
 
             // Error,
             if (test === undefined) {
-                return "ERROR: " + component + " is undefined";
+                console.error("ERROR: " + component + " is undefined")
+                return -1;
             }
 
             // Go to next base
@@ -110,6 +112,14 @@ function getBase(base, path, list) {
     }
 }
 // perm, role
-module.exports.check = function (perm, role) {
-    perms.getPermission();
-}
+module.exports.check = function (path) {
+    if(perms.getPermission(path, "role") !== -1) {
+        return perms.getPermission(path, "role");
+    }
+    else if(perms.getPermission(path) !== -1) {
+        return perms.getPermission(path);
+    }
+    else {
+        return "wrong permission";
+    }
+};
