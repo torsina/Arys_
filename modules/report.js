@@ -56,7 +56,7 @@ module.exports = {
                             .catch(console.error);
                     })
                     .catch(console.error);
-                if(report > 3){
+                if(report > config.report.need){
                     msg.channel.fetchMessage(post.id_message)
                         .then(m => {
                             m.delete();
