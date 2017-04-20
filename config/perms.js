@@ -17,7 +17,8 @@ module.exports.perm = {
     post: {
         base: false,
         max : 5,
-        force: false
+        force: false,
+        reset: false
     },
     report: {
         base: false,
@@ -34,10 +35,8 @@ module.exports.perm = {
             base: false,
             bypass: false,
             force: false,
-            max: 100,
             user: {
                 base: false,
-                max: 100,
                 force: false
             }
         },
@@ -112,9 +111,13 @@ function getBase(base, path, list) {
     }
 }
 // perm, role
-module.exports.check = function (path) {
-    if(perms.getPermission(path, "role") !== -1) {
-        return perms.getPermission(path, "role");
+module.exports.check = function (path, role) {
+    if(role !== null) {
+        let input = role + "." + path;
+        console.log(input);
+        if(perms.getPermission(input, "role") !== -1) { //input = role + "." + path
+            return perms.getPermission(input, "role");
+        }
     }
     else if(perms.getPermission(path) !== -1) {
         return perms.getPermission(path);

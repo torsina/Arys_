@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Arys = require('../Arys');
 const config = require('../config/config');
-
+const perms = require('../config/perms');
 const db = Arys.db;
 const wait = Arys.wait;
 
@@ -23,7 +23,12 @@ function load() {
 
 module.exports = {
     help: 'usage: $post (number of image, the number cant be more than 5 for obvious reasons)',
-    func: (client, msg, args) => {
+    func: (client, msg, args, role) => {
+
+        if(perms.check("post.base", role) !== true) {
+            msg.channel.sendMessage("You don't have the permission to do that");
+            return;
+        }
         if(msg.channel.id==='275280722531581952' || msg.author.id===config.discord.owner){
             if (args.length < 1){
                 msg.reply("please add the number of image you want (._. )").then(m => {
@@ -33,7 +38,7 @@ module.exports = {
                 });
                 return;
             }
-            if (args[0] > 5 && msg.author.id!==config.discord.owner){
+            if (args[0] > perms.check("post.max", role) || perms.check("post.force", role) !== true){
                 msg.reply("don't make me use all of my material you horny fuck !"+"\n" + "Go fap to your girlfriend, Oh wait..").then(m => {
                     setTimeout(function() {
                         m.delete();
@@ -42,7 +47,7 @@ module.exports = {
                 return;
             }
             if (args.length < 1) return;
-            if (args[0] == 'reset') {
+            if (args[0] === 'reset' && perms.check("post.reset", role) === true) {
                 msg.channel.sendMessage('The list start from the beginning again papi <@245614884786667520>').then(m => {
                     setTimeout(function() {
                         m.delete();

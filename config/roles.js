@@ -1,12 +1,16 @@
 module.exports.id = {
     fresh: "276647021790887937",
     trending: "248176040428437504",
-    nsfw_god: "276058085641027584",
+    captain: "244175416460443649",
+    op: "280671574321922048",
+    oldfag: "288607952468836352",
+    hot: "248164589458554883",
+    nsfw_god: "276058085641027584", //276058085641027584
     eye: "242971198718345216",
     smurf: "253880732626321418",
-    admin: "242684239223455755"
+    admin: "242684239223455755" //242684239223455755
 };
-
+//244175416460443649
 module.exports.rolePerm = {
     fresh: {
         help: {
@@ -50,6 +54,12 @@ module.exports.rolePerm = {
         }
     },
     bot_owner: {
+        ping: {
+            base: true
+        },
+        post: {
+            reset: true
+        }
     }
 };
 module.exports.load = function() {
@@ -67,6 +77,4 @@ module.exports.load = function() {
     perm.eye.id = id.eye;
     perm.smurf.id = id.smurf;
     perm.admin.id = id.admin;
-    console.log("perm : " + perm.bot_owner.logout.base);
-    console.log("id : " + perm.admin.id);
 };

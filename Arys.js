@@ -50,15 +50,59 @@ Client.on('message', message => {
             command = args[0].slice(config.discord.prefix.length);
             args.splice(0, 1);
 
+            //var id = message.mentions.roles.first().id;
+            //let role = check(member);
+            let member = message.guild.member(Client.users.get(message.author.id));
+            let role = check(member);
+
             if (command in Client.commands) {
                 let timestamp = new Date();
                 console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ' + command);
-                Client.commands[command].func(Client, message, args);
+                Client.commands[command].func(Client, message, args, role);
                 console.log(args);
             }
         }
     else{}
 });
+
+function check(member){
+    if(member.roles.has(roles.id.admin)) {
+        return "admin";
+    }
+    else if(member.id === config.discord.owner) {
+        return "bot_owner";
+    }
+    else if(member.roles.has(roles.id.smurf)) {
+        return "smurf";
+    }
+    else if(member.roles.has(roles.id.eye)) {
+        return "eye";
+    }
+    else if(member.roles.has(roles.id.nsfw_god)) {
+        return "nsfw_god";
+    }
+    else if(member.roles.has(roles.id.hot)) {
+        return "hot";
+    }
+    else if(member.roles.has(roles.id.oldfag)) {
+        return "oldfag";
+    }
+    else if(member.roles.has(roles.id.op)) {
+        return "op";
+    }
+    else if(member.roles.has(roles.id.captain)) {
+        return "captain";
+    }
+    else if(member.roles.has(roles.id.trending)) {
+        return "trending";
+    }
+    else if(member.roles.has(roles.id.fresh)) {
+        return "fresh";
+    }
+    else {
+        return "none";
+    }
+}
 
 process.on("unhandledRejection", err => {
     console.error("Uncaught Promise Error: \n" + err.stack);
