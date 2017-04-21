@@ -43,6 +43,9 @@ Client.on('message', message => {
 
     //if(message.author.id=='245614884786667520') {
         if(message.channel.id==="257541472772030464") {return;}
+        if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
+            message.channel.sendMessage("throw her in a pit and let me do the rest")
+        }
         if (message.content.startsWith(config.discord.prefix)) {
             if (message.author.bot) return;
 
