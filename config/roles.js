@@ -29,28 +29,42 @@ module.exports.rolePerm = {
             max : 5,
         }
     },
+    captain: {
+    },
+    op : {
+    },
+    oldfag: {
+    },
+    hot : {
+    },
     nsfw_god: {
         post: {
             force: true
         }
     },
     eye: {
-        purge: {
-            all: true
-        },
+        mod: {
+            purge: {
+                all: true
+            }
+        }
     },
     smurf: {
-        logout: {
-            base: true
-        },
-        perm: {
-            base: true
+        mod: {
+            logout: {
+                base: true
+            },
+            perm: {
+                base: true
+            }
         }
     },
     admin: {
-        reload: {
-            base: true,
-            command: true
+        mod: {
+            reload: {
+                base: true,
+                command: true
+            }
         }
     },
     bot_owner: {
@@ -63,18 +77,96 @@ module.exports.rolePerm = {
     }
 };
 module.exports.load = function() {
-    const perm = require('./roles').rolePerm;
-    const id = require('./roles').id;
-    perm.trending = Object.assign(perm.trending, perm.fresh);
-    perm.nsfw_god = Object.assign(perm.nsfw_god, perm.trending);
-    perm.eye = Object.assign(perm.eye, perm.nsfw_god);
-    perm.smurf = Object.assign(perm.smurf, perm.eye);
-    perm.admin = Object.assign(perm.admin, perm.smurf);
-    perm.bot_owner = Object.assign(perm.bot_owner, perm.admin);
+    let perm = require('./roles').rolePerm;
+    let id = require('./roles').id;
+    let assign = require('assign-deep');
+    let perms = require('./perms');
+    let objectPath = require('object-path');
+    //make that every role extand from the one above
+    assign(perm.trending, perm.fresh);
+    assign(perm.captain, perm.trending);
+    assign(perm.op, perm.captain);
+    assign(perm.oldfag, perm.op);
+    assign(perm.hot, perm.oldfag);
+    assign(perm.nsfw_god, perm.hot);
+    assign(perm.eye, perm.nsfw_god);
+    assign(perm.smurf, perm.eye);
+    assign(perm.admin, perm.smurf);
+    assign(perm.bot_owner, perm.admin);
     perm.fresh.id = id.fresh;
     perm.trending.id = id.trending;
+    perm.captain.id = id.captain;
+    perm.op.id = id.op;
+    perm.oldfag.id = id.oldfag;
+    perm.hot.id = id.hot;
     perm.nsfw_god.id = id.nsfw_god;
     perm.eye.id = id.eye;
     perm.smurf.id = id.smurf;
     perm.admin.id = id.admin;
+    console.log(Object.keys(perm));
+    keys = Object.keys(perm);
+    for(i = 0; i<keys.length; i++) {
+        let a;
+        let str;
+        //console.log(perms.check("", Object.keys(perm)[i]));
+        for(j = 0; j<perms.check("", keys[i]).length; j++) {
+            a = perms.check("", Object.keys(perm)[i])[j];
+            //console.log(a);
+            if(a.search(".all=true") !== -1) {
+                let b = a.split(".");
+                for(k = 0; k<b.length; k++) {
+                    if(b[k] === "all=true") { //k-1
+                        //console.log(b[k-1] + " I AM HERE");
+                        for(l = 1; l<b.length-1; l++) {
+                            if(l == 1) {
+                                str = b[l];
+                                //console.log(str);
+                            }
+                            else{
+                                str += "." + b[l];
+                            }
+                        }
+                    }
+                }
+                //console.log(str);
+                //console.log(perms.check(str));
+                let x = perms.check(str);
+                for (m = 1; m<x.length; m++) {
+                    let y = keys[i] + "." + x[m]; //keys[i] + "." +
+                    //y.slice(y.search("=false"), y.length);
+                    let z = y.replace("=false", "");
+                    console.log(z);
+                    //eval(z);
+                    objectPath.set(perm, z, true);
+                }
+            }
+        }
+    }
 };
+
+/*
+ Object.assign(perm.trending, perm.fresh, perm.trending);
+ Object.assign(perm.captain, perm.trending, perm.captain);
+ Object.assign(perm.op, perm.captain, perm.op);
+ Object.assign(perm.oldfag, perm.op, perm.oldfag);
+ Object.assign(perm.hot, perm.oldfag, perm.hot);
+ Object.assign(perm.nsfw_god, perm.hot, perm.nsfw_god);
+ Object.assign(perm.eye, perm.nsfw_god, perm.eye);
+ Object.assign(perm.smurf, perm.eye, perm.smurf);
+ Object.assign(perm.admin, perm.smurf, perm.admin);
+ Object.assign(perm.bot_owner, perm.admin, perm.bot_owner);
+ */
+
+//console.log(b + " : " + b.length);
+/*for(k = 0; k<b.length; k++) {
+ if(b[k] === "all=true") { //k-1
+ console.log(b[k-1] + " I AM HERE");
+ /*for(l = 0; l<b.length-1; l++) {
+ if(l = 0) {
+ str = b[l];
+ }
+ str += b[l] + ".";
+ }
+ console.log(str);
+ }
+ }*/

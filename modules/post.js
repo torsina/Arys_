@@ -38,7 +38,7 @@ module.exports = {
                 });
                 return;
             }
-            if (args[0] > perms.check("post.max", role) || perms.check("post.force", role) !== true){
+            if (args[0] > parseInt(perms.check("post.max", role)) && perms.check("post.force", role) !== true){ //
                 msg.reply("don't make me use all of my material you horny fuck !"+"\n" + "Go fap to your girlfriend, Oh wait..").then(m => {
                     setTimeout(function() {
                         m.delete();

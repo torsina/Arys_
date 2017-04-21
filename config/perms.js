@@ -53,7 +53,6 @@ const perms = require('./perms');
 const rolesPerm = require("./roles");
 
 module.exports.getPermission = function (path, source) {
-    console.log("I am here, " + rolesPerm.rolePerm.admin.reload.base);
     if (!path)
         return path;
 
@@ -112,9 +111,19 @@ function getBase(base, path, list) {
 }
 // perm, role
 module.exports.check = function (path, role) {
-    if(role !== null) {
-        let input = role + "." + path;
-        console.log(input);
+    if(role !== undefined) {
+        let input;
+        if (path === "") {
+            input = role;
+            //console.log("full tree");
+        }
+        else {
+            input = role + "." + path;
+            console.log("not full tree");
+        }
+        //console.log(path + " path");
+        //console.log(role + " role");
+        //console.log(input + " input");
         if(perms.getPermission(input, "role") !== -1) { //input = role + "." + path
             return perms.getPermission(input, "role");
         }

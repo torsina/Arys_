@@ -5,7 +5,7 @@ module.exports = {
     func: (client, msg, args, role) => {
 
         if(perms.check("purge.base", role) !== true) {
-            msg.channel.sendMessage("You don't have the permission to do that");
+            msg.channel.sendMessage("You don't have the permission `purge.base`");
             return;
         }
 
