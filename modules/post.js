@@ -26,10 +26,10 @@ module.exports = {
     func: (client, msg, args, role) => {
 
         if(perms.check("post.base", role) !== true) {
-            msg.channel.sendMessage("You don't have the permission to do that");
+            msg.channel.sendMessage("You don't have the permission `post.base`");
             return;
         }
-        if(msg.channel.id==='275280722531581952' || msg.author.id===config.discord.owner){
+        if(msg.channel.id==='275280722531581952' || role === "bot_owner"){
             if (args.length < 1){
                 msg.reply("please add the number of image you want (._. )").then(m => {
                     setTimeout(function() {

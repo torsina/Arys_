@@ -4,7 +4,7 @@ module.exports = {
     func: (client, msg, args, role) => {
 
         if(perms.check("interaction.trigger.base", role) !== true) {
-            msg.channel.sendMessage("You don't have the permission to do that");
+            msg.channel.sendMessage("You don't have the permission `interaction.trigger.base`");
             return;
         }
         msg.delete();

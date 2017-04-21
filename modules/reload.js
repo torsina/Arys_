@@ -5,16 +5,12 @@ const perms = require('../config/perms');
 module.exports = {
     help: 'Reload the commands',
     func: (client, msg, args, role) => {
-        if(perms.check("reload.base", role) !== true) {
-            msg.channel.sendMessage("You don't have the permission to do that");
+        if(perms.check("mod.reload.base", role) !== true) {
+            msg.channel.sendMessage("You don't have the permission `mod.reload.base`");
             return;
         }
         console.time('reload');
         msg.delete();
-        if(msg.author.id!==config.discord.owner) {
-            msg.channel.sendMessage('Papi <@'+config.discord.owner+'> (づ⍜⍘⍜)づ, <@' + msg.author.id + '> tried to abuse me, ban him pls!');
-            return;
-        }
 
         if (args.length > 0 && perms.check("reload.command", role) === true){
             client.load(args[0]);

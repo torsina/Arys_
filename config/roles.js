@@ -103,40 +103,29 @@ module.exports.load = function() {
     perm.eye.id = id.eye;
     perm.smurf.id = id.smurf;
     perm.admin.id = id.admin;
-    console.log(Object.keys(perm));
     keys = Object.keys(perm);
     for(i = 0; i<keys.length; i++) {
         let a;
         let str;
-        //console.log(perms.check("", Object.keys(perm)[i]));
         for(j = 0; j<perms.check("", keys[i]).length; j++) {
             a = perms.check("", Object.keys(perm)[i])[j];
-            //console.log(a);
             if(a.search(".all=true") !== -1) {
                 let b = a.split(".");
                 for(k = 0; k<b.length; k++) {
                     if(b[k] === "all=true") { //k-1
-                        //console.log(b[k-1] + " I AM HERE");
                         for(l = 1; l<b.length-1; l++) {
                             if(l == 1) {
                                 str = b[l];
-                                //console.log(str);
-                            }
-                            else{
+                            } else {
                                 str += "." + b[l];
                             }
                         }
                     }
                 }
-                //console.log(str);
-                //console.log(perms.check(str));
                 let x = perms.check(str);
                 for (m = 1; m<x.length; m++) {
-                    let y = keys[i] + "." + x[m]; //keys[i] + "." +
-                    //y.slice(y.search("=false"), y.length);
+                    let y = keys[i] + "." + x[m];
                     let z = y.replace("=false", "");
-                    console.log(z);
-                    //eval(z);
                     objectPath.set(perm, z, true);
                 }
             }

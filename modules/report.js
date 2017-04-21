@@ -5,9 +5,9 @@ const db = Arys.db;
 const perms = require('../config/perms');
 
 
-var image = new Array();
+var image = [];
 for(var id=0; id<post.line; id++){
-    image[id] = new Array();
+    image[id] = [];
 }
 
 
@@ -21,6 +21,9 @@ module.exports = {
         if(perms.check("report.base", role) !== true) {
             msg.channel.sendMessage("You don't have the permission to do that");
             return;
+        }
+        if(args[0] === undefined) {
+            msg.channel.sendMessage("please enter the id of the image you want to report")
         }
         db.serialize(function() {
 
