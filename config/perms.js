@@ -24,6 +24,9 @@ module.exports.perm = {
         base: false,
         force: false
     },
+    init: {
+        base: true
+    },
     mod: {
         all: false,
         reload: {
@@ -59,6 +62,8 @@ module.exports.getPermission = function (path, source) {
     const pathComponents = path.trim().split(/\./);
     if (source === "role") {
         var base = rolesPerm.rolePerm[pathComponents[0]];
+    } else if(path === "") {
+        var base = basePerm.perm[pathComponents[0]];
     } else {
         var base = basePerm[pathComponents[0]];
     }

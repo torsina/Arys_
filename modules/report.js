@@ -19,7 +19,7 @@ module.exports = {
             msg.delete();
         }, config.discord.wait);
         if(perms.check("report.base", role) !== true) {
-            msg.channel.sendMessage("You don't have the permission to do that");
+            msg.channel.sendMessage("You don't have the permission `report.base`");
             return;
         }
         if(args[0] === undefined) {

@@ -40,6 +40,9 @@ module.exports.rolePerm = {
     nsfw_god: {
         post: {
             force: true
+        },
+        report: {
+            force: true
         }
     },
     eye: {
@@ -47,7 +50,7 @@ module.exports.rolePerm = {
             purge: {
                 all: true
             }
-        }
+        },
     },
     smurf: {
         mod: {
@@ -73,6 +76,9 @@ module.exports.rolePerm = {
         },
         post: {
             reset: true
+        },
+        init: {
+            base: true
         }
     }
 };
