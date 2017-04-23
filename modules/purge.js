@@ -1,5 +1,5 @@
 const config = require('../config/config');
-const perms = require('../config/perms');
+const perms = require('../config/perm/perms');
 module.exports = {
     help: 'Delete messages',
     func: (client, msg, args, role) => {

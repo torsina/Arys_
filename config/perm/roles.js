@@ -1,3 +1,4 @@
+const fs = require('fs');
 module.exports.id = {
     fresh: "276647021790887937",
     trending: "248176040428437504",
@@ -11,7 +12,7 @@ module.exports.id = {
     admin: "242684239223455755" //242684239223455755
 };
 //244175416460443649
-module.exports.rolePerm = {
+module.exports.rolePermBase = {
     fresh: {
         help: {
             base: true
@@ -82,14 +83,19 @@ module.exports.rolePerm = {
         }
     }
 };
+
+module.exports.JSON = {
+    rolePerm: JSON.parse(fs.readFileSync('./config/perms.json', 'utf8'))
+}
+
 module.exports.load = function() {
-    let perm = require('./roles').rolePerm;
+    let perm = require('./roles').JSON.rolePerm;
     let id = require('./roles').id;
     let assign = require('assign-deep');
     let perms = require('./perms');
     let objectPath = require('object-path');
     //make that every role extand from the one above
-    assign(perm.trending, perm.fresh);
+    /*assign(perm.trending, perm.fresh);
     assign(perm.captain, perm.trending);
     assign(perm.op, perm.captain);
     assign(perm.oldfag, perm.op);
@@ -108,7 +114,7 @@ module.exports.load = function() {
     perm.nsfw_god.id = id.nsfw_god;
     perm.eye.id = id.eye;
     perm.smurf.id = id.smurf;
-    perm.admin.id = id.admin;
+    perm.admin.id = id.admin;*/
     keys = Object.keys(perm);
     for(i = 0; i<keys.length; i++) {
         let a;
@@ -137,6 +143,7 @@ module.exports.load = function() {
             }
         }
     }
+
 };
 
 /*

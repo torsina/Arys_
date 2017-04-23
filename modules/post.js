@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Arys = require('../Arys');
 const config = require('../config/config');
-const perms = require('../config/perms');
+const perms = require('../config/perm/perms');
 const db = Arys.db;
 const wait = Arys.wait;
 
@@ -17,7 +17,11 @@ function save(value) {
 };
 
 function load() {
-    return parseInt(fs.readFileSync('save.txt').toString());
+    return parseInt(fs.writeFile("save.txt", value, function(err) {
+        if(err) {
+            return console.log(err);
+        }
+    }.toString()));
 };
 
 

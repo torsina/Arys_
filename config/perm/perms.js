@@ -53,7 +53,8 @@ module.exports.perm = {
 };
 const basePerm = require("./perms").perm;
 const perms = require('./perms');
-const rolesPerm = require("./roles");
+let fs = require('fs');
+let rolesPerm = require('./roles').JSON.rolePerm;
 
 module.exports.getPermission = function (path, source) {
     if (!path)
@@ -61,7 +62,7 @@ module.exports.getPermission = function (path, source) {
 
     const pathComponents = path.trim().split(/\./);
     if (source === "role") {
-        var base = rolesPerm.rolePerm[pathComponents[0]];
+        var base = rolesPerm[pathComponents[0]];
     } else if(path === "") {
         var base = basePerm.perm[pathComponents[0]];
     } else {

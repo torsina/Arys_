@@ -1,4 +1,4 @@
-const perms = require('../config/perms');
+const perms = require('../config/perm/perms');
 module.exports = {
     help: 'show me',
     func: (client, msg, args, role) => {

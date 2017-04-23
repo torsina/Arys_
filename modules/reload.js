@@ -1,7 +1,7 @@
 const Arys = require('../Arys');
 const wait = Arys.wait;
 const config = require('../config/config');
-const perms = require('../config/perms');
+const perms = require('../config/perm/perms');
 module.exports = {
     help: 'Reload the commands',
     func: (client, msg, args, role) => {

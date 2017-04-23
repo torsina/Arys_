@@ -1,6 +1,7 @@
-const perms = require('../config/perms');
-const roles = require('../config/roles');
+const perms = require('../config/perm/perms');
+const roles = require('../config/perm/roles').JSON.rolePerm;
 const objectPath = require('object-path');
+const fs = require('fs');
 
 module.exports = {
     help: 'trigger perm function',
@@ -19,8 +20,11 @@ module.exports = {
                     msg.channel.sendMessage("this is not a right value");
                 }
                 //objectPath.set(roles.rolePerm, args[3], bool);
-                msg.channel.sendMessage("post :");
-                msg.channel.sendMessage(perms.check(objectPath.get(roles.rolePerm)));
+                input = args[1] + "." + args[3];
+                msg.channel.sendMessage("pre :" + perms.check(args[3], args[1]));
+                objectPath.set(roles, input, bool);
+                msg.channel.sendMessage("post :" + perms.check(args[3], args[1]));
+                fs.writeFileSync("./config/perms.json", JSON.stringify(roles), "utf8");
             }
         }
     }

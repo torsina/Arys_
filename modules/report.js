@@ -2,7 +2,7 @@ const Arys = require('../Arys');
 const post = require('./post');
 const config = require('../config/config');
 const db = Arys.db;
-const perms = require('../config/perms');
+const perms = require('../config/perm/perms');
 
 
 var image = [];
