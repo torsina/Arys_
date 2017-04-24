@@ -11,6 +11,9 @@ Client.login(config.discord.token.bot);
 // Au chargement du programme
 Client.on('ready', () => {
     console.time('loading');
+    let isLoaded = false;
+    if(isLoaded==true) return ;
+    isLoaded = true;
     Client.load();
     roles.load();
     console.timeEnd('loading');
