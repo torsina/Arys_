@@ -16,6 +16,7 @@ Client.on('ready', () => {
     isLoaded = true;
     Client.load();
     roles.load();
+    Client.user.setGame('type $help')
     console.timeEnd('loading');
     console.log('I am ready!');
 });
