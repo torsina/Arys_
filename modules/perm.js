@@ -24,7 +24,7 @@ module.exports = {
                 msg.channel.sendMessage("pre :" + perms.check(args[3], args[1]));
                 objectPath.set(roles, input, bool);
                 msg.channel.sendMessage("post :" + perms.check(args[3], args[1]));
-                fs.writeFileSync("./config/perms.json", JSON.stringify(roles), "utf8");
+                fs.writeFileSync("./config/perm/perms.json", JSON.stringify(roles), "utf8");
             }
         }
     }
