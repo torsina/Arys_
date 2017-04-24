@@ -85,7 +85,7 @@ module.exports.rolePermBase = {
 };
 
 module.exports.JSON = {
-    rolePerm: JSON.parse(fs.readFileSync('./config/perms.json', 'utf8'))
+    rolePerm: JSON.parse(fs.readFileSync('./config/perm/perms.json', 'utf8'))
 }
 
 module.exports.load = function() {
@@ -95,7 +95,7 @@ module.exports.load = function() {
     let perms = require('./perms');
     let objectPath = require('object-path');
     //make that every role extand from the one above
-    /*assign(perm.trending, perm.fresh);
+    assign(perm.trending, perm.fresh);
     assign(perm.captain, perm.trending);
     assign(perm.op, perm.captain);
     assign(perm.oldfag, perm.op);
@@ -114,35 +114,24 @@ module.exports.load = function() {
     perm.nsfw_god.id = id.nsfw_god;
     perm.eye.id = id.eye;
     perm.smurf.id = id.smurf;
-    perm.admin.id = id.admin;*/
-    keys = Object.keys(perm);
-    for(i = 0; i<keys.length; i++) {
-        let a;
-        let str;
-        for(j = 0; j<perms.check("", keys[i]).length; j++) {
-            a = perms.check("", Object.keys(perm)[i])[j];
+    perm.admin.id = id.admin;
+    Object.keys(perm).forEach(function(role) {
+        // Pour chaque permission associée au role
+        perms.check("", role).forEach(function(a) {
+            // Si ta condition bizarre s'applique alors
             if(a.search(".all=true") !== -1) {
-                let b = a.split(".");
-                for(k = 0; k<b.length; k++) {
-                    if(b[k] === "all=true") { //k-1
-                        for(l = 1; l<b.length-1; l++) {
-                            if(l == 1) {
-                                str = b[l];
-                            } else {
-                                str += "." + b[l];
-                            }
-                        }
-                    }
-                }
-                let x = perms.check(str);
-                for (m = 1; m<x.length; m++) {
-                    let y = keys[i] + "." + x[m];
-                    let z = y.replace("=false", "");
-                    objectPath.set(perm, z, true);
-                }
+                // On coupe la permission au niveau du =, on prends la première partie, on la découpe sur les points
+                let b = a.split('=')[0].split('.');
+                // On taille tableau - 2 depuis la seconde entrée, on réassemble les éléments avec un . entre
+                let c = b.splice(1,b.length-2).join('.');
+                // Pour chaque perm check sur l'objet réassemblé
+                perms.check(c).forEach(function(d) {
+                    // On fait un objectpath
+                    objectPath.set(perm, role + '.' + d.split('=')[0], true);
+                })
             }
-        }
-    }
+        });
+    });
 
 };
 
