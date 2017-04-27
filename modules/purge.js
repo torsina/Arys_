@@ -4,7 +4,7 @@ module.exports = {
     help: 'Delete messages',
     func: (client, msg, args, role) => {
 
-        if(perms.check("mod.purge.base", role) !== true) {
+        if(perms.check("mod.purge.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `mod.purge.base`");
             return;
         }
@@ -21,7 +21,7 @@ module.exports = {
         }
         let bot_permissions = msg.channel.permissionsFor(client.user);
         let user_permissions = msg.channel.permissionsFor(msg.author);
-        if (!user_permissions.hasPermission("MANAGE_MESSAGES") && perms.check("mod.purge.bypass", role) !== true) {
+        if (!user_permissions.hasPermission("MANAGE_MESSAGES") && perms.check("mod.purge.bypass", role, msg.author.id) !== true) {
             msg.channel.sendMessage("Sorry, your permissions doesn't allow that.");
             return;
         }
@@ -33,7 +33,7 @@ module.exports = {
             msg.channel.sendMessage("The maximum is " + config.purge.max + ", " + config.purge.safe + " without `--force`.");
             return;
         }
-        if (args[0] === "user" && args[2] < config.purge.safe && perms.check("mod.purge.user.base", role) === true) { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
+        if (args[0] === "user" && args[2] < config.purge.safe && perms.check("mod.purge.user.base", role, msg.author.id) === true) { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
 
             let messagecount = parseInt(args[2]);
             msg.channel.fetchMessages({
@@ -52,7 +52,7 @@ module.exports = {
                 });
             return;
         }
-        else if(args[0] === "user" && args[2] < config.purge.safe && perms.check("mod.purge.user.base", role) !== true) {
+        else if(args[0] === "user" && args[2] < config.purge.safe && perms.check("mod.purge.user.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `mod.purge.user.base`");
             return;
         }
@@ -60,7 +60,7 @@ module.exports = {
             msg.channel.sendMessage("I can't delete that much messages of that user in safe-mode, add `--force` to your message to force me to delete.");
             return;
         }
-        if (args[0] === "user" && args[2] < config.purge.max && args[3] === "--force" && perms.check("mod.purge.user.force", role) === true) { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
+        if (args[0] === "user" && args[2] < config.purge.max && args[3] === "--force" && perms.check("mod.purge.user.force", role, msg.author.id) === true) { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
 
             let messagecount = parseInt(args[2]);
             msg.channel.fetchMessages({
@@ -88,7 +88,7 @@ module.exports = {
                 .catch(console.error);
             return;
         }
-        else if(args[0] === "user" && args[2] < config.purge.max && args[3] === "--force" && perms.check("mod.purge.user.force", role) !== true) {
+        else if(args[0] === "user" && args[2] < config.purge.max && args[3] === "--force" && perms.check("mod.purge.user.force", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `mod.purge.user.force`");
             return;
         }

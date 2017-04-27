@@ -8,7 +8,7 @@ module.exports = {
         },
         prefix: "$",
         wait: 5000,
-        owner: "245614884786667520"
+        owner: "306418399242747906"
     },
     db: {
         file: "Arys.db"
@@ -23,6 +23,7 @@ module.exports = {
     },
     report: {
         need: 3
-    }
+    },
+    reposter: "245501778018304001"
 
 };

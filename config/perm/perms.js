@@ -25,7 +25,7 @@ module.exports.perm = {
         force: false
     },
     init: {
-        base: true
+        base: false
     },
     mod: {
         all: false,
@@ -48,6 +48,9 @@ module.exports.perm = {
         },
         perm: {
             base: false
+        },
+        reposter: {
+            base: false
         }
     },
 };
@@ -55,18 +58,21 @@ const basePerm = require("./perms").perm;
 const perms = require('./perms');
 let fs = require('fs');
 let rolesPerm = require('./roles').JSON.rolePerm;
+let userPerm = require('./users').JSON.userPerm;
 
 module.exports.getPermission = function (path, source) {
     if (!path)
         return path;
-
+    let base;
     const pathComponents = path.trim().split(/\./);
-    if (source === "role") {
-        var base = rolesPerm[pathComponents[0]];
+    if (source === "user") {
+        base = userPerm[pathComponents[0]]; //from the user table
+    } else if (source === "role") {
+        base = rolesPerm[pathComponents[0]]; //from the role table
     } else if(path === "") {
-        var base = basePerm.perm[pathComponents[0]];
+        base = basePerm.perm[pathComponents[0]]; //from default table, full tree
     } else {
-        var base = basePerm[pathComponents[0]];
+        base = basePerm[pathComponents[0]]; //from default table, a part of the tree
     }
 
     if (base === undefined) {
@@ -82,7 +88,7 @@ module.exports.getPermission = function (path, source) {
 
             // Error,
             if (test === undefined) {
-                console.error("ERROR: " + component + " is undefined")
+                console.error("ERROR: " + component + " is undefined");
                 return -1;
             }
 
@@ -116,7 +122,25 @@ function getBase(base, path, list) {
     }
 }
 // perm, role
-module.exports.check = function (path, role) {
+module.exports.check = function (path, role, user) {
+    if(user !== undefined) {
+        let input;
+        if (path === "") {
+            input = user;
+            //console.log("full tree user");
+        }
+        else {
+            input = user + "." + path;
+            console.log("not full tree user");
+        }
+        console.log(path + " path");
+        console.log(role + " role");
+        console.log(input + " input");
+        if(perms.getPermission(input, "user") !== -1) {
+            console.log("user used : " + perms.getPermission(input, "user"));
+            return perms.getPermission(input, "user");
+        }
+    }
     if(role !== undefined) {
         let input;
         if (path === "") {
@@ -125,16 +149,18 @@ module.exports.check = function (path, role) {
         }
         else {
             input = role + "." + path;
-            console.log("not full tree");
+            //console.log("not full tree");
         }
-        //console.log(path + " path");
-        //console.log(role + " role");
-        //console.log(input + " input");
+        console.log(path + " path");
+        console.log(role + " role");
+        console.log(input + " input");
         if(perms.getPermission(input, "role") !== -1) { //input = role + "." + path
+            //console.log("role used");
             return perms.getPermission(input, "role");
         }
     }
-    else if(perms.getPermission(path) !== -1) {
+    if(perms.getPermission(path) !== -1) {
+        //console.log("default used");
         return perms.getPermission(path);
     }
     else {

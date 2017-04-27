@@ -12,7 +12,7 @@ module.exports = {
         console.time('reload');
         msg.delete();
 
-        if (args.length > 0 && perms.check("reload.command", role) === true){
+        if (args.length > 0 && perms.check("reload.command", role, msg.author.id) === true){
             client.load(args[0]);
             msg.channel.sendMessage('Command '+ args[0] + ' reloaded').then(m => {
                 setTimeout(function() {

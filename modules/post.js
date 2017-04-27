@@ -17,11 +17,7 @@ function save(value) {
 };
 
 function load() {
-    return parseInt(fs.writeFile("save.txt", value, function(err) {
-        if(err) {
-            return console.log(err);
-        }
-    }.toString()));
+    return parseInt(fs.readFileSync('save.txt').toString());
 };
 
 
@@ -29,7 +25,7 @@ module.exports = {
     help: 'usage: $post (number of image, the number cant be more than 5 for obvious reasons)',
     func: (client, msg, args, role) => {
 
-        if(perms.check("post.base", role) !== true) {
+        if(perms.check("post.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `post.base`");
             return;
         }

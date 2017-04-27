@@ -18,7 +18,7 @@ module.exports = {
         setTimeout(function() {
             msg.delete();
         }, config.discord.wait);
-        if(perms.check("report.base", role) !== true) {
+        if(perms.check("report.base", role, msg.author.id, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `report.base`");
             return;
         }

@@ -2,7 +2,7 @@ const perms = require('../config/perm/perms');
 module.exports = {
     help: 'show me',
     func: (client, msg, args, role) => {
-        if(perms.check("interaction.pet.base", role) !== true) {
+        if(perms.check("interaction.pet.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `interaction.pet.base`");
             return;
         }

@@ -4,7 +4,7 @@ const perms = require('../config/perm/perms');
 module.exports = {
     help: 'Plz send help!!',
     func: (Client, msg, args, role) => {
-        if(perms.check("help.base", role) !== true) {
+        if(perms.check("help.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission to do that");
             return;
         }

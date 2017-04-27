@@ -7,13 +7,11 @@ const sqlite3 = require('sqlite3').verbose();
 const Client = new Discord.Client();
 const db = new sqlite3.Database(config.db.file);
 const roles = require('./config/perm/roles');
+let reposter = JSON.parse(fs.readFileSync('./config/reposter.json', 'utf8'));
 Client.login(config.discord.token.bot);
 // Au chargement du programme
-Client.on('ready', () => {
+Client.once('ready', () => {
     console.time('loading');
-    let isLoaded = false;
-    if(isLoaded==true) return ;
-    isLoaded = true;
     Client.load();
     roles.load();
     Client.user.setGame('type $help')
@@ -42,17 +40,31 @@ Client.load = (command) => {
         }
     }
 };
+Client.on('guildMemberUpdate', (oldMember, newMember) => {
+    if (!oldMember.roles.has(config.reposter) && newMember.roles.has(config.reposter)) {
+        let timestamp = new Date();
+        let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
+        let prep = db.prepare("INSERT INTO reposter VALUES (?,?,?)");
+        prep.run(oldMember.id, date, "");
+    }
+    if(oldMember.roles.has(config.reposter) && !newMember.roles.has(config.reposter)) {
+        let timestamp = new Date();
+        let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
+        db.run("UPDATE reposter SET end = '"+date+"' WHERE id='"+oldMember.id+"'");
+    }
+});
 
 Client.on('message', message => {
 
     //if(message.author.id=='245614884786667520') {
         if(message.channel.id==="257541472772030464") {return;}
+
         if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
             message.channel.sendMessage("throw her in a pit and let me do the rest")
         }
         if (message.content.startsWith(config.discord.prefix)) {
             if (message.author.bot) return;
-
+            if(message.author.id==="278720049080958976") {message.channel.sendMessage("go die in hell stupid fag"); return;}
             args = message.content.split(' ');
             command = args[0].slice(config.discord.prefix.length);
             args.splice(0, 1);
@@ -73,11 +85,11 @@ Client.on('message', message => {
 });
 
 function check(member){
+    if(member.id === config.discord.owner) {
+        return "bot_owner";
+    }
     if(member.roles.has(roles.id.admin)) {
         return "admin";
-    }
-    else if(member.id === config.discord.owner) {
-        return "bot_owner";
     }
     else if(member.roles.has(roles.id.smurf)) {
         return "smurf";

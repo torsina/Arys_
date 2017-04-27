@@ -2,7 +2,7 @@ const perms = require('../config/perm/perms');
 module.exports = {
     help: 'Disconect the bot',
     func: (client, msg, args, role) => {
-        if(perms.check("mod.logout.base", role) !== true) {
+        if(perms.check("mod.logout.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `mod.logout.base`");
         }
         else {

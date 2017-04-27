@@ -3,7 +3,7 @@ module.exports.id = {
     fresh: "276647021790887937",
     trending: "248176040428437504",
     captain: "244175416460443649",
-    op: "280671574321922048",
+    op: "244050172768813058",
     oldfag: "288607952468836352",
     hot: "248164589458554883",
     nsfw_god: "276058085641027584", //276058085641027584
@@ -50,6 +50,10 @@ module.exports.rolePermBase = {
         mod: {
             purge: {
                 all: true
+            },
+            reposter: {
+                base: true,
+                get: true
             }
         },
     },
@@ -80,13 +84,18 @@ module.exports.rolePermBase = {
         },
         init: {
             base: true
+        },
+        mod: {
+            reposter: {
+                set: true
+            }
         }
     }
 };
 
 module.exports.JSON = {
-    rolePerm: JSON.parse(fs.readFileSync('./config/perm/perms.json', 'utf8'))
-}
+    rolePerm: JSON.parse(fs.readFileSync('./config/perm/JSON/perms.json', 'utf8'))
+};
 
 module.exports.load = function() {
     let perm = require('./roles').JSON.rolePerm;
