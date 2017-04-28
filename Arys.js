@@ -58,7 +58,17 @@ Client.on('message', message => {
 
     //if(message.author.id=='245614884786667520') {
         if(message.channel.id==="257541472772030464") {return;}
+        if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
+            Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
+                if(m.guild.id === "242655328410402816") {
+                    message.channel.sendMessage("from 9i");
+                    return;
+                }
+                message.channel.sendMessage("from other");
+                message.delete();
+            });
 
+        }
         if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
             message.channel.sendMessage("throw her in a pit and let me do the rest")
         }

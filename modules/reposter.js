@@ -22,7 +22,7 @@ module.exports = {
                 let output = "";
                 db.all("SELECT * FROM reposter", function(err, user) {
                     user.forEach(function (reposter) {
-                        output +=  "<@" + reposter.id + ">: " + reposter.beginning + "   " + reposter.end + "\n";
+                        output +=  "<@" + reposter.id + ">: " + reposter.beginning + "  to  " + reposter.end + "\n";
 
                     });
                     msg.channel.sendMessage(output);
