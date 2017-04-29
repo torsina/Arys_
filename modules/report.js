@@ -18,7 +18,7 @@ module.exports = {
         setTimeout(function() {
             msg.delete();
         }, config.discord.wait);
-        if(perms.check("report.base", role, msg.author.id, msg.author.id) !== true) {
+        if(perms.check("report.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `report.base`");
             return;
         }
@@ -29,7 +29,7 @@ module.exports = {
 
             db.each("SELECT id_message, report_count FROM post WHERE id_image='"+args[0]+"'", function(err, post) { // SELECT id_image, id_message, id_file WHERE id_file="file_name" FROM post
                 let report = parseInt(post.report_count) + 1;
-                if(perms.check("report.force", role) === true && args[1]==='--force'){
+                if(perms.check("report.force", role, msg.author.id) === true && args[1]==='--force'){
                     msg.channel.fetchMessage(post.id_message)
                         .then(m => {
                             m.delete()
@@ -39,8 +39,8 @@ module.exports = {
                         return;
 
                 }
-                else if(perms.check("report.force", role) !== true && args[1]==='--force') {
-                    msg.channel.sendMessage("You don't have the permission to do that");
+                else if(perms.check("report.force", role, msg.author.id) !== true && args[1]==='--force') {
+                    msg.channel.sendMessage("You don't have the permission `report.force`");
                     return;
                 }
                 else if(!image[args[0]].includes(msg.author.id)){

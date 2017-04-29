@@ -5,7 +5,7 @@ module.exports = {
     help: 'Plz send help!!',
     func: (Client, msg, args, role) => {
         if(perms.check("help.base", role, msg.author.id) !== true) {
-            msg.channel.sendMessage("You don't have the permission to do that");
+            msg.channel.sendMessage("You don't have the permission `help.base`");
             return;
         }
 
