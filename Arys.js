@@ -7,6 +7,7 @@ const sqlite3 = require('sqlite3').verbose();
 const Client = new Discord.Client();
 const db = new sqlite3.Database(config.db.file);
 const roles = require('./config/perm/roles');
+let loaded = false;
 let reposter = JSON.parse(fs.readFileSync('./config/reposter.json', 'utf8'));
 Client.login(config.discord.token.bot);
 // Au chargement du programme
@@ -14,7 +15,7 @@ Client.once('ready', () => {
     console.time('loading');
     Client.load();
     roles.load();
-    Client.user.setGame('type $help')
+    Client.user.setGame('type $help');
     console.timeEnd('loading');
     console.log('I am ready!');
 });
@@ -57,24 +58,25 @@ Client.on('guildMemberUpdate', (oldMember, newMember) => {
 Client.on('message', message => {
 
     //if(message.author.id=='245614884786667520') {
-        if(message.channel.id==="257541472772030464") {return;}
+        if(message.channel.id==="257541472772030464") return;
         if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
+        //invite delete system
             Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
                 if(m.guild.id === "242655328410402816") {
                     message.channel.sendMessage("from 9i");
-                    return;
                 }
-                message.channel.sendMessage("from other");
-                message.delete();
+                else message.channel.sendMessage("from other");
             });
-
+            message.delete();
         }
         if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
             message.channel.sendMessage("throw her in a pit and let me do the rest")
         }
+    if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of him ?")) {
+        message.channel.sendMessage("throw him in a pit and let me do the rest")
+    }
         if (message.content.startsWith(config.discord.prefix)) {
             if (message.author.bot) return;
-            if(message.author.id==="278720049080958976") {message.channel.sendMessage("go die in hell stupid fag"); return;}
             args = message.content.split(' ');
             command = args[0].slice(config.discord.prefix.length);
             args.splice(0, 1);
@@ -139,3 +141,4 @@ process.on("unhandledRejection", err => {
 
 exports.db = db;
 exports.Client = Client;
+exports.loaded = loaded;
