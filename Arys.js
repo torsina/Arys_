@@ -56,8 +56,7 @@ Client.on('guildMemberUpdate', (oldMember, newMember) => {
 });
 
 Client.on('message', message => {
-
-    //if(message.author.id=='245614884786667520') {
+    if (message.author.bot) return;
         if(message.channel.id==="257541472772030464") return;
         if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
         //invite delete system
@@ -69,20 +68,20 @@ Client.on('message', message => {
             });
             message.delete();
         }
-        if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
-            message.channel.sendMessage("throw her in a pit and let me do the rest")
-        }
+    //interaction
+    if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
+        message.channel.sendMessage("throw her in a pit and let me do the rest")
+    }
     if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of him ?")) {
         message.channel.sendMessage("throw him in a pit and let me do the rest")
     }
+    //command handler
         if (message.content.startsWith(config.discord.prefix)) {
-            if (message.author.bot) return;
+            if (loaded = false) loaded = true;
             args = message.content.split(' ');
             command = args[0].slice(config.discord.prefix.length);
             args.splice(0, 1);
 
-            //var id = message.mentions.roles.first().id;
-            //let role = check(member);
             let member = message.guild.member(Client.users.get(message.author.id));
             let role = check(member);
 

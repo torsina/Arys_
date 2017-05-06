@@ -38,7 +38,7 @@ module.exports = {
                 });
                 return;
             }
-            if (args[0] > parseInt(perms.check("post.max", role)) && perms.check("post.force", role) !== true){ //
+            if (args[0] > parseInt(perms.check("post.max", role, msg.author.id)) && perms.check("post.force", role, msg.author.id) !== true){ //
                 msg.reply("don't make me use all of my material you horny fuck !"+"\n" + "Go fap to your girlfriend, Oh wait..").then(m => {
                     setTimeout(function() {
                         m.delete();
@@ -47,7 +47,7 @@ module.exports = {
                 return;
             }
             if (args.length < 1) return;
-            if (args[0] === 'reset' && perms.check("post.reset", role) === true) {
+            if (args[0] === 'reset' && perms.check("post.reset", role,  msg.author.id) === true) {
                 msg.channel.sendMessage('The list start from the beginning again papi <@245614884786667520>').then(m => {
                     setTimeout(function() {
                         m.delete();

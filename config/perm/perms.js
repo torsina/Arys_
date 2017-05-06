@@ -1,4 +1,5 @@
 module.exports.perm = {
+    base: false,
     interaction: {
         all: false,
         trigger: {
@@ -59,6 +60,7 @@ const perms = require('./perms');
 let fs = require('fs');
 let rolesPerm = require('./roles').JSON.rolePerm;
 let userPerm = require('./users').JSON.userPerm;
+const Arys = require('../../Arys');
 
 module.exports.getPermission = function (path, source) {
     if (!path)
@@ -121,8 +123,19 @@ function getBase(base, path, list) {
         }
     }
 }
-// perm, role
+/*function base(role, user) {
+    if(perms.getPermission(role + ".base", "role") === true && perms.getPermission(user + ".base", "user") !==false || perms.getPermission(user + ".base", "user") === true) {
+        return true;
+    }
+    return false;
+}*/
+
+
 module.exports.check = function (path, role, user) {
+   /* if(Arys.loaded = true) {
+        console.log("fffdffddffddfdfdf")
+        if(base(role, user) === false) return;
+    }*/
     if(user !== undefined) {
         let input;
         if (path === "") {
@@ -131,10 +144,10 @@ module.exports.check = function (path, role, user) {
         }
         else {
             input = user + "." + path;
-            console.log("not full tree user");
+            //console.log("not full tree user");
         }
-        console.log(path + " path");
-        console.log(role + " role");
+        //console.log(path + " path");
+        //console.log(user + " user");
         console.log(input + " input");
         if(perms.getPermission(input, "user") !== -1) {
             console.log("user used : " + perms.getPermission(input, "user"));
@@ -151,8 +164,8 @@ module.exports.check = function (path, role, user) {
             input = role + "." + path;
             //console.log("not full tree");
         }
-        console.log(path + " path");
-        console.log(role + " role");
+        //console.log(path + " path");
+        //console.log(role + " role");
         console.log(input + " input");
         if(perms.getPermission(input, "role") !== -1) { //input = role + "." + path
             //console.log("role used");

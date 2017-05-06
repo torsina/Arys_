@@ -14,6 +14,7 @@ module.exports.id = {
 //244175416460443649
 module.exports.rolePermBase = {
     fresh: {
+        base: true,
         help: {
             base: true
         }
