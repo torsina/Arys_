@@ -78,7 +78,7 @@ module.exports.getPermission = function (path, source) {
     }
 
     if (base === undefined) {
-        console.error("ERROR: " + pathComponents[0] + " is undefined");
+        console.error("ERROR1: " + pathComponents[0] + " is undefined");
         return -1;
     }
 
@@ -90,7 +90,7 @@ module.exports.getPermission = function (path, source) {
 
             // Error,
             if (test === undefined) {
-                console.error("ERROR: " + component + " is undefined");
+                //console.error("ERROR2: " + component + " is undefined");
                 return -1;
             }
 
