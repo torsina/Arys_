@@ -45,15 +45,10 @@ Client.load = (command) => {
 };
 Client.on('guildMemberUpdate', (oldMember, newMember) => {
     if (!oldMember.roles.has(config.reposter) && newMember.roles.has(config.reposter)) {
-        let timestamp = new Date();
-        let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
-        let prep = sqlite.prepare("INSERT INTO reposter VALUES (?,?,?)");
-        prep.run(oldMember.id, date, "");
+        db.createReposter(oldMember.id);
     }
     if(oldMember.roles.has(config.reposter) && !newMember.roles.has(config.reposter)) {
-        let timestamp = new Date();
-        let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
-        sqlite.run("UPDATE reposter SET end = '"+date+"' WHERE id='"+oldMember.id+"'");
+        db.endReposter(oldMember.id);
     }
 });
 

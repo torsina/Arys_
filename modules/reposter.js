@@ -1,6 +1,7 @@
 const perms = require('../config/perm/perms');
-const db = require('../Arys').db;
+const sqlite = require('../Arys').db;
 const config = require('../config/config');
+const db = require('../util/db');
 let reposter;
 let timestamp = new Date();
 module.exports = {
@@ -18,18 +19,7 @@ module.exports = {
                 msg.channel.sendMessage("You don't have the permission `mod.reposter.get`");
                 return;
             }
-            db.serialize( function() {
-                let output = "";
-                db.all("SELECT * FROM reposter", function(err, user) {
-                    user.forEach(function (reposter) {
-                        output +=  "<@" + reposter.id + ">: " + reposter.beginning + "  to  " + reposter.end + "\n";
-
-                    });
-                    msg.channel.sendMessage(output);
-
-                });
-            });
-
+            db.getReposter();
         }
         if(args[0] === "set") {
             if(perms.check("mod.reposter.set", role, msg.author.id) !== true) {
@@ -38,15 +28,13 @@ module.exports = {
             }
             msg.guild.members.filter(m=> m.roles.has(config.reposter));
             msg.guild.roles.get(config.reposter).members.forEach(function (m) {
-             let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
-             let prep = db.prepare("INSERT INTO reposter VALUES (?,?,?)");
-             prep.run(m.id, date, "");
+                db.createReposter(m.id);
              })
 
         }
         if (args[0] === "clear") {
-            db.run("DROP TABLE reposter");
-            db.run("CREATE TABLE reposter(id varchar(18), beginning varchar(17), end varchar(17))");
+            sqlite.run("DROP TABLE reposter");
+            sqlite.run("CREATE TABLE reposter(id varchar(18), beginning varchar(17), end varchar(17))");
         }
 
     }

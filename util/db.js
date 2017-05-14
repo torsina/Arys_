@@ -2,15 +2,23 @@ const config = require('../config/config.js');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const db = module.exports = {};
+let timestamp = new Date();
 
-let imagePostShema = new Schema({
+let imagePostSchema = new Schema({
     id_image: String,
     id_message: String,
     id_file: String,
     report_count: Number
 });
 
-let imagePost = mongoose.model('imagePost', imagePostShema);
+let reposterSchema = new Schema({
+    id: String,
+    enter: String,
+    exit: String
+});
+
+let imagePost = mongoose.model('imagePost', imagePostSchema);
+let reposter = mongoose.model('reposter', reposterSchema);
 
 db.load = () => {
     mongoose.connect("mongodb://192.168.1.30/arys"); //id_image, id_message, id_file, report_count
@@ -22,13 +30,13 @@ db.load = () => {
 };
 
 db.createPost = (id_image, id_message, id_file) => {
-    let Post = new imagePost({
+    let query = new imagePost({
         id_image: id_image,
         id_message: id_message,
         id_file: id_file,
         report_count: 0
     });
-    Post.save(function (err, doc) {
+    query.save(function (err, doc) {
         console.log(doc);
         if (err) return console.error(err);
     });
@@ -51,15 +59,21 @@ db.getPost = (id_image, id_file) => {
 
 };
 
-db.getAllPost = () => {
-    return new Promise((resolve, reject) => {
-        imagePost.find().then(doc => {
-            if (Object.keys(doc).length === 0) {
-                return reject(new Error('table is empty'));
-            }
-            resolve(doc);
-        }).catch(reject);
-    });
+db.getAllPost = (image, message, file) => {
+    const searchobj = {};
+    if(image !== undefined) searchobj.id_image = image;
+    if(message !== undefined) searchobj.id_message = message;
+    if(file !== undefined) searchobj.id_file = file;
+
+    let query = imagePost.where(searchobj);
+        return new Promise((resolve, reject) => {
+            query.find().then(doc => {
+                if (Object.keys(doc).length === 0) {
+                    return reject(new Error('no entry found'));
+                }
+                resolve(doc);
+            }).catch(reject);
+        });
 };
 
 db.reportPost = (id_message) => {
@@ -86,5 +100,52 @@ db.deletePost = (id_message) => {
             if (doc === null) return reject(new Error('no entry found to delete'));
             resolve(doc);
         }).catch(reject);
+    });
+};
+
+db.createReposter = (member) => {
+    let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
+    let query = new reposter({
+        id: member,
+        enter: date
+    });
+    return new Promise((resolve, reject) => {
+        query.save(function (err, doc) {
+            if (err) return reject(new Error('could not save'));
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.endReposter = (member) => {
+    let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
+    let query = new reposter({
+        id: member
+    });
+    return new Promise((resolve, reject) => {
+    query.findOne(function(err, doc) {
+        if (err) return reject(new Error('could not find'));
+        doc.end = date;
+        doc.save();
+        resolve(doc);
+    }).catch(reject);
+    });
+};
+
+db.getReposter = (member) => {
+    let query = reposter.where({id: member});
+    return new Promise((resolve, reject) => {
+        query.find().then(doc => {
+            if (Object.keys(doc).length === 0) {
+                return reject(new Error('no entry found'));
+            }
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.deleteReposter = () => {
+    return new Promise((resolve, reject) => {
+        reposter.collection.drop()
     });
 };
