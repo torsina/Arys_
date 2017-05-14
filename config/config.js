@@ -11,7 +11,9 @@ module.exports = {
         owner: "306418399242747906"
     },
     db: {
-        file: "Arys.db"
+        file: "Arys.db",
+        host: "localhost",
+        port: "28015"
     },
     purge: {
         safe: 20,

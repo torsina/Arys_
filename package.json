@@ -1,20 +1,33 @@
 {
-  "name": "Arys",
+  "name": "arys",
   "version": "0.1.0",
   "description": "A discord bot",
   "main": "Arys.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": {
-    "name": "torsina",
-    "email": "theo.sagot.1@gmail.com"
-  },
+  "author": "torsina <theo.sagot.1@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "discord.js": "11.0.0",
     "sqlite3": "3.1.8",
     "assign-deep": "0.4.5",
-    "object-path": "0.11.4"
-  }
+    "object-path": "0.11.4",
+    "mongoose": "4.9.8"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/torsina/Arys.git"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "js",
+    "discord.js"
+  ],
+  "bugs": {
+    "url": "https://github.com/torsina/Arys/issues"
+  },
+  "homepage": "https://github.com/torsina/Arys#readme"
 }

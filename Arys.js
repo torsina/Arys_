@@ -5,8 +5,9 @@ const path = require('path');
 const config = require('./config/config');
 const sqlite3 = require('sqlite3').verbose();
 const Client = new Discord.Client();
-const db = new sqlite3.Database(config.db.file);
+const sqlite = new sqlite3.Database(config.db.file);
 const roles = require('./config/perm/roles');
+const db = require ('./util/db');
 let loaded = false;
 let reposter = JSON.parse(fs.readFileSync('./config/reposter.json', 'utf8'));
 Client.login(config.discord.token.bot);
@@ -15,6 +16,7 @@ Client.once('ready', () => {
     console.time('loading');
     Client.load();
     roles.load();
+    db.load();
     Client.user.setGame('type $help');
     console.timeEnd('loading');
     console.log('I am ready!');
@@ -45,35 +47,39 @@ Client.on('guildMemberUpdate', (oldMember, newMember) => {
     if (!oldMember.roles.has(config.reposter) && newMember.roles.has(config.reposter)) {
         let timestamp = new Date();
         let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
-        let prep = db.prepare("INSERT INTO reposter VALUES (?,?,?)");
+        let prep = sqlite.prepare("INSERT INTO reposter VALUES (?,?,?)");
         prep.run(oldMember.id, date, "");
     }
     if(oldMember.roles.has(config.reposter) && !newMember.roles.has(config.reposter)) {
         let timestamp = new Date();
         let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
-        db.run("UPDATE reposter SET end = '"+date+"' WHERE id='"+oldMember.id+"'");
+        sqlite.run("UPDATE reposter SET end = '"+date+"' WHERE id='"+oldMember.id+"'");
     }
 });
 
 Client.on('message', message => {
     if (message.author.bot) return;
-        if(message.channel.id==="257541472772030464") return;
-        if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
-        //invite delete system
-            Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
-                if(m.guild.id === "242655328410402816") {
-                    message.channel.sendMessage("from 9i");
-                }
-                else message.channel.sendMessage("from other");
-            });
-            message.delete();
-        }
+    if(message.channel.id==="257541472772030464") return;
+    //invite delete system
+    if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
+        Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
+            if(m.guild.id === "242655328410402816") {
+                message.channel.sendMessage("from 9i");
+            }
+            else message.channel.sendMessage("from other");
+        });
+        message.delete();
+    }
     //interaction
     if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
         message.channel.sendMessage("throw her in a pit and let me do the rest")
     }
     if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of him ?")) {
         message.channel.sendMessage("throw him in a pit and let me do the rest")
+    }
+    //emoji delete system
+    if (isEmoji(message.content) === true) {
+            console.log("there is an emoji here");
     }
     //command handler
         if (message.content.startsWith(config.discord.prefix)) {
@@ -92,7 +98,6 @@ Client.on('message', message => {
                 console.log(args);
             }
         }
-    else{}
 });
 
 function check(member){
@@ -134,10 +139,23 @@ function check(member){
     }
 }
 
+function isEmoji(str) {
+    var ranges = [
+        //'\ud83c[\udf00-\udfff]', // U+1F300 to U+1F3FF
+        //'\ud83d[\udc00-\ude4f]', // U+1F400 to U+1F64F
+        '\ud83d[\ude00-\udeff]' // U+1F680 to U+1F6FF // U+263A // 1F600 - 1F636
+    ];
+    if (str.match(ranges.join('|'))) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 process.on("unhandledRejection", err => {
     console.error("Uncaught Promise Error: \n" + err.stack);
 });
 
-exports.db = db;
+exports.db = sqlite;
 exports.Client = Client;
 exports.loaded = loaded;

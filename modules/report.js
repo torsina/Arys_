@@ -1,12 +1,13 @@
 const Arys = require('../Arys');
 const post = require('./post');
 const config = require('../config/config');
-const db = Arys.db;
+const db = require('../util/db');
+const sqlite = Arys.db;
 const perms = require('../config/perm/perms');
 
 
-var image = [];
-for(var id=0; id<post.line; id++){
+let image = [];
+for(let id=0; id<post.line; id++){
     image[id] = [];
 }
 
@@ -25,57 +26,58 @@ module.exports = {
         if(args[0] === undefined) {
             msg.channel.sendMessage("please enter the id of the image you want to report")
         }
-        db.serialize(function() {
 
-            db.each("SELECT id_message, report_count FROM post WHERE id_image='"+args[0]+"'", function(err, post) { // SELECT id_image, id_message, id_file WHERE id_file="file_name" FROM post
-                let report = parseInt(post.report_count) + 1;
-                if(perms.check("report.force", role, msg.author.id) === true && args[1]==='--force'){
-                    msg.channel.fetchMessage(post.id_message)
-                        .then(m => {
-                            m.delete()
-                            msg.channel.sendMessage("id : "+args[0]+" was deleted")
-                        })
-                        .catch(console.error);
-                        return;
-
-                }
-                else if(perms.check("report.force", role, msg.author.id) !== true && args[1]==='--force') {
-                    msg.channel.sendMessage("You don't have the permission `report.force`");
-                    return;
-                }
-                else if(!image[args[0]].includes(msg.author.id)){
-                    image[args[0]][report-1] = msg.author.id;
-                }
-                else {msg.reply("you already reported this image you twat !").then(m => {
-                    setTimeout(function() {
-                        m.delete();
-                    }, config.discord.wait);
-                    });
-                    return;
-                }
-                db.run("UPDATE post SET report_count = '"+report+"' WHERE id_image='"+args[0]+"'");
-                msg.channel.sendMessage("report count : " + report).then(m => {
-                    setTimeout(function() {
-                        m.delete();
-                    }, config.discord.wait);
-                });
-                msg.channel.fetchMessage(post.id_message)
+        db.getPost(args[0], config.post.file).then(query => {
+            let report = parseInt(query.report_count) + 1;
+            if(perms.check("report.force", role, msg.author.id) === true && args[1]==='--force'){
+                msg.channel.fetchMessage(query.id_message)
                     .then(m => {
-                        let edit = m.content.split("-");
-                        edit[0] += "\n" + "-" + "\n" + "report count : " + report;
-                        m.edit(edit[0])
-                            .catch(console.error);
+                        m.delete();
+                        db.deletePost(query.id_message);
+                        msg.channel.sendMessage("id : "+args[0]+" was deleted")
                     })
                     .catch(console.error);
-                if(report > config.report.need){
-                    msg.channel.fetchMessage(post.id_message)
-                        .then(m => {
-                            m.delete();
-                            msg.channel.sendMessage("id : "+args[0]+" was deleted")
-                        })
-                        .catch(console.error);
-                }
+                return;
+
+            }
+            else if(perms.check("report.force", role, msg.author.id) !== true && args[1]==='--force') {
+                msg.channel.sendMessage("You don't have the permission `report.force`");
+                return;
+            }
+            else if(!image[args[0]].includes(msg.author.id)){
+                image[args[0]][report-1] = msg.author.id;
+            }
+            else {msg.reply("you already reported this image you twat !").then(m => {
+                setTimeout(function() {
+                    m.delete();
+                }, config.discord.wait);
             });
+                return;
+            } // UPDATE post SET report_count = '"+report+"' WHERE id_image='"+args[0]+"'"
+            db.reportPost(query.id_message);
+            msg.channel.sendMessage("report count : " + report).then(m => {
+                setTimeout(function() {
+                    m.delete();
+                }, config.discord.wait);
+            });
+            msg.channel.fetchMessage(query.id_message)
+                .then(m => {
+                    let edit = m.content.split("-");
+                    edit[0] += "\n" + "-" + "\n" + "report count : " + report;
+                    m.edit(edit[0])
+                        .catch(console.error);
+                })
+                .catch(console.error);
+            if(report > config.report.need){
+                msg.channel.fetchMessage(query.id_message)
+                    .then(m => {
+                        m.delete();
+                        db.deletePost(query.id_message);
+                        msg.channel.sendMessage("id : "+args[0]+" was deleted")
+                    })
+                    .catch(console.error);
+            }
         });
+
     }
 };

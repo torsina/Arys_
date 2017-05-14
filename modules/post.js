@@ -2,7 +2,7 @@ const fs = require('fs');
 const Arys = require('../Arys');
 const config = require('../config/config');
 const perms = require('../config/perm/perms');
-const db = Arys.db;
+const db = require('../util/db');
 const wait = Arys.wait;
 
 const line = fs.readFileSync(config.post.file + '.txt').toString().split("\n");
@@ -14,11 +14,11 @@ function save(value) {
         }
         console.log("The file was saved!");
     });
-};
+}
 
 function load() {
     return parseInt(fs.readFileSync('save.txt').toString());
-};
+}
 
 
 module.exports = {
@@ -59,14 +59,9 @@ module.exports = {
             let start = load();
             let end = parseInt(args[0]) + start;
 
-            for (var i = start; i < end; i++) {
+            for (let i = start; i < end; i++) {
                 msg.channel.sendMessage('id : ' + i + "\n" + line[i]).then(m => {
-                    db.serialize(function () {
-                        let stmt = db.prepare("INSERT INTO post VALUES (?,?,?,?)");  // ? --->var.run(i)  // db.run("CREATE TABLE post(id_image smallint, id_message varchar(18), id_file varchar(20))");
-                        stmt.run(start, m.id, config.post.file, 0); //id_image, id_message, id_file, report_count
-                        start++;
-                        stmt.finalize();
-                    });
+                    db.createPost(start, m.id, config.post.file)
                 });
                 console.log(start + " " + end + " " + i);
             }
@@ -74,7 +69,6 @@ module.exports = {
         }
         else{
             msg.reply("why do you use me outside of the NSFW channels you stupid perverted faggot, go back to the shithole you crawled out of before I stab your eyes out with a red-hot spoon!");
-            return;
         }
     }
 };
