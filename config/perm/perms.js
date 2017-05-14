@@ -51,7 +51,9 @@ module.exports.perm = {
             base: false
         },
         reposter: {
-            base: false
+            base: false,
+            set: false,
+            clear: false
         }
     },
 };
@@ -100,8 +102,8 @@ module.exports.getPermission = function (path, source) {
     }
 
     // Either return list of permissions or a value
-    if (base instanceof Object) {
-        // Get list of permissions
+    if (base instanceof Object) { // Get list of permissions
+
         const list = [];
         getBase(base, pathComponents.join(".") + ".", list);
         return list;
@@ -123,31 +125,16 @@ function getBase(base, path, list) {
         }
     }
 }
-/*function base(role, user) {
-    if(perms.getPermission(role + ".base", "role") === true && perms.getPermission(user + ".base", "user") !==false || perms.getPermission(user + ".base", "user") === true) {
-        return true;
-    }
-    return false;
-}*/
-
 
 module.exports.check = function (path, role, user) {
-   /* if(Arys.loaded = true) {
-        console.log("fffdffddffddfdfdf")
-        if(base(role, user) === false) return;
-    }*/
     if(user !== undefined) {
         let input;
         if (path === "") {
-            input = user;
-            //console.log("full tree user");
+            input = user; //full tree user
         }
         else {
-            input = user + "." + path;
-            //console.log("not full tree user");
+            input = user + "." + path; //not full tree user
         }
-        //console.log(path + " path");
-        //console.log(user + " user");
         console.log(input + " input");
         if(perms.getPermission(input, "user") !== -1) {
             console.log("user used : " + perms.getPermission(input, "user"));
@@ -157,23 +144,17 @@ module.exports.check = function (path, role, user) {
     if(role !== undefined) {
         let input;
         if (path === "") {
-            input = role;
-            //console.log("full tree");
+            input = role; //full tree role
         }
         else {
-            input = role + "." + path;
-            //console.log("not full tree");
+            input = role + "." + path; //not full tree role
         }
-        //console.log(path + " path");
-        //console.log(role + " role");
         console.log(input + " input");
-        if(perms.getPermission(input, "role") !== -1) { //input = role + "." + path
-            //console.log("role used");
+        if(perms.getPermission(input, "role") !== -1) { //role used
             return perms.getPermission(input, "role");
         }
     }
-    if(perms.getPermission(path) !== -1) {
-        //console.log("default used");
+    if(perms.getPermission(path) !== -1) { //default used
         return perms.getPermission(path);
     }
     else {
