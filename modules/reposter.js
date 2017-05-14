@@ -30,11 +30,14 @@ module.exports = {
             msg.guild.roles.get(config.reposter).members.forEach(function (m) {
                 db.createReposter(m.id);
              })
-
         }
         if (args[0] === "clear") {
-            sqlite.run("DROP TABLE reposter");
-            sqlite.run("CREATE TABLE reposter(id varchar(18), beginning varchar(17), end varchar(17))");
+            if(perms.check("mod.reposter.clear", role, msg.author.id) !== true) {
+                msg.channel.sendMessage("You don't have the permission `mod.reposter.clear`");
+                return;
+            }
+            db.deleteReposter();
+            msg.channel.sendMessage("table deleted");
         }
 
     }
