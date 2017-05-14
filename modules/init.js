@@ -13,7 +13,6 @@ module.exports = {
                 }
                 console.log("The file was saved!");
             });
-            let object = {};
             fs.writeFileSync("./config/perm/JSON/users.json", "{}", "utf8", function(err) {
                 if(err) {
                     return console.log(err);
