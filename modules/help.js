@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const perms = require('../config/perm/perms');
 module.exports = {
     help: 'Plz send help!!',
