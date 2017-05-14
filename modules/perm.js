@@ -18,7 +18,12 @@ module.exports = {
                 } else if (args[4] === "false") {
                     bool = false;
                 } else {
-                    msg.channel.sendMessage("this is not a right value");
+                    msg.channel.sendMessage("pre :" + perms.check(args[3], "", args[1]));
+                    objectPath.del(roles, input);
+                    msg.channel.sendMessage("post :" + perms.check(args[3], "", args[1]));
+                    msg.channel.sendMessage("property deleted");
+                    fs.writeFileSync("./config/perm/JSON/perms.json", JSON.stringify(roles), "utf8");
+                    msg.channel.sendMessage("test : " + objectPath.has(roles, ""));
                     return;
                 }
                 //objectPath.set(roles.rolePerm, args[3], bool);
@@ -33,7 +38,7 @@ module.exports = {
                     bool = true;
                 } else if (args[4] === "false") {
                     bool = false;
-                } else if (args.length<5 && args.length>4) {
+                } else if (args.length === 4) {
                     msg.channel.sendMessage("pre :" + perms.check(args[3], "", args[1]));
                     objectPath.del(users, input);
                     msg.channel.sendMessage("post :" + perms.check(args[3], "", args[1]));
@@ -49,7 +54,7 @@ module.exports = {
                 msg.channel.sendMessage("pre :" + perms.check(args[3], "", args[1]));
                 objectPath.set(users, input, bool);
                 msg.channel.sendMessage("post :" + perms.check(args[3], "", args[1]));
-                msg.channel.sendMessage("test : " + objectPath.get(users, args[1]));
+                msg.channel.sendMessage("test : " + JSON.stringify(objectPath.get(users, args[1])));
                 fs.writeFileSync("./config/perm/JSON/users.json", JSON.stringify(users), "utf8");
             }
         }
