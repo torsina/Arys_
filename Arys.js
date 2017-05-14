@@ -3,9 +3,7 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const config = require('./config/config');
-const sqlite3 = require('sqlite3').verbose();
 const Client = new Discord.Client();
-const sqlite = new sqlite3.Database(config.db.file);
 const roles = require('./config/perm/roles');
 const db = require ('./util/db');
 let loaded = false;
@@ -151,6 +149,5 @@ process.on("unhandledRejection", err => {
     console.error("Uncaught Promise Error: \n" + err.stack);
 });
 
-exports.db = sqlite;
 exports.Client = Client;
 exports.loaded = loaded;

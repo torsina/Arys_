@@ -1,11 +1,10 @@
 const Arys = require('../Arys');
 const wait = Arys.wait;
-const config = require('../config/config');
 const perms = require('../config/perm/perms');
 module.exports = {
     help: 'Reload the commands',
     func: (client, msg, args, role) => {
-        if(perms.check("mod.reload.base", role) !== true) {
+        if(perms.check("mod.reload.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `mod.reload.base`");
             return;
         }
@@ -22,6 +21,10 @@ module.exports = {
             console.timeEnd('reload');
         }
         else {
+            if(perms.check("mod.reload.command", role, msg.author.id) !== true) {
+                msg.channel.sendMessage("You don't have the permission `mod.reload.base`");
+                return;
+            }
             client.load();
             msg.channel.sendMessage('Commands reloaded.').then(m => {
                 setTimeout(function() {

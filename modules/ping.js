@@ -6,9 +6,6 @@ module.exports = {
             msg.channel.sendMessage("You don't have the permission `ping.base`");
             return;
         }
-        //let myRole = msg.guild.roles.find("name", "Dindu Nuffin");
-        //console.log(myRole);
-        //msg.channel.sendMessage("pong");
-        console.log(msg.content);
+        msg.channel.sendMessage("pong");
     }
 };

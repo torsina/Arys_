@@ -4,7 +4,6 @@ const config = require('../config/config');
 const perms = require('../config/perm/perms');
 const db = require('../util/db');
 const wait = Arys.wait;
-
 const line = fs.readFileSync(config.post.file + '.txt').toString().split("\n");
 
 function save(value) {
@@ -19,7 +18,6 @@ function save(value) {
 function load() {
     return parseInt(fs.readFileSync('save.txt').toString());
 }
-
 
 module.exports = {
     help: 'usage: $post (number of image, the number cant be more than 5 for obvious reasons)',

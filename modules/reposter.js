@@ -1,5 +1,4 @@
 const perms = require('../config/perm/perms');
-const sqlite = require('../Arys').db;
 const config = require('../config/config');
 const db = require('../util/db');
 let reposter;
