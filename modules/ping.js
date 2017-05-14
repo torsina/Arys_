@@ -8,6 +8,7 @@ module.exports = {
         }
         //let myRole = msg.guild.roles.find("name", "Dindu Nuffin");
         //console.log(myRole);
-        msg.channel.sendMessage("pong");
+        //msg.channel.sendMessage("pong");
+        console.log(msg.content);
     }
 };

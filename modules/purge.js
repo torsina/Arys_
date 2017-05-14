@@ -62,7 +62,6 @@ module.exports = {
         }
         if (args[0] === "user" && args[2] < config.purge.max && args[3] === "--force" && perms.check("mod.purge.user.force", role, msg.author.id) === true) { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
 
-            let messagecount = parseInt(args[2]);
             msg.channel.fetchMessages({
                 limit: config.purge.max,
             })
@@ -81,7 +80,6 @@ module.exports = {
                             });
                         console.log("test");
                     }
-                    // Has to delete messages individually. Cannot use `deleteMessages()` on selfbots.
                     //msg_array.map(m => m.delete().catch(console.error));
                     msg.channel.bulkDelete(msg_array);
                 })

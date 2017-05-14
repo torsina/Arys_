@@ -44,6 +44,10 @@ module.exports = {
              })
 
         }
+        if (args[0] === "clear") {
+            db.run("DROP TABLE reposter");
+            db.run("CREATE TABLE reposter(id varchar(18), beginning varchar(17), end varchar(17))");
+        }
 
     }
 };
