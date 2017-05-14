@@ -88,7 +88,8 @@ module.exports.rolePermBase = {
         },
         mod: {
             reposter: {
-                set: true
+                set: true,
+                clear: true
             }
         }
     }
@@ -144,30 +145,3 @@ module.exports.load = function() {
     });
 
 };
-
-/*
- Object.assign(perm.trending, perm.fresh, perm.trending);
- Object.assign(perm.captain, perm.trending, perm.captain);
- Object.assign(perm.op, perm.captain, perm.op);
- Object.assign(perm.oldfag, perm.op, perm.oldfag);
- Object.assign(perm.hot, perm.oldfag, perm.hot);
- Object.assign(perm.nsfw_god, perm.hot, perm.nsfw_god);
- Object.assign(perm.eye, perm.nsfw_god, perm.eye);
- Object.assign(perm.smurf, perm.eye, perm.smurf);
- Object.assign(perm.admin, perm.smurf, perm.admin);
- Object.assign(perm.bot_owner, perm.admin, perm.bot_owner);
- */
-
-//console.log(b + " : " + b.length);
-/*for(k = 0; k<b.length; k++) {
- if(b[k] === "all=true") { //k-1
- console.log(b[k-1] + " I AM HERE");
- /*for(l = 0; l<b.length-1; l++) {
- if(l = 0) {
- str = b[l];
- }
- str += b[l] + ".";
- }
- console.log(str);
- }
- }*/

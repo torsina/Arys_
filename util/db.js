@@ -37,7 +37,6 @@ db.createPost = (id_image, id_message, id_file) => {
         report_count: 0
     });
     query.save(function (err, doc) {
-        console.log(doc);
         if (err) return console.error(err);
     });
 };
@@ -133,7 +132,9 @@ db.endReposter = (member) => {
 };
 
 db.getReposter = (member) => {
-    let query = reposter.where({id: member});
+    const searchobj = {};
+    if(member !== undefined) searchobj.id = image;
+    let query = reposter.where(searchobj);
     return new Promise((resolve, reject) => {
         query.find().then(doc => {
             if (Object.keys(doc).length === 0) {
@@ -145,7 +146,5 @@ db.getReposter = (member) => {
 };
 
 db.deleteReposter = () => {
-    return new Promise((resolve, reject) => {
-        reposter.collection.drop()
-    });
+        reposter.collection.drop();
 };
