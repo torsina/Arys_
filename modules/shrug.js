@@ -7,7 +7,7 @@ module.exports = {
             return;
         }
         msg.delete();
-        msg.channel.sendMessage("¯\_(ツ)_/¯");
+        msg.channel.sendMessage("\u00af\\_(\u30c4)_\/\u00af");
 
     }
 };
