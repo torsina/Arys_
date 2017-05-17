@@ -59,9 +59,11 @@ Client.on('message', message => {
             if(m.guild.id === "242655328410402816") {
                 message.channel.sendMessage("from 9i");
             }
-            else message.channel.sendMessage("from other");
+            else {
+                message.channel.sendMessage("from other");
+                message.delete();
+            }
         });
-        message.delete();
     }
     //interaction
     if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
@@ -133,7 +135,7 @@ function check(member){
 }
 
 function isEmoji(str) {
-    var ranges = [
+    let ranges = [
         //'\ud83c[\udf00-\udfff]', // U+1F300 to U+1F3FF
         //'\ud83d[\udc00-\ude4f]', // U+1F400 to U+1F64F
         '\ud83d[\ude00-\udeff]' // U+1F680 to U+1F6FF // U+263A // 1F600 - 1F636
