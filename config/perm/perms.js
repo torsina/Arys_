@@ -7,6 +7,9 @@ module.exports.perm = {
         },
         pet: {
             base: false
+        },
+        shrug: {
+            base: false
         }
     },
     help: {

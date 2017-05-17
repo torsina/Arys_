@@ -21,7 +21,12 @@ module.exports.rolePermBase = {
     },
     trending: {
         interaction: {
-            all: true
+            pet: {
+                base: true
+            },
+            trigger: {
+                base: true
+            }
         },
         report: {
             base: true,
@@ -90,6 +95,11 @@ module.exports.rolePermBase = {
             reposter: {
                 set: true,
                 clear: true
+            }
+        },
+        interaction: {
+            shrug: {
+                base: true
             }
         }
     }
