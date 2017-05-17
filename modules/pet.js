@@ -20,7 +20,7 @@ module.exports = {
         ];
         let n = Math.floor(Math.random() * array.length);
         msg.delete();
-        msg.channel.sendMessage(array[0]);
+        msg.channel.sendMessage(array[n]);
 
     }
 };
