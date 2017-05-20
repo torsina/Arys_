@@ -34,7 +34,7 @@ module.exports = {
             msg.guild.members.filter(m=> m.roles.has(config.reposter));
             msg.guild.roles.get(config.reposter).members.forEach(function (m) {
                 db.createReposter(m.id).catch(console.error);
-             })
+             });
         }
         if (args[0] === "clear") {
             if(perms.check("mod.reposter.clear", role, msg.author.id) !== true) {
