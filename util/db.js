@@ -2,7 +2,6 @@ const config = require('../config/config.js');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const db = module.exports = {};
-let timestamp = new Date();
 
 let imagePostSchema = new Schema({
     id_image: String,
@@ -17,6 +16,12 @@ let reposterSchema = new Schema({
     exit: String
 });
 
+let userSchema = new Schema({
+    id: String,
+    post: String,
+    perm: Object
+});
+
 let imagePost = mongoose.model('imagePost', imagePostSchema);
 let reposter = mongoose.model('reposter', reposterSchema);
 
@@ -28,6 +33,11 @@ db.load = () => {
         console.log("connected to mongodb server");
     });
 };
+
+function date() {
+    let timestamp = new Date();
+    return timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + ":" + timestamp.getSeconds();
+}
 
 db.createPost = (id_image, id_message, id_file) => {
     let query = new imagePost({
@@ -59,7 +69,7 @@ db.getPost = (id_image, id_file) => {
 };
 
 db.getAllPost = (image, message, file) => {
-    const searchobj = {};
+    let searchobj = {};
     if(image !== undefined) searchobj.id_image = image;
     if(message !== undefined) searchobj.id_message = message;
     if(file !== undefined) searchobj.id_file = file;
@@ -103,10 +113,9 @@ db.deletePost = (id_message) => {
 };
 
 db.createReposter = (member) => {
-    let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
     let query = new reposter({
         id: member,
-        enter: date
+        enter: date()
     });
     return new Promise((resolve, reject) => {
         query.save(function (err, doc) {
@@ -116,33 +125,52 @@ db.createReposter = (member) => {
     });
 };
 
-db.endReposter = (member) => {
-    let date = timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes();
-    let query = new reposter({
-        id: member
+db.endReposter = (id) => {
+    let query  = reposter.where({
+        id: id
     });
     return new Promise((resolve, reject) => {
-    query.findOne(function(err, doc) {
-        if (err) return reject(new Error('could not find'));
-        doc.end = date;
-        doc.save();
-        resolve(doc);
-    }).catch(reject);
+        query.find(function (err, doc) {
+            if (err) {
+                return reject(new Error('no entry found'));
+            }
+            db.getReposter().then((member) => {
+                for (let i = 0; i < member.length; i++) {
+                    if (member[i].exit === undefined) {
+                        member[i].exit = date();
+                        member[i].save();
+                        resolve(member[i]);
+                        return;
+                    }
+                }
+            }).catch(console.error);
+        });
     });
 };
 
 db.getReposter = (member) => {
-    const searchobj = {};
-    if(member !== undefined) searchobj.id = image;
-    let query = reposter.where(searchobj);
-    return new Promise((resolve, reject) => {
-        query.find().then(doc => {
-            if (Object.keys(doc).length === 0) {
-                return reject(new Error('no entry found'));
-            }
-            resolve(doc);
-        }).catch(reject);
-    });
+    if(member !== undefined) {
+        let query = reposter.where({
+            id: member
+        });
+        return new Promise((resolve, reject) => {
+            query.find().then(doc => {
+                if (Object.keys(doc).length === 0) {
+                    return reject(new Error('no entry found'));
+                }
+                resolve(doc);
+            }).catch(reject);
+        });
+    } else {
+        return new Promise((resolve, reject) => {
+            reposter.find().then(doc => {
+                if (Object.keys(doc).length === 0) {
+                    return reject(new Error('no entry found'));
+                }
+                resolve(doc);
+            }).catch(reject);
+        });
+    }
 };
 
 db.deleteReposter = () => {

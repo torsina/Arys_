@@ -18,7 +18,13 @@ module.exports = {
                 msg.channel.sendMessage("You don't have the permission `mod.reposter.get`");
                 return;
             }
-            db.getReposter();
+            db.getReposter().then((member) => {
+                let object = [];
+                for (let i = 0; i<member.length; i++) {
+                    object[i] = member[i].id + " " + member[i].enter + " " + member[i].exit;
+                }
+                msg.channel.sendMessage(object);
+            }).catch(console.error);
         }
         if(args[0] === "set") {
             if(perms.check("mod.reposter.set", role, msg.author.id) !== true) {
@@ -27,7 +33,7 @@ module.exports = {
             }
             msg.guild.members.filter(m=> m.roles.has(config.reposter));
             msg.guild.roles.get(config.reposter).members.forEach(function (m) {
-                db.createReposter(m.id);
+                db.createReposter(m.id).catch(console.error);
              })
         }
         if (args[0] === "clear") {
