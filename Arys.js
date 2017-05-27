@@ -58,8 +58,7 @@ Client.on('message', message => {
         Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
             if(m.guild.id === "242655328410402816") {
                 message.channel.sendMessage("from 9i");
-            }
-            else {
+            } else {
                 message.channel.sendMessage("from other");
                 message.delete();
             }
@@ -75,6 +74,15 @@ Client.on('message', message => {
     //emoji delete system
     if (isEmoji(message.content) === true) {
             console.log("there is an emoji here");
+    }
+    //server emoji analytics
+    let serverEmojis = message.guild.emojis.array();
+    let emojiStack = message.content.match(/<:(\w+):(\d+)>/g);
+    for (let i = 0; i<serverEmojis.length; i++) {
+        let emoji = "<:" + serverEmojis[i].name + ":" + serverEmojis[i].id + ">";
+        if (emojiStack.includes(emoji)) {
+            db.createAnalytic(emoji, message.author.id);
+        }
     }
     //command handler
         if (message.content.startsWith(config.discord.prefix)) {

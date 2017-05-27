@@ -22,8 +22,29 @@ let userSchema = new Schema({
     perm: Object
 });
 
+let eventSchema = new Schema({
+    name: String,
+    creator: String,
+    desc: String,
+    prize: Object,
+    winners: Object,
+    schedule: {
+        every: String,
+        day: String,
+        dates: Array //dates out of schedule
+    }
+});
+
+let analyticSchema = new Schema({
+    item: String,
+    user: String,
+    date: String
+});
+
 let imagePost = mongoose.model('imagePost', imagePostSchema);
 let reposter = mongoose.model('reposter', reposterSchema);
+let event = mongoose.model('event', eventSchema);
+let analytic = mongoose.model('analytic', analyticSchema);
 
 db.load = () => {
     mongoose.connect("mongodb://192.168.1.30/arys"); //id_image, id_message, id_file, report_count
@@ -46,8 +67,11 @@ db.createPost = (id_image, id_message, id_file) => {
         id_file: id_file,
         report_count: 0
     });
-    query.save(function (err, doc) {
-        if (err) return console.error(err);
+    return new Promise((resolve, reject) => {
+        query.save(function (err, doc) {
+            if (err) return reject(new Error('could not save'));
+            resolve(doc);
+        }).catch(reject);
     });
 };
 
@@ -60,7 +84,6 @@ db.getPost = (id_image, id_file) => {
         query.findOne().then(doc => {
             if (doc === null) return reject(new Error('no entry found'));
             if (doc) {
-                console.log(doc);
                 resolve(doc);
             }
         }).catch(reject);
@@ -73,30 +96,27 @@ db.getAllPost = (image, message, file) => {
     if(image !== undefined) searchobj.id_image = image;
     if(message !== undefined) searchobj.id_message = message;
     if(file !== undefined) searchobj.id_file = file;
-
     let query = imagePost.where(searchobj);
-        return new Promise((resolve, reject) => {
-            query.find().then(doc => {
-                if (Object.keys(doc).length === 0) {
-                    return reject(new Error('no entry found'));
-                }
-                resolve(doc);
-            }).catch(reject);
-        });
+
+    return new Promise((resolve, reject) => {
+        query.find().then(doc => {
+            if (doc === null) return reject(new Error('no entry found'));
+            resolve(doc);
+        }).catch(reject);
+    });
 };
 
 db.reportPost = (id_message) => {
     let query  = imagePost.where({
         id_message: id_message
     });
-    query.findOne(function(err, doc) {
-        if (err) {
-            return console.error('error, no entry found');
-        }
-        console.log(doc.report_count);
-        doc.report_count ++;
-        console.log(doc.report_count);
-        doc.save();
+    return new Promise((resolve, reject) => {
+        query.findOne(function (err, doc) {
+            if (err) return reject(new Error('no entry found'));
+            doc.report_count++;
+            doc.save();
+            resolve(doc);
+        }).catch(reject);
     });
 };
 
@@ -143,7 +163,7 @@ db.endReposter = (id) => {
                         return;
                     }
                 }
-            }).catch(console.error);
+            }).catch(reject);
         });
     });
 };
@@ -174,5 +194,166 @@ db.getReposter = (member) => {
 };
 
 db.deleteReposter = () => {
-        reposter.collection.drop();
+    reposter.collection.drop();
+};
+
+/*
+db.createEvent = (name) => {
+    let query = new event({
+        name: name
+    });
+    return new Promise((resolve, reject) => {
+        query.save(function (err, doc) {
+            if (err) return reject(new Error('could not save'));
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.getEvent = () => {
+    return new Promise((resolve, reject) => {
+        event.find(function (err, doc) {
+            if (err) return reject(new Error('no entry found'));
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.deleteEvent = () => {
+    let query = new event({
+        name: name
+    });
+    return new Promise((resolve, reject) => {
+        query.findOneAndRemove(function (err, doc) {
+            if (err) return reject(new Error('no entry found'));
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.editEventCreator = (name, creator) => {
+    let query  = event.where({
+        name: name
+    });
+    return new Promise((resolve, reject) => {
+        query.findOne(function (err, doc) {
+            if (err) return reject(new Error('no entry found'));
+            doc.creator = creator;
+            doc.save();
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.editEventDescription = (name, desc) => {
+    let query  = event.where({
+        name: name
+    });
+    return new Promise((resolve, reject) => {
+        query.findOne(function (err, doc) {
+            if (err) return reject(new Error('no entry found'));
+            doc.desc = desc;
+            doc.save();
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.editEventCreator = (name, creator) => {
+    let query  = event.where({
+        name: name
+    });
+    return new Promise((resolve, reject) => {
+        query.findOne(function (err, doc) {
+            if (err) return reject(new Error('no entry found'));
+            doc.creator = creator;
+            doc.save();
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.editEventPrize = (name, prize) => {
+    let query  = event.where({
+        name: name
+    });
+    return new Promise((resolve, reject) => {
+        query.findOne(function (err, doc) {
+            if (err) return reject(new Error('no entry found'));
+            doc.prize = prize;
+            doc.save();
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.addEventWinners = (name, winners) => {
+    let query  = event.where({
+        name: name
+    });
+    return new Promise((resolve, reject) => {
+        query.findOne(function (err, doc) {
+            if (err) return reject(new Error('no entry found'));
+            doc.winners = winners;
+            doc.save();
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.editEventScheduleRegular = (name, every, day) => {
+    let query  = event.where({
+        name: name
+    });
+    return new Promise((resolve, reject) => {
+        query.findOne(function (err, doc) {
+            if (err) return reject(new Error('no entry found'));
+            doc.schedule.every = every;
+            doc.schedule.day = day;
+            doc.save();
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.editEventScheduleIrregular = (name, date) => {
+    let query  = event.where({
+        name: name
+    });
+    return new Promise((resolve, reject) => {
+        query.findOne(function (err, doc) {
+            if (err) return reject(new Error('no entry found'));
+            let length = doc.schedule.dates.length + 1;
+            doc.schedule.dates[length] = date;
+            doc.save();
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+*/
+
+db.createAnalytic = (item, member) => {
+    let query = new analytic({
+        item: item,
+        date: date(),
+        user: member
+    });
+    return new Promise((resolve, reject) => {
+        query.save(function (err, doc) {
+            if (err) return reject(new Error('could not save'));
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.getAnalyticByName = (name) => {
+    let query = analytic.where({
+        item: name
+    });
+    return new Promise((resolve, reject) => {
+        query.find().then(doc => {
+            if (doc === null) return reject(new Error('no entry found'));
+            resolve(doc);
+        }).catch(reject);
+    });
 };
