@@ -82,7 +82,7 @@ Client.on('message', message => {
         for (let i = 0; i<serverEmojis.length; i++) {
             let emoji = "<:" + serverEmojis[i].name + ":" + serverEmojis[i].id + ">";
             if (emojiStack.includes(emoji)) {
-                db.createAnalytic(emoji, message.author.id);
+                db.createAnalytic(emoji, message.author.id, message.channel.id).catch(console.error);
                 console.log(emoji);
             }
         }

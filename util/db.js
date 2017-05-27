@@ -38,6 +38,7 @@ let eventSchema = new Schema({
 let analyticSchema = new Schema({
     item: String,
     user: String,
+    channel: String,
     date: String
 });
 
@@ -332,11 +333,12 @@ db.editEventScheduleIrregular = (name, date) => {
 };
 */
 
-db.createAnalytic = (item, member) => {
+db.createAnalytic = async (item, member, channel) => {
     let query = new analytic({
         item: item,
         date: date(),
-        user: member
+        user: member,
+        channe: channel
     });
     return new Promise((resolve, reject) => {
         query.save(function (err, doc) {
@@ -346,14 +348,50 @@ db.createAnalytic = (item, member) => {
     });
 };
 
-db.getAnalyticByName = (name) => {
+db.getDifferentAnalytic = async () => {
+    return new Promise((resolve, reject) => {
+        analytic.find().distinct('item').then(doc => {
+            if (doc === null) return reject(new Error('table is empty'));
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.getAllAnalytic = async () => {
+    analytic.find().distinct('_id', function(error, ids) {
+        // ids is an array of all ObjectIds
+    });
+    return new Promise((resolve, reject) => {
+        analytic.find().then(doc => {
+            if (doc === null) return reject(new Error('table is empty'));
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.countAnalyticByName = async (name) => {
     let query = analytic.where({
         item: name
     });
     return new Promise((resolve, reject) => {
         query.find().then(doc => {
             if (doc === null) return reject(new Error('no entry found'));
-            resolve(doc);
+            resolve(Object.keys(doc).length);
+        }).catch(reject);
+    });
+};
+
+db.countAnalytic = async () => {
+    let stack = [];
+    return new Promise((resolve, reject) => {
+        db.getDifferentAnalytic().then(doc => {
+            if (doc === null) return reject(new Error('table is empty or register doesnt work'));
+            for(let i=0; i<doc.length; i++) {
+                db.countAnalyticByName(doc[i]).then(count => {
+                    stack.push(doc[i] + " " + count);
+                    if (i === doc.length - 1) resolve(stack);
+                });
+            }
         }).catch(reject);
     });
 };
