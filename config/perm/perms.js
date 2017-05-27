@@ -57,6 +57,9 @@ module.exports.perm = {
             base: false,
             set: false,
             clear: false
+        },
+        analytic: {
+            base: false
         }
     },
 };

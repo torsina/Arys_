@@ -78,12 +78,17 @@ Client.on('message', message => {
     //server emoji analytics
     let serverEmojis = message.guild.emojis.array();
     let emojiStack = message.content.match(/<:(\w+):(\d+)>/g);
-    for (let i = 0; i<serverEmojis.length; i++) {
-        let emoji = "<:" + serverEmojis[i].name + ":" + serverEmojis[i].id + ">";
-        if (emojiStack.includes(emoji)) {
-            db.createAnalytic(emoji, message.author.id);
+    if (emojiStack !== null) {
+        for (let i = 0; i<serverEmojis.length; i++) {
+            let emoji = "<:" + serverEmojis[i].name + ":" + serverEmojis[i].id + ">";
+            if (emojiStack.includes(emoji)) {
+                db.createAnalytic(emoji, message.author.id);
+                console.log(emoji);
+            }
         }
     }
+
+
     //command handler
         if (message.content.startsWith(config.discord.prefix)) {
             if (loaded = false) loaded = true;

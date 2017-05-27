@@ -60,6 +60,9 @@ module.exports.rolePermBase = {
             reposter: {
                 base: true,
                 get: true
+            },
+            analytic: {
+                base: true
             }
         },
     },
