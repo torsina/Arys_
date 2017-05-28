@@ -87,8 +87,6 @@ Client.on('message', message => {
             }
         }
     }
-
-
     //command handler
         if (message.content.startsWith(config.discord.prefix)) {
             if (loaded = false) loaded = true;

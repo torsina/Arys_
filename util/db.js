@@ -338,7 +338,7 @@ db.createAnalytic = async (item, member, channel) => {
         item: item,
         date: date(),
         user: member,
-        channe: channel
+        channel: channel
     });
     return new Promise((resolve, reject) => {
         query.save(function (err, doc) {
