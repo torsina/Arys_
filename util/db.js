@@ -387,7 +387,7 @@ db.countAnalytic = async () => { //
 };
 
 db.deleteAnalytic = () => {
-    reposter.collection.drop();
+    analytic.collection.drop();
 };
 
 /*db.getAnalyticByDate = async (min, max) => {
