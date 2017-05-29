@@ -338,7 +338,6 @@ db.editEventScheduleIrregular = (name, date) => {
 db.createAnalytic = async (item, member, channel) => { //
     let query = new analytic({
         item: item,
-        date: date(),
         user: member,
         channel: channel
     });

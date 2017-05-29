@@ -76,7 +76,7 @@ Client.on('message', message => {
             console.log("there is an emoji here");
     }
     //server emoji analytics
-    /*let serverEmojis = message.guild.emojis.array();
+    let serverEmojis = message.guild.emojis.array();
     let emojiStack = message.content.match(/<:(\w+):(\d+)>/g);
     if (emojiStack !== null) {
         for (let i = 0; i<serverEmojis.length; i++) {
@@ -86,7 +86,7 @@ Client.on('message', message => {
                 console.log(emoji);
             }
         }
-    }*/
+    }
     //command handler
         if (message.content.startsWith(config.discord.prefix)) {
             if (loaded = false) loaded = true;
