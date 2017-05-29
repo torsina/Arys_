@@ -13,7 +13,8 @@
     "sqlite3": "3.1.8",
     "assign-deep": "0.4.5",
     "object-path": "0.11.4",
-    "mongoose": "4.9.8"
+    "mongoose": "4.9.8",
+    "chart.js": "2.6.0"
   },
   "devDependencies": {},
   "repository": {
