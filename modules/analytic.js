@@ -14,17 +14,31 @@ module.exports = {
                         let [item, count] = str.split(" "); return { item, count }
                     });
                     //console.log(array[0].item + " " + array[0].count);
-                    array.count.sort(function(a, b){return a-b});
-                    console.log(array);
-                    /*
+                    array.sort(function(a, b){
+                        return a.count-b.count;
+                    });
+                    //msg.channel.sendMessage(array.item + " " + array.count);
+
                     let str = "";
-                    for(let i=0;i<doc.length; i++) {
-                        str += doc[i] + "\n";
+                    for(let i=0;i<array.length; i++) {
+                        str += array[i].item + " " + array[i].count + "\n";
                     }
-                    console.log(str);*/
+                    msg.channel.sendMessage(str);
                 });
             }
             //db.getAnalyticByName("<:feelssmugman:246765996684083210>").then(doc => {console.log(Object.keys(doc).length)})
         }
+        if(args[0] === "delete") {
+            db.deleteAnalytic();
+        }
     }
 };
+
+function compare(a,b) {
+    if (a.count < b.count)
+        return -1;
+    if (a.count > b.count)
+        return 1;
+    return 0;
+}
+

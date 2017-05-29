@@ -39,7 +39,9 @@ let analyticSchema = new Schema({
     item: String,
     user: String,
     channel: String,
-    date: String
+    date: {
+        type: Date, default: Date.now
+    }
 });
 
 let imagePost = mongoose.model('imagePost', imagePostSchema);
@@ -333,7 +335,7 @@ db.editEventScheduleIrregular = (name, date) => {
 };
 */
 
-db.createAnalytic = async (item, member, channel) => {
+db.createAnalytic = async (item, member, channel) => { //
     let query = new analytic({
         item: item,
         date: date(),
@@ -348,7 +350,7 @@ db.createAnalytic = async (item, member, channel) => {
     });
 };
 
-db.getDifferentAnalytic = async () => {
+db.getDifferentAnalytic = async () => { //
     return new Promise((resolve, reject) => {
         analytic.find().distinct('item').then(doc => {
             if (doc === null) return reject(new Error('table is empty'));
@@ -357,21 +359,9 @@ db.getDifferentAnalytic = async () => {
     });
 };
 
-db.getAllAnalytic = async () => {
-    analytic.find().distinct('_id', function(error, ids) {
-        // ids is an array of all ObjectIds
-    });
-    return new Promise((resolve, reject) => {
-        analytic.find().then(doc => {
-            if (doc === null) return reject(new Error('table is empty'));
-            resolve(doc);
-        }).catch(reject);
-    });
-};
-
-db.countAnalyticByName = async (name) => {
+db.countAnalyticByName = async (name) => { //
     let query = analytic.where({
-        item: name
+        item: name < i && name > i
     });
     return new Promise((resolve, reject) => {
         query.find().then(doc => {
@@ -381,7 +371,7 @@ db.countAnalyticByName = async (name) => {
     });
 };
 
-db.countAnalytic = async () => {
+db.countAnalytic = async () => { //
     let stack = [];
     return new Promise((resolve, reject) => {
         db.getDifferentAnalytic().then(doc => {
@@ -395,3 +385,16 @@ db.countAnalytic = async () => {
         }).catch(reject);
     });
 };
+
+db.deleteAnalytic = () => {
+    reposter.collection.drop();
+};
+
+/*db.getAnalyticByDate = async (min, max) => {
+ let minDate = new Date(min);
+ let maxDate = new Date(max);
+ let query = analytic.where({
+ date:  < i
+ });
+ };*/
+
