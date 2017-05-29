@@ -52,7 +52,6 @@ Client.on('guildMemberUpdate', (oldMember, newMember) => {
 
 Client.on('message', message => {
     if (message.author.bot) return;
-    if(message.channel.id==="257541472772030464") return;
     //invite delete system
     if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
         Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
@@ -60,7 +59,6 @@ Client.on('message', message => {
                 message.channel.sendMessage("from 9i");
             } else {
                 message.channel.sendMessage("from other");
-                message.delete();
             }
         });
     }
@@ -88,6 +86,7 @@ Client.on('message', message => {
         }
     }
     //command handler
+        if(message.channel.id==="257541472772030464") return;
         if (message.content.startsWith(config.discord.prefix)) {
             if (loaded = false) loaded = true;
             args = message.content.split(' ');
