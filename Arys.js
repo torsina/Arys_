@@ -73,14 +73,16 @@ Client.on('message', message => {
             console.log("there is an emoji here");
     }
     //server emoji analytics
-    let serverEmojis = message.guild.emojis.array();
-    let emojiStack = message.content.match(/<:(\w+):(\d+)>/g);
-    if (emojiStack !== null) {
-        for (let i = 0; i<serverEmojis.length; i++) {
-            let emoji = "<:" + serverEmojis[i].name + ":" + serverEmojis[i].id + ">";
-            if (emojiStack.includes(emoji)) {
-                db.createAnalytic(emoji, message.author.id, message.channel.id).catch(console.error);
-                console.log(emoji);
+    if(!message.author.bot) {
+        let serverEmojis = message.guild.emojis.array();
+        let emojiStack = message.content.match(/<:(\w+):(\d+)>/g);
+        if (emojiStack !== null) {
+            for (let i = 0; i<serverEmojis.length; i++) {
+                let emoji = "<:" + serverEmojis[i].name + ":" + serverEmojis[i].id + ">";
+                if (emojiStack.includes(emoji)) {
+                    db.createAnalytic(emoji, message.author.id, message.channel.id, message.guild.id).catch(console.error);
+                    console.log(emoji);
+                }
             }
         }
     }

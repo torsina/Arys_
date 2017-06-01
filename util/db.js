@@ -39,6 +39,7 @@ let analyticSchema = new Schema({
     item: String,
     user: String,
     channel: String,
+    guild: String,
     date: Number
 });
 
@@ -333,11 +334,12 @@ db.editEventScheduleIrregular = (name, date) => {
 };
 */
 
-db.createAnalytic = async (item, member, channel) => { //
+db.createAnalytic = async (item, member, channel, guild) => { //
     let query = new analytic({
         item: item,
         user: member,
         channel: channel,
+        guild: guild,
         date: Date.now()
     });
     return new Promise((resolve, reject) => {
@@ -413,6 +415,21 @@ db.getAnalyticInDate = async (min, max) => { //
             if (doc === null) return reject(new Error('no entry for this period'));
             db.countAnalytic(query).then(obj => resolve(obj)).catch(console.error);
         }).catch(reject);
+    });
+};
+
+db.getAnalyticByDate = async (min, max) => {
+    let minDate, maxDate;
+    if (min === undefined) minDate = 0;
+    else minDate = min;
+    if (max === undefined) maxDate = Date.now();
+    else maxDate = max;
+    let minDateObj = new Date(minDate);
+    let maxDateObj = new Date(maxDate);
+    return new Promise((resolve, reject) => {
+        db.getAnalyticInDate(min, max).then(doc => {
+
+        });
     });
 };
 
