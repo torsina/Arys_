@@ -16,6 +16,7 @@ for(let id=0; id<post.line; id++){
 module.exports = {
     help: 'Use this if some retard placed loli in my lists, usage : $report (id)',
     func: (client, msg, args, role) => {
+        if(config.env === "dev") return;
         setTimeout(function() {
             msg.delete();
         }, config.discord.wait);

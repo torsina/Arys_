@@ -6,6 +6,7 @@ let timestamp = new Date();
 module.exports = {
     help: 'gives the list of all the current reposters',
     func: (client, msg, args, role) => {
+        if(config.env === "dev") return;
         if(perms.check("mod.reposter.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `mod.reposter.base`");
             return;

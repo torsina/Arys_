@@ -3,14 +3,11 @@ const perms = require('../config/perm/perms');
 module.exports = {
     help: 'Delete messages',
     func: (client, msg, args, role) => {
-
+        if(config.env === "dev") return;
         if(perms.check("mod.purge.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `mod.purge.base`");
             return;
         }
-
-
-
         if (msg.channel.type === 'dm') {
             msg.channel.sendMessage("You can't do that in a DM, dummy!");
             return;

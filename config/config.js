@@ -26,6 +26,7 @@ module.exports = {
     report: {
         need: 3
     },
-    reposter: "245501778018304001"
+    reposter: "245501778018304001",
+    env: token.env
 
 };

@@ -39,9 +39,7 @@ let analyticSchema = new Schema({
     item: String,
     user: String,
     channel: String,
-    date: {
-        type: Date, default: Date.now
-    }
+    date: Number
 });
 
 let imagePost = mongoose.model('imagePost', imagePostSchema);
@@ -339,7 +337,8 @@ db.createAnalytic = async (item, member, channel) => { //
     let query = new analytic({
         item: item,
         user: member,
-        channel: channel
+        channel: channel,
+        date: Date.now()
     });
     return new Promise((resolve, reject) => {
         query.save(function (err, doc) {
@@ -349,9 +348,21 @@ db.createAnalytic = async (item, member, channel) => { //
     });
 };
 
-db.getDifferentAnalytic = async () => { //
+db.getAnalytic = async (name) => { //
+    let query = analytic.where({
+        item: name
+    });
     return new Promise((resolve, reject) => {
-        analytic.find().distinct('item').then(doc => {
+        query.find().then(doc => {
+            if (doc === null) return reject(new Error('no entry found'));
+            resolve(doc);
+        }).catch(reject);
+    });
+};
+
+db.getDifferentAnalytic = async (obj) => { //
+    return new Promise((resolve, reject) => {
+        obj.find().distinct('item').then(doc => {
             if (doc === null) return reject(new Error('table is empty'));
             resolve(doc);
         }).catch(reject);
@@ -360,7 +371,7 @@ db.getDifferentAnalytic = async () => { //
 
 db.countAnalyticByName = async (name) => { //
     let query = analytic.where({
-        item: name < i && name > i
+        item: name
     });
     return new Promise((resolve, reject) => {
         query.find().then(doc => {
@@ -370,17 +381,37 @@ db.countAnalyticByName = async (name) => { //
     });
 };
 
-db.countAnalytic = async () => { //
+db.countAnalytic = async (Object) => { //
+    let obj;
+    if (Object === undefined) obj = analytic;
+    else obj = Object;
     let stack = [];
     return new Promise((resolve, reject) => {
-        db.getDifferentAnalytic().then(doc => {
+        db.getDifferentAnalytic(obj).then(doc => {
             if (doc === null) return reject(new Error('table is empty or register doesnt work'));
             for(let i=0; i<doc.length; i++) {
                 db.countAnalyticByName(doc[i]).then(count => {
                     stack.push(doc[i] + " " + count);
                     if (i === doc.length - 1) resolve(stack);
-                });
+                }).catch(console.error);
             }
+        }).catch(reject);
+    });
+};
+
+db.getAnalyticInDate = async (min, max) => { //
+    let minDate, maxDate;
+    if (min === undefined) minDate = 0;
+    else minDate = min;
+    if (max === undefined) maxDate = Date.now();
+    else maxDate = max;
+    let minDateObj = new Date(minDate);
+    let maxDateObj = new Date(maxDate);
+    let query = analytic.where('date').lt(maxDateObj.getTime()).gt(minDateObj.getTime());
+    return new Promise((resolve, reject) => {
+        query.find().then(doc => {
+            if (doc === null) return reject(new Error('no entry for this period'));
+            db.countAnalytic(query).then(obj => resolve(obj)).catch(console.error);
         }).catch(reject);
     });
 };
@@ -388,7 +419,6 @@ db.countAnalytic = async () => { //
 db.deleteAnalytic = () => {
     analytic.collection.drop();
 };
-
 /*db.getAnalyticByDate = async (min, max) => {
  let minDate = new Date(min);
  let maxDate = new Date(max);

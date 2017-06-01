@@ -1,8 +1,9 @@
 const perms = require('../config/perm/perms');
+const config = require('../config/config');
 module.exports = {
     help: 'You dont want to see this',
     func: (client, msg, args, role) => {
-
+        if(config.env === "dev") return;
         if(perms.check("interaction.trigger.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `interaction.trigger.base`");
             return;

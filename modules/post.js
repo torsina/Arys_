@@ -22,7 +22,7 @@ function load() {
 module.exports = {
     help: 'usage: $post (number of image, the number cant be more than 5 for obvious reasons)',
     func: (client, msg, args, role) => {
-
+    if(config.env === "dev") return;
         if(perms.check("post.base", role, msg.author.id) !== true) {
             msg.channel.sendMessage("You don't have the permission `post.base`");
             return;
