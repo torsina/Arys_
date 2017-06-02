@@ -428,7 +428,17 @@ db.getAnalyticByDate = async (min, max) => {
     let maxDateObj = new Date(maxDate);
     return new Promise((resolve, reject) => {
         db.getAnalyticInDate(min, max).then(doc => {
-
+/*let minDate, maxDate;
+ if (args[0] === undefined) minDate = 0;
+ else minDate = args[0];
+ if (args[1] === undefined) maxDate = Date.now();
+ else maxDate = args[1];
+ let minDateObj = new Date(minDate);
+ let maxDateObj = new Date(maxDate);
+ let a = minDateObj.getTime();
+ let b = maxDateObj.getTime();
+ let days = Math.floor((b-a)/86400000); //number of days
+ console.log(days);*/
         });
     });
 };
