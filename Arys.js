@@ -73,7 +73,7 @@ Client.on('message', message => {
             console.log("there is an emoji here");
     }
     //server emoji analytics
-    if(!message.author.bot) {
+    if(!message.author.bot && config.env !== "dev") {
         let serverEmojis = message.guild.emojis.array();
         let emojiStack = message.content.match(/<:(\w+):(\d+)>/g);
         if (emojiStack !== null) {

@@ -371,37 +371,36 @@ db.getDifferentAnalytic = async (obj) => { //
     });
 };
 
-db.countAnalyticByName = async (name) => { //
-    let query = analytic.where({
-        item: name
-    });
+db.countAnalyticByName = async (name, obj) => { //
+    //console.log(obj);
     return new Promise((resolve, reject) => {
-        query.find().then(doc => {
+        obj.where({item: name}).find().then(doc => {
             if (doc === null) return reject(new Error('no entry found'));
+            console.log(Object.keys(doc).length);
             resolve(Object.keys(doc).length);
         }).catch(reject);
     });
 };
 
-db.countAnalytic = async (Object) => { //
+db.countAnalytic = async (Object) => { //main func
     let obj;
     if (Object === undefined) obj = analytic;
     else obj = Object;
     let stack = [];
     return new Promise((resolve, reject) => {
-        db.getDifferentAnalytic(obj).then(doc => {
+        db.getDifferentAnalytic(obj).then(doc => { //get all nzmes of items in obj(timeframe)
             if (doc === null) return reject(new Error('table is empty or register doesnt work'));
             for(let i=0; i<doc.length; i++) {
-                db.countAnalyticByName(doc[i]).then(count => {
+                db.countAnalyticByName(doc[i], obj).then(count => { //
                     stack.push(doc[i] + " " + count);
                     if (i === doc.length - 1) resolve(stack);
                 }).catch(console.error);
             }
-        }).catch(reject);
+        }).catch(console.error);
     });
 };
 
-db.getAnalyticInDate = async (min, max) => { //
+db.getAnalyticInDate = async (min, max) => { //set timeframe
     let minDate, maxDate;
     if (min === undefined) minDate = 0;
     else minDate = min;
@@ -409,36 +408,49 @@ db.getAnalyticInDate = async (min, max) => { //
     else maxDate = max;
     let minDateObj = new Date(minDate);
     let maxDateObj = new Date(maxDate);
+    console.log("triggered");
     let query = analytic.where('date').lt(maxDateObj.getTime()).gt(minDateObj.getTime());
     return new Promise((resolve, reject) => {
         query.find().then(doc => {
-            if (doc === null) return reject(new Error('no entry for this period'));
+            if (doc === null) return console.log("error : " + min + " " + max); //reject(new Error('no entry for this period'))
             db.countAnalytic(query).then(obj => resolve(obj)).catch(console.error);
-        }).catch(reject);
+        }).catch(console.error);
     });
 };
 
 db.getAnalyticByDate = async (min, max) => {
     let minDate, maxDate;
-    if (min === undefined) minDate = 0;
-    else minDate = min;
-    if (max === undefined) maxDate = Date.now();
-    else maxDate = max;
-    let minDateObj = new Date(minDate);
-    let maxDateObj = new Date(maxDate);
-    return new Promise((resolve, reject) => {
-        db.getAnalyticInDate(min, max).then(doc => {
-/*let minDate, maxDate;
- if (args[0] === undefined) minDate = 0;
- else minDate = args[0];
- if (args[1] === undefined) maxDate = Date.now();
- else maxDate = args[1];
- let minDateObj = new Date(minDate);
- let maxDateObj = new Date(maxDate);
- let a = minDateObj.getTime();
- let b = maxDateObj.getTime();
- let days = Math.floor((b-a)/86400000); //number of days
- console.log(days);*/
+    minDate = min || 0;
+    maxDate = max || Date.now();
+    let a = new Date(minDate).getTime();
+    let b = new Date(maxDate).getTime();
+    let days = Math.floor((b-a)/86400000); //number of day
+    let stack = [];
+    return new Promise((resolve) => {
+        let query = analytic.where('date').gt(a).lt(b);
+        query.find().then(doc => {
+            for(i=0; i<days;i++) { //for each day
+                let start = a + i*86400000; //a =
+                let end = start + 86400000;
+                stack[i] = {};
+                let subDoc = doc.filter(function (o) {return (parseInt(o.date) >= parseInt(start) && parseInt(o.date) <= parseInt(end))});
+                //console.log(subDoc.length + "max : " + doc.length +", start : "+ new Date(start) + " , stop : " + new Date(end) + " , i: " + i);
+                let nameStack = [...new Set(subDoc.map(analytic => analytic.item))];
+                let subStack = [];
+                if(nameStack.length !== 0) {
+                    for(j=0;j<nameStack.length;j++) {
+                        let name = nameStack[j];
+                        let count = subDoc.filter(function (o) {
+                            return (o.item === name);
+                        }).length;
+                        subStack.push(name + " " + count);
+                    }
+                }
+                stack[i].value = subStack;
+                stack[i].start = start;
+                stack[i].end = end;
+            }
+            resolve(stack);
         });
     });
 };
@@ -446,11 +458,4 @@ db.getAnalyticByDate = async (min, max) => {
 db.deleteAnalytic = () => {
     analytic.collection.drop();
 };
-/*db.getAnalyticByDate = async (min, max) => {
- let minDate = new Date(min);
- let maxDate = new Date(max);
- let query = analytic.where({
- date:  < i
- });
- };*/
 
