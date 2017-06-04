@@ -23,7 +23,7 @@ module.exports = {
                     b = args.indexOf("-to");
                     to = args[b+1];
                 }
-                db.getAnalyticByDate(args[0], args[1]).then(doc => {
+                db.getAnalyticByDate(from, to).then(doc => {
                     for(i=0;i<doc.length; i++) {
                         let start = new Date(doc[i].start);
                         let end = new Date(doc[i].end);
