@@ -23,8 +23,12 @@ module.exports = {
                     b = args.indexOf("-to");
                     to = args[b+1];
                 }
-                db.getAnalyticInDate(from, to).then(doc => {
-                    msg.channel.sendMessage(compare(doc));
+                db.getAnalyticByDate(args[0], args[1]).then(doc => {
+                    for(i=0;i<doc.length; i++) {
+                        let start = new Date(doc[i].start);
+                        let end = new Date(doc[i].end);
+                        msg.channel.sendMessage(start + "\n" + end + "\n" + doc[i].value);
+                    }
                 }).catch(console.error);
                 if(a === undefined && b === undefined) {
                     msg.channel.sendMessage("you did not set the limits of the search \nplease use `-from <date>` and/or `-to <date>` to set the limits of the search");
