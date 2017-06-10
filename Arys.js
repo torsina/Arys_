@@ -2,14 +2,12 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-const config = require('./config/config');
 const Client = new Discord.Client();
+const config = require('./config/config');
 const roles = require('./config/perm/roles');
-const db = require ('./util/db');
-let loaded = false;
-let reposter = JSON.parse(fs.readFileSync('./config/reposter.json', 'utf8'));
-Client.login(config.discord.token.bot);
-// Au chargement du programme
+const db = require('./util/db');
+const web = require('./web/server');
+Client.login(config.discord.token.bot).catch(console.error);
 Client.once('ready', () => {
     console.time('loading');
     Client.load();
@@ -41,6 +39,7 @@ Client.load = (command) => {
         }
     }
 };
+
 Client.on('guildMemberUpdate', (oldMember, newMember) => {
     if (!oldMember.roles.has(config.reposter) && newMember.roles.has(config.reposter)) {
         db.createReposter(oldMember.id);
@@ -90,18 +89,18 @@ Client.on('message', message => {
         if (message.content.startsWith(config.discord.prefix)) {
             if(message.channel.id==="257541472772030464") return;
             if (message.author.bot) return;
-            if (loaded = false) loaded = true;
-            args = message.content.split(' ');
-            command = args[0].slice(config.discord.prefix.length);
-            args.splice(0, 1);
-
+            let args = message.content.split(' ');
             let member = message.guild.member(Client.users.get(message.author.id));
             let role = check(member);
+            let guild = message.guild;
+
+            let command = args[0].slice(config.discord.prefix.length);
+            args.splice(0, 1);
 
             if (command in Client.commands) {
                 let timestamp = new Date();
                 console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ' + command);
-                Client.commands[command].func(Client, message, args, role);
+                Client.commands[command].func(Client, message, args, role, guild);
                 console.log(args);
             }
         }
@@ -164,4 +163,3 @@ process.on("unhandledRejection", err => {
 });
 
 exports.Client = Client;
-exports.loaded = loaded;

@@ -334,7 +334,7 @@ db.editEventScheduleIrregular = (name, date) => {
 };
 */
 
-db.createAnalytic = async (item, member, channel, guild) => { //
+db.createAnalytic = (item, member, channel, guild) => { //
     let query = new analytic({
         item: item,
         user: member,
@@ -350,7 +350,7 @@ db.createAnalytic = async (item, member, channel, guild) => { //
     });
 };
 
-db.getAnalytic = async (name) => { //
+db.getAnalytic = (name) => { //
     let query = analytic.where({
         item: name
     });
@@ -362,7 +362,7 @@ db.getAnalytic = async (name) => { //
     });
 };
 
-db.getDifferentAnalytic = async (obj) => { //
+db.getDifferentAnalytic = (obj) => { //
     return new Promise((resolve, reject) => {
         obj.find().distinct('item').then(doc => {
             if (doc === null) return reject(new Error('table is empty'));
@@ -371,7 +371,7 @@ db.getDifferentAnalytic = async (obj) => { //
     });
 };
 
-db.countAnalyticByName = async (name, obj) => { //
+db.countAnalyticByName = (name, obj) => { //
     //console.log(obj);
     return new Promise((resolve, reject) => {
         obj.where({item: name}).find().then(doc => {
@@ -382,7 +382,7 @@ db.countAnalyticByName = async (name, obj) => { //
     });
 };
 
-db.countAnalytic = async (Object) => { //main func
+db.countAnalytic = (Object) => { //main func
     let obj;
     if (Object === undefined) obj = analytic;
     else obj = Object;
@@ -400,7 +400,7 @@ db.countAnalytic = async (Object) => { //main func
     });
 };
 
-db.getAnalyticInDate = async (min, max) => { //set timeframe
+db.getAnalyticInDate = (min, max) => { //set timeframe
     let minDate, maxDate;
     if (min === undefined) minDate = 0;
     else minDate = min;
@@ -418,7 +418,7 @@ db.getAnalyticInDate = async (min, max) => { //set timeframe
     });
 };
 
-db.getAnalyticByDate = async (min, max) => {
+db.getAnalyticByDate = (min, max) => {
     let minDate, maxDate;
     minDate = min || 0;
     maxDate = max || Date.now();
