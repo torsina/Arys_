@@ -17,11 +17,20 @@ module.exports = {
                 let a, b, from, to;
                 if(args.includes("-from")) {
                     a = args.indexOf("-from");
-                    from = args[a+1];
+                    from = new Date;
+                    let substr =  args[a+1].split("/");
+                    from.setYear(substr[2]);
+                    from.setMonth(substr[1]);
+                    from.setDate(substr[0]);
+
                 }
                 if(args.includes("-to")) {
                     b = args.indexOf("-to");
-                    to = args[b+1];
+                    to = new Date;
+                    let substr =  args[b+1].split("/");
+                    to.setYear(substr[2]);
+                    to.setMonth(substr[1]);
+                    to.setDate(substr[0]);
                 }
                 db.getAnalyticByDate(from, to).then(doc => {
                     for(i=0;i<doc.length; i++) {
