@@ -1,7 +1,7 @@
 const config = require('../config/config');
 const perms = require('../config/perm/perms');
 module.exports = {
-    help: 'Delete messages',
+    help: 'Delete messages \nSynthax: $purge <number> [--force(if number>25)]\n$purge user <user> <number>',
     func: (client, msg, args, role) => {
         if(config.env === "dev") return;
         if(perms.check("mod.purge.base", role, msg.author.id) !== true) {
@@ -60,7 +60,7 @@ module.exports = {
         if (args[0] === "user" && args[2] < config.purge.max && args[3] === "--force" && perms.check("mod.purge.user.force", role, msg.author.id) === true) { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
 
             msg.channel.fetchMessages({
-                limit: config.purge.max,
+                limit: 100,
             })
                 .then(messages => {
                     let msg_array = messages.array();
@@ -77,7 +77,6 @@ module.exports = {
                             });
                         console.log("test");
                     }
-                    //msg_array.map(m => m.delete().catch(console.error));
                     msg.channel.bulkDelete(msg_array);
                 })
                 .catch(console.error);
@@ -96,20 +95,14 @@ module.exports = {
             return;
         }
         let messagecount = parseInt(args[0]);
-        // get the channel logs
         msg.channel.fetchMessages({
-            limit: config.purge.max
+            limit: 100
         })
             .then(messages => {
                 let msg_array = messages.array();
-                // filter the message to only your own
                 msg_array = msg_array.filter(m => m.author.id);
-                // limit to the requested number + 1 for the command message
                 msg_array.length = messagecount + 1;
-                // Has to delete messages individually. Cannot use `deleteMessages()` on selfbots.
-                //msg_array.map(m => m.delete().catch(console.error));
                 msg.channel.bulkDelete(msg_array);
-
             });
     }
 };

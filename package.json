@@ -10,11 +10,15 @@
   "license": "MIT",
   "dependencies": {
     "discord.js": "11.0.0",
-    "sqlite3": "3.1.8",
     "assign-deep": "0.4.5",
     "object-path": "0.11.4",
     "mongoose": "4.9.8",
-    "chart.js": "2.6.0"
+    "chart.js": "2.6.0",
+    "canvas": "1.6.5",
+    "chartjs-node": "1.4.1",
+    "pngjs": "3.2.0",
+    "connect": "1.9.0",
+    "serve-static": "1.12.3"
   },
   "devDependencies": {},
   "repository": {
