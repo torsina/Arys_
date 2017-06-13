@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const fs = require('fs');
-const path = require('path');
 const Client = new Discord.Client();
 const config = require('./config/config');
 const roles = require('./config/perm/roles');
@@ -88,7 +87,6 @@ Client.on('message', message => {
         if (message.content.startsWith(config.discord.prefix)) {
             if(message.channel.id==="257541472772030464") return;
             if (message.author.bot) return;
-            let args = message.content.split(' ');
             let member = message.guild.member(Client.users.get(message.author.id));
             let role = check(member);
             let guild = message.guild;
