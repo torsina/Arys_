@@ -59,8 +59,9 @@ module.exports = {
 
             for (let i = start; i < end; i++) {
                 msg.channel.sendMessage('id : ' + i + "\n" + line[i]).then(m => {
-                    db.createPost(start, m.id, config.post.file)
+                    db.createPost(start, m.id, config.post.file, m.channel.id, m.guild.id)
                 });
+
                 console.log(start + " " + end + " " + i);
             }
             save(end);

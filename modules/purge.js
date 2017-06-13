@@ -38,14 +38,13 @@ module.exports = {
             })
                 .then(messages => {
                     let msg_array = messages.array();
-                    // filter the message to only your own
                     msg_array = msg_array.filter(m => m.author.id === msg.mentions.users.first().id);
-                    // limit to the requested number + 1 for the command message
+                    if(msg_array.length < messagecount + 1) {
+                        msg.channel.sendMessage("that user only have " + msg_array.length +1 + " messages in this channel");
+                        return;
+                    }
                     msg_array.length = messagecount + 1;
-                    // Has to delete messages individually. Cannot use `deleteMessages()` on selfbots.
-                    //msg_array.map(m => m.delete().catch(console.error));
                     msg.channel.bulkDelete(msg_array);
-
                 });
             return;
         }
@@ -64,9 +63,11 @@ module.exports = {
             })
                 .then(messages => {
                     let msg_array = messages.array();
-                    // filter the message to only your own
                     msg_array = msg_array.filter(m => m.author.id === msg.mentions.users.first().id);
-                    // limit to the requested number + 1 for the command message
+                    if(msg_array.length < messagecount + 1) {
+                        msg.channel.sendMessage("that user only have " + msg_array.length +1 + " messages in this channel");
+                        return;
+                    }
                     while (msg_array  < args[2]) {
                         msg.channel.fetchMessages({
                             limit: config.purge.max,

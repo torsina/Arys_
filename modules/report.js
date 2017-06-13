@@ -28,13 +28,13 @@ module.exports = {
             msg.channel.sendMessage("please enter the id of the image you want to report")
         }
 
-        db.getPost(args[0], config.post.file).then(query => {
+        db.getPost(args[0], config.post.file, msg.guild.id).then(query => {
             let report = parseInt(query.report_count) + 1;
             if(perms.check("report.force", role, msg.author.id) === true && args[1]==='--force'){
                 msg.channel.fetchMessage(query.id_message)
                     .then(m => {
                         m.delete();
-                        db.deletePost(query.id_message);
+                        db.deletePost(query.id_message, msg.guild.id);
                         msg.channel.sendMessage("id : "+args[0]+" was deleted")
                     })
                     .catch(console.error);
@@ -55,7 +55,7 @@ module.exports = {
             });
                 return;
             } // UPDATE post SET report_count = '"+report+"' WHERE id_image='"+args[0]+"'"
-            db.reportPost(query.id_message);
+            db.reportPost(query.id_message, msg.guild.id);
             msg.channel.sendMessage("report count : " + report).then(m => {
                 setTimeout(function() {
                     m.delete();
@@ -73,7 +73,7 @@ module.exports = {
                 msg.channel.fetchMessage(query.id_message)
                     .then(m => {
                         m.delete();
-                        db.deletePost(query.id_message);
+                        db.deletePost(query.id_message, msg.guild.id);
                         msg.channel.sendMessage("id : "+args[0]+" was deleted")
                     })
                     .catch(console.error);
