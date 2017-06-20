@@ -462,7 +462,7 @@ db.getAnalytic = (item, guild) => { //
     });
     return new Promise((resolve, reject) => {
         if(guild === undefined) return reject(new Error('no guild scope was used'));
-        query.find().then(doc => {
+       query.find().then(doc => {
             if (doc === null) return reject(new Error('no entry found'));
             resolve(doc);
         }).catch(reject);

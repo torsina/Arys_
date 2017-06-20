@@ -20,7 +20,10 @@ db.init = async () => {
         "settings", "post", "listenedRoles", "user", "event", "analytic",
     ];
     let indexExpected = [
-        {table: "analytic", index: "guild_date", row: ["guild", "date"]},
+        {table: "analytic", index: "analytic_guild_date", rows: ["guild", "date"]},
+        {table: "post", index: "post_guild_file_image", rows: ["guild", "file", "image"]},
+        {table: "post", index: "post_guild_message", rows: ["guild", "message"]},
+        {table: "listenedRoles", index: "listenedRoles_guild_member_role", rows: ["guild", "member", "role"]}
     ];
     let indexes = [];
 // create indexes and push them to indexCreate, for example indexCreates.push(r.table(...).indexCreate(...))
@@ -36,10 +39,7 @@ db.init = async () => {
     }
     for(let index of indexExpected) {
         if(!containsObject(index, indexes)) {
-            if(index.row.length > 1)
-                await r.table(index.table).indexCreate(index.index, [r.row(index.row[0]), r.row(index.row[1])]).run();
-            else
-                await r.table(index.table).indexCreate(index.index).run();
+            await r.table(index.table).indexCreate(index.index, index.rows.map(i => r.row(i))).run();
             console.info(`Creating index of "${index.index}" in "${index.table}" table...`);
             await r.table(index.table).indexWait(index.index).run();
             console.info(`Index "${index.index}" in "${index.table}" table is set up`);
@@ -73,49 +73,39 @@ function date() {
 
 db.createPost = async (image, message, file, channel, guild) => {
     let query = {
-        id_image: image,
-        id_message: message,
-        id_file: file,
+        image: image,
+        message: message,
+        file: file,
         channel: channel,
         guild: guild,
         report_count: 0
     };
     return await r.table('post').insert(query).run();
 };
-//db.createPost("imadge", "messaffge", "figle", "chg", "f");
+
 db.getPost = async (image, file, guild) => {
-    let query  = {
-        id_image: image,
-        id_file: file,
-        guild: guild
-    };
-    return await r.table('post').filter(query).run();
+    return await r.table('post').getAll([guild, file, image], {index: "post_guild_file_image"}).run();
 };
 
 db.reportPost = async (guild, message) => {
-    let query ={
-        id_message: message,
-        guild: guild
-    };
-    let a = await r.table('post').filter(query).run();
-    console.log(a);
+    let a = await r.table('post').getAll([guild, message], {index: "post_guild_message"}).run();
     return await r.table('post').get(a[0].id).update({report_count: a[0].report_count+1}).run();
 };
 
 db.deletePost = async (guild, message) => {
     let query  = {
-        id_message: message,
+        message: message,
         guild: guild
     };
-    return await r.table('post').filter(query).delete().run();
+    return await r.table('post').getAll([guild, message], {index: "post_guild_message"}).delete().run();
 };
 
 db.createListenedRole = async (guild, role, member) => {
     let query = {
         role: role,
-        id: member,
+        member: member,
         guild: guild,
-        enter: date()
+        enter: Date.now()
     };
     return await r.table('listenedRoles').insert(query).run();
 };
@@ -123,7 +113,7 @@ db.createListenedRole = async (guild, role, member) => {
 db.endListenedRole = async (guild, role, member) => {
     let query  = {
         role: role,
-        id: member,
+        member: member,
         guild: guild,
         exit: undefined
     };
@@ -179,7 +169,7 @@ db.countAnalyticByDate = async (guild, min, max) => {
     let stack = [];
     console.log(Date.now());
     console.log("min : " + min + " max : " + max + " guild : " + guild);
-    let doc  = await r.table("analytic").between([guild, min], [guild, max], { index: "guild_date" }).run();
+    let doc  = await r.table("analytic").between([guild, min], [guild, max], { index: "analytic_guild_date" }).run();
     console.log(days);
     for(let i=0; i<days;i++) { //for each day
         let start = min + i*86400000; //a =
