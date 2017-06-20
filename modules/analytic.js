@@ -1,5 +1,5 @@
 const perms = require('../config/perm/perms');
-const db = require('../util/db');
+const db = require('../util/rethinkdb');
 module.exports = {
     help: 'get dem data',
     func: (client, msg, args, role) => {
@@ -10,7 +10,7 @@ module.exports = {
         if(args[0] === "get") { // 0 = get ; 1 = <orderby(least used; highest used; user> ; 2 = <emoji>  ;
             if (args[1] === "inc") {
                 db.countAnalytic(msg.guild.id).then(doc => {
-                    msg.channel.sendMessage(compare(doc));
+                    msg.channel.sendMessage(compare(doc)).catch(console.error);
                 });
             }
             if(args[1] === "date") {
@@ -20,7 +20,7 @@ module.exports = {
                     from = new Date;
                     let substr =  args[a+1].split("/");
                     from.setYear(substr[2]);
-                    from.setMonth(substr[1]);
+                    from.setMonth(substr[1]-1);
                     from.setDate(substr[0]);
 
                 }
@@ -29,10 +29,10 @@ module.exports = {
                     to = new Date;
                     let substr =  args[b+1].split("/");
                     to.setYear(substr[2]);
-                    to.setMonth(substr[1]);
+                    to.setMonth(substr[1]-1);
                     to.setDate(substr[0]);
                 }
-                db.getAnalyticByDate(from, to, msg.guild.id).then(doc => {
+                db.countAnalyticByDate(msg.guild.id, from, to).then(doc => {
                     for(i=0;i<doc.length; i++) {
                         let start = new Date(doc[i].start);
                         let end = new Date(doc[i].end);
@@ -61,7 +61,8 @@ function compare(doc) {
     });
     let str = "";
     for(let i=0;i<array.length; i++) {
-        str += array[i].item + " " + array[i].count + "\n";
+        console.log(array[i].item);
+        str += array[i].item + " " + array[i].count  + "\n";
     }
     return str;
 }
