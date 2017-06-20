@@ -67,14 +67,15 @@ Client.on('message', message => {
         message.channel.sendMessage("throw him in a pit and let me do the rest")
     }
     //emoji delete system
-    if (isEmoji(message.content) === true && message.channel.id !== "249626680434491392") {
-            console.log("there is an emoji here : " + message.channel.name + " ,by : " + message.author.username + '#' + message.author.discriminator);
-            message.delete();
-            message.reply("***GTFO RETARD AND READ THE RULES IN *** <#242655328410402816> <:feelsrageman:246603943768096769>").then(m => {
-                setTimeout(function() {
-                    m.delete();
-                }, 7000);
-            });
+    if (isEmoji(message.content) === true && message.channel.id !== "249626680434491392" && config.env !== "dev") {
+        if (message.author.bot) return;
+        console.log("there is an emoji here : " + message.channel.name + " ,by : " + message.author.username + '#' + message.author.discriminator);
+        message.delete();
+        message.reply("***GTFO RETARD AND READ THE RULES IN *** <#242655328410402816> <:feelsrageman:246603943768096769>").then(m => {
+            setTimeout(function() {
+                m.delete();
+            }, 7000);
+        });
     }
     //server emote analytics
     if(!message.author.bot && config.env !== "dev") {

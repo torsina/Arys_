@@ -20,10 +20,13 @@ db.init = async () => {
         "settings", "post", "listenedRoles", "user", "event", "analytic",
     ];
     let indexExpected = [
+        {table: "analytic", index: "analytic_guild", rows: ["guild"]},
         {table: "analytic", index: "analytic_guild_date", rows: ["guild", "date"]},
-        {table: "post", index: "post_guild_file_image", rows: ["guild", "file", "image"]},
         {table: "post", index: "post_guild_message", rows: ["guild", "message"]},
-        {table: "listenedRoles", index: "listenedRoles_guild_member_role", rows: ["guild", "member", "role"]}
+        {table: "post", index: "post_guild_file_image", rows: ["guild", "file", "image"]},
+        {table: "listenedRoles", index: "listenedRoles_guild", rows: ["guild"]},
+        {table: "listenedRoles", index: "listenedRoles_guild_role", rows: ["guild", "role"]},
+        {table: "listenedRoles", index: "listenedRoles_guild_role_member", rows: ["guild", "role", "member"]},
     ];
     let indexes = [];
 // create indexes and push them to indexCreate, for example indexCreates.push(r.table(...).indexCreate(...))
@@ -111,21 +114,14 @@ db.createListenedRole = async (guild, role, member) => {
 };
 
 db.endListenedRole = async (guild, role, member) => {
-    let query  = {
-        role: role,
-        member: member,
-        guild: guild,
-        exit: undefined
-    };
-    return await r.table('listenedRoles').filter(query).update({exit: date()}).run();
+    let doc = await r.table('listenedRoles').getAll([guild, role, member], {index: "listenedRoles_guild_role_member"}).run();
+    for(let entry of doc) {
+        if(entry.exit === undefined) return await r.table('listenedRoles').get(entry.id).update({exit: date()}).run();
+    }
 };
 
-db.getListenedRole = async (guild, member) => {
-    let query = {
-        guild: guild
-    };
-    if(member !== undefined) query.member = member;
-    return await r.table('listenedRoles').filter(query).run();
+db.getListenedRole = async (guild, role, member) => {
+    return await r.table('listenedRoles').getAll([guild], {index: "listenedRoles_guild_role_member"}).run();
 };
 
 db.createAnalytic = async (guild, channel, item, member, date) => {
