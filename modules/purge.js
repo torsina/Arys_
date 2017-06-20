@@ -1,7 +1,7 @@
 const config = require('../config/config');
 const perms = require('../config/perm/perms');
 module.exports = {
-    help: 'Delete messages \nSynthax: $purge <number> [--force(if number>25)]\n$purge user <user> <number>',
+    help: 'Delete messages \nSynthax: $purge <number> [--force(if number>25)]\n$purge user <user> <number> [--force(if number>25)]',
     func: (client, msg, args, role) => {
         if(config.env === "dev") return;
         if(perms.check("mod.purge.base", role, msg.author.id) !== true) {
