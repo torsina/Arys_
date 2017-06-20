@@ -2,7 +2,7 @@ const fs = require('fs');
 const Arys = require('../Arys');
 const config = require('../config/config');
 const perms = require('../config/perm/perms');
-const db = require('../util/db');
+const db = require('../util/rethinkdb');
 const wait = Arys.wait;
 const line = fs.readFileSync(config.post.file + '.txt').toString().split("\n");
 
@@ -59,7 +59,7 @@ module.exports = {
 
             for (let i = start; i < end; i++) {
                 msg.channel.sendMessage('id : ' + i + "\n" + line[i]).then(m => {
-                    db.createPost(start, m.id, config.post.file, m.channel.id, m.guild.id)
+                    db.createPost(start, m.id, config.post.file, m.channel.id, m.guild.id);
                 });
 
                 console.log(start + " " + end + " " + i);

@@ -1,8 +1,7 @@
 const Arys = require('../Arys');
 const post = require('./post');
 const config = require('../config/config');
-const db = require('../util/db');
-const sqlite = Arys.db;
+const db = require('../util/rethinkdb');
 const perms = require('../config/perm/perms');
 
 
@@ -31,10 +30,10 @@ module.exports = {
         db.getPost(args[0], config.post.file, msg.guild.id).then(query => {
             let report = parseInt(query.report_count) + 1;
             if(perms.check("report.force", role, msg.author.id) === true && args[1]==='--force'){
-                msg.channel.fetchMessage(query.id_message)
+                msg.channel.fetchMessage(query.message)
                     .then(m => {
                         m.delete();
-                        db.deletePost(query.id_message, msg.guild.id);
+                        db.deletePost(query.message, msg.guild.id);
                         msg.channel.sendMessage("id : "+args[0]+" was deleted")
                     })
                     .catch(console.error);
@@ -54,14 +53,14 @@ module.exports = {
                 }, config.discord.wait);
             });
                 return;
-            } // UPDATE post SET report_count = '"+report+"' WHERE id_image='"+args[0]+"'"
-            db.reportPost(query.id_message, msg.guild.id);
+            }
+            db.reportPost(query.message, msg.guild.id).catch(console.error);
             msg.channel.sendMessage("report count : " + report).then(m => {
                 setTimeout(function() {
                     m.delete();
                 }, config.discord.wait);
             });
-            msg.channel.fetchMessage(query.id_message)
+            msg.channel.fetchMessage(query.message)
                 .then(m => {
                     let edit = m.content.split("-");
                     edit[0] += "\n" + "-" + "\n" + "report count : " + report;
@@ -70,10 +69,10 @@ module.exports = {
                 })
                 .catch(console.error);
             if(report > config.report.need){
-                msg.channel.fetchMessage(query.id_message)
+                msg.channel.fetchMessage(query.message)
                     .then(m => {
                         m.delete();
-                        db.deletePost(query.id_message, msg.guild.id);
+                        db.deletePost(query.message, msg.guild.id);
                         msg.channel.sendMessage("id : "+args[0]+" was deleted")
                     })
                     .catch(console.error);
