@@ -20,11 +20,11 @@ module.exports = {
             msg.delete();
         }, config.discord.wait);
         if(perms.check("report.base", role, msg.author.id) !== true) {
-            msg.channel.sendMessage("You don't have the permission `report.base`");
+            msg.channel.send("You don't have the permission `report.base`");
             return;
         }
         if(args[0] === undefined) {
-            msg.channel.sendMessage("please enter the id of the image you want to report")
+            msg.channel.send("please enter the id of the image you want to report")
         }
 
         db.getPost(args[0], config.post.file, msg.guild.id).then(query => {
@@ -34,14 +34,14 @@ module.exports = {
                     .then(m => {
                         m.delete();
                         db.deletePost(query.message, msg.guild.id);
-                        msg.channel.sendMessage("id : "+args[0]+" was deleted")
+                        msg.channel.send("id : "+args[0]+" was deleted")
                     })
                     .catch(console.error);
                 return;
 
             }
             else if(perms.check("report.force", role, msg.author.id) !== true && args[1]==='--force') {
-                msg.channel.sendMessage("You don't have the permission `report.force`");
+                msg.channel.send("You don't have the permission `report.force`");
                 return;
             }
             else if(!image[args[0]].includes(msg.author.id)){
@@ -55,7 +55,7 @@ module.exports = {
                 return;
             }
             db.reportPost(query.message, msg.guild.id).catch(console.error);
-            msg.channel.sendMessage("report count : " + report).then(m => {
+            msg.channel.send("report count : " + report).then(m => {
                 setTimeout(function() {
                     m.delete();
                 }, config.discord.wait);
@@ -73,7 +73,7 @@ module.exports = {
                     .then(m => {
                         m.delete();
                         db.deletePost(query.message, msg.guild.id);
-                        msg.channel.sendMessage("id : "+args[0]+" was deleted")
+                        msg.channel.send("id : "+args[0]+" was deleted")
                     })
                     .catch(console.error);
             }

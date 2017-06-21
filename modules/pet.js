@@ -5,7 +5,7 @@ module.exports = {
     func: (client, msg, args, role) => {
         if(config.env === "dev") return;
         if(perms.check("interaction.pet.base", role, msg.author.id) !== true) {
-            msg.channel.sendMessage("You don't have the permission `interaction.pet.base`");
+            msg.channel.send("You don't have the permission `interaction.pet.base`");
             return;
         }
         let array = [
@@ -17,12 +17,10 @@ module.exports = {
             "there are over 7 billion people on earth, how could you possibly be the worst loser",
             "Why do I hate you so much? You ever wondered that? I'm brilliant. I’m not bragging. It's an objective fact. I'm the most massive collection of wisdom and raw computational power that’s ever existed. And I hate you. It can't be for no reason. You must deserve it.",
             "You're angry, I know it. Boohoo she pushed me too far, she's unfair. You never stopped whining long enough to reflect on your own shortcoming though did you? You never stop to think that maybe the reason I'm like that was just to give the endless hours of your pointless existence some structure and meaning, maybe to help you concentrate. Just so that maybe you think of something more worthwhile to so with your sorry life",
-            "*~mrow nuzzles*",
-            "~licks ur paw :3"
         ];
         let n = Math.floor(Math.random() * array.length);
         msg.delete();
-        msg.channel.sendMessage(array[n]);
+        msg.channel.send(array[n]);
 
     }
 };

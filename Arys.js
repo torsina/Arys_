@@ -11,6 +11,7 @@ Client.once('ready', () => {
     console.time('loading');
     Client.load();
     roles.load();
+    db.init().catch(console.error);
     mongo.load();
     Client.user.setGame('type $help');
     console.timeEnd('loading');
@@ -53,18 +54,18 @@ Client.on('message', message => {
     if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
         Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
             if(m.guild.id === "242655328410402816") {
-                message.channel.sendMessage("from 9i");
+                message.channel.send("from 9i");
             } else {
-                message.channel.sendMessage("from other");
+                message.channel.send("from other");
             }
         });
     }
     //interaction
     if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
-        message.channel.sendMessage("throw her in a pit and let me do the rest")
+        message.channel.send("throw her in a pit and let me do the rest")
     }
     if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of him ?")) {
-        message.channel.sendMessage("throw him in a pit and let me do the rest")
+        message.channel.send("throw him in a pit and let me do the rest")
     }
     //emoji delete system
     if (isEmoji(message.content) === true && message.channel.id !== "249626680434491392" && config.env !== "dev") {

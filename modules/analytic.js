@@ -4,13 +4,13 @@ module.exports = {
     help: 'get dem data',
     func: (client, msg, args, role) => {
         if(perms.check("mod.analytic.base", role, msg.author.id) !== true) {
-            msg.channel.sendMessage("You don't have the permission `mod.analytic.base`");
+            msg.channel.send("You don't have the permission `mod.analytic.base`");
             return;
         }
         if(args[0] === "get") { // 0 = get ; 1 = <orderby(least used; highest used; user> ; 2 = <emoji>  ;
             if (args[1] === "inc") {
                 db.countAnalytic(msg.guild.id).then(doc => {
-                    msg.channel.sendMessage(compare(doc)).catch(console.error);
+                    msg.channel.send(compare(doc)).catch(console.error);
                 });
             }
             if(args[1] === "date") {
@@ -36,11 +36,11 @@ module.exports = {
                     for(i=0;i<doc.length; i++) {
                         let start = new Date(doc[i].start);
                         let end = new Date(doc[i].end);
-                        msg.channel.sendMessage(start + "\n" + end + "\n" + doc[i].value);
+                        msg.channel.send(start + "\n" + end + "\n" + doc[i].value);
                     }
                 }).catch(console.error);
                 if(a === undefined && b === undefined) {
-                    msg.channel.sendMessage("you did not set the limits of the search \nplease use `-from <date>` and/or `-to <date>` to set the limits of the search");
+                    msg.channel.send("you did not set the limits of the search \nplease use `-from <date>` and/or `-to <date>` to set the limits of the search");
                 }
             }
             //db.getAnalyticByName("<:feelssmugman:246765996684083210>").then(doc => {console.log(Object.keys(doc).length)})

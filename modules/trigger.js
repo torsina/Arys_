@@ -5,11 +5,11 @@ module.exports = {
     func: (client, msg, args, role) => {
         if(config.env === "dev") return;
         if(perms.check("interaction.trigger.base", role, msg.author.id) !== true) {
-            msg.channel.sendMessage("You don't have the permission `interaction.trigger.base`");
+            msg.channel.send("You don't have the permission `interaction.trigger.base`");
             return;
         }
         msg.delete();
-        msg.channel.sendMessage('I can see their regrets everytime. The ones they had feelings for. But they all end up the same way, as red stains on my hands. Will you join them ?');
+        msg.channel.send('I can see their regrets everytime. The ones they had feelings for. But they all end up the same way, as red stains on my hands. Will you join them ?');
 
     }
 };

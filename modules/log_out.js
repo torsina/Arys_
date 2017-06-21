@@ -3,7 +3,7 @@ module.exports = {
     help: 'Disconect the bot',
     func: (client, msg, args, role) => {
         if(perms.check("mod.logout.base", role, msg.author.id) !== true) {
-            msg.channel.sendMessage("You don't have the permission `mod.logout.base`");
+            msg.channel.send("You don't have the permission `mod.logout.base`");
         }
         else {
             msg.reply(' has shut me down');

@@ -5,7 +5,7 @@ module.exports = {
     help: 'Reload the commands',
     func: (client, msg, args, role) => {
         if(perms.check("mod.reload.base", role, msg.author.id) !== true) {
-            msg.channel.sendMessage("You don't have the permission `mod.reload.base`");
+            msg.channel.send("You don't have the permission `mod.reload.base`");
             return;
         }
         console.time('reload');
@@ -13,7 +13,7 @@ module.exports = {
 
         if (args.length > 0 && perms.check("reload.command", role, msg.author.id) === true){
             client.load(args[0]);
-            msg.channel.sendMessage('Command '+ args[0] + ' reloaded').then(m => {
+            msg.channel.send('Command '+ args[0] + ' reloaded').then(m => {
                 setTimeout(function() {
                     m.delete();
                 }, wait);
@@ -22,11 +22,11 @@ module.exports = {
         }
         else {
             if(perms.check("mod.reload.command", role, msg.author.id) !== true) {
-                msg.channel.sendMessage("You don't have the permission `mod.reload.base`");
+                msg.channel.send("You don't have the permission `mod.reload.base`");
                 return;
             }
             client.load();
-            msg.channel.sendMessage('Commands reloaded.').then(m => {
+            msg.channel.send('Commands reloaded.').then(m => {
                 setTimeout(function() {
                     m.delete();
                 }, wait);
