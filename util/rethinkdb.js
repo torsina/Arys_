@@ -103,6 +103,13 @@ db.endListenedRole = async (guild, role, member) => {
 };
 
 db.getListenedRole = async (guild, role, member) => {
+    if(member === undefined) {
+        if(role === undefined) {
+            if(guild === undefined) return console.error("please put a guild scope to the query");
+            return await r.table('listenedRoles').getAll([guild], {index: "listenedRoles_guild"}).orderBy(r.desc(r.row("exit"))).run();
+        }
+        return await r.table('listenedRoles').getAll([guild, role], {index: "listenedRoles_guild_role"}).orderBy(r.desc(r.row("exit"))).run();
+    }
     return await r.table('listenedRoles').getAll([guild, role, member], {index: "listenedRoles_guild_role_member"}).orderBy(r.desc(r.row("exit"))).run();
 };
 
