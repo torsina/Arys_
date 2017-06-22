@@ -50,6 +50,7 @@ Client.on('guildMemberUpdate', (oldMember, newMember) => {
 });
 
 Client.on('message', message => {
+    let timestamp = new Date();
     //invite delete system
     if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
         Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
@@ -70,7 +71,7 @@ Client.on('message', message => {
     //emoji delete system
     if (isEmoji(message.content) === true && message.channel.id !== "249626680434491392" && config.env !== "dev") {
         if (message.author.bot) return;
-        console.log("there is an emoji here : " + message.channel.name + " ,by : " + message.author.username + '#' + message.author.discriminator);
+        console.log(timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + "there is an emoji here : " + message.channel.name + " ,by : " + message.author.username + '#' + message.author.discriminator);
         message.delete();
         message.reply("***GTFO RETARD AND READ THE RULES IN *** <#242655328410402816> <:feelsrageman:246603943768096769>").then(m => {
             setTimeout(function() {
@@ -104,7 +105,6 @@ Client.on('message', message => {
             args.splice(0, 1);
 
             if (command in Client.commands) {
-                let timestamp = new Date();
                 console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ' + command);
                 Client.commands[command].func(Client, message, args, role, guild);
                 console.log(args);
