@@ -3,7 +3,6 @@ const Arys = require('../Arys');
 const config = require('../config/config');
 const perms = require('../config/perm/perms');
 const db = require('../util/rethinkdb');
-const wait = Arys.wait;
 const line = fs.readFileSync(config.post.file + '.txt').toString().split("\n");
 
 function save(value) {

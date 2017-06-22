@@ -4,7 +4,6 @@ const Client = new Discord.Client();
 const config = require('./config/config');
 const roles = require('./config/perm/roles');
 const db = require('./util/rethinkdb');
-const mongo = require('./util/db');
 const web = require('./web/server');
 Client.login(config.discord.token.bot).catch(console.error);
 Client.once('ready', () => {
@@ -12,7 +11,6 @@ Client.once('ready', () => {
     Client.load();
     roles.load();
     db.init().catch(console.error);
-    mongo.load();
     Client.user.setGame('type $help');
     console.timeEnd('loading');
     console.log('I am ready!');
