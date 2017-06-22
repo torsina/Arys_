@@ -4,7 +4,7 @@ const db = require('../util/rethinkdb');
 module.exports = {
     help: 'gives the list of all the current reposters',
     func: async (client, msg, args, role) => {
-        //if(config.env === "dev") return;
+        if(config.env === "dev") return;
         if(perms.check("mod.reposter.base", role, msg.author.id) !== true) {
             msg.channel.send("You don't have the permission `mod.reposter.base`");
             return;
@@ -18,13 +18,21 @@ module.exports = {
                 return;
             }
             let member = await db.getListenedRole(msg.guild.id, config.reposter, msg.author.id);
-            console.log(member);
             let object = [];
             for (let i = 0; i<member.length; i++) {
                 let enter = new Date(member[i].enter);
-                //if(member[i].exit !== undefined) let exit = new Date(member[i].exit);
-                object[i] = msg.guild.roles.get(member[i].role).name
-                    + " <@" + member[i].member + "> " + enter.getDate() + "/" + parseInt(enter.getMonth()+1) + "/" + enter.getFullYear();
+                if(member[i].exit === undefined) {
+                    object[i] = msg.guild.roles.get(member[i].role).name
+                        + " " + client.users.get(member[i].member).tag + " "
+                        + date(enter);
+                }
+                else {
+                    let exit = new Date(member[i].exit);
+                    object[i] = msg.guild.roles.get(member[i].role).name
+                        + " " + client.users.get(member[i].member).tag + " "
+                        + date(enter) + " "
+                        + date(exit);
+                }
             }
             msg.channel.send(object);
         }
@@ -49,3 +57,12 @@ module.exports = {
 
     }
 };
+
+function date (obj) {
+    return obj.getDate() + "/"
+        + parseInt(obj.getMonth()+1) + "/"
+        + obj.getFullYear() + " "
+        + obj.getHours() + ":"
+        + obj.getMinutes() + ":"
+        + obj.getSeconds();
+}

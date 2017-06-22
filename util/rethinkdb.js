@@ -29,7 +29,6 @@ db.init = async () => {
         {table: "listenedRoles", index: "listenedRoles_guild_role_member", rows: ["guild", "role", "member"]},
     ];
     let indexes = [];
-// create indexes and push them to indexCreate, for example indexCreates.push(r.table(...).indexCreate(...))
     for(let table of tablesExpected) {
         if(!~tableList.indexOf(table)) {
             console.info(`Creating "${table}" table...`);
@@ -51,14 +50,7 @@ db.init = async () => {
     await Promise.all(tableWait);
     console.log(`rethinkdb initialized`);
     return true;
-
-    /*
-    let Indexes = [];
-    // create indexes and push them to indexCreate, for example indexCreates.push(r.table(...).indexCreate(...))
-    await Promise.all(indexCreates);
-     */
 };
-db.init().catch(console.error);
 
 function containsObject(obj, list) {
     for(let i = 0; i < list.length; i++) {
@@ -67,11 +59,6 @@ function containsObject(obj, list) {
         }
     }
     return false;
-}
-
-function date() {
-    let timestamp = new Date();
-    return timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + ":" + timestamp.getSeconds();
 }
 
 db.createPost = async (image, message, file, channel, guild) => {
@@ -96,10 +83,6 @@ db.reportPost = async (guild, message) => {
 };
 
 db.deletePost = async (guild, message) => {
-    let query  = {
-        message: message,
-        guild: guild
-    };
     return await r.table('post').getAll([guild, message], {index: "post_guild_message"}).delete().run();
 };
 
@@ -114,14 +97,13 @@ db.createListenedRole = async (guild, role, member) => {
 };
 
 db.endListenedRole = async (guild, role, member) => {
-    let doc = await r.table('listenedRoles').getAll([guild, role, member], {index: "listenedRoles_guild_role_member"}).run();
-    for(let entry of doc) {
-        if(entry.exit === undefined) return await r.table('listenedRoles').get(entry.id).update({exit: date()}).run();
-    }
+    let doc = await r.table('listenedRoles').getAll([guild, role, member], {index: "listenedRoles_guild_role_member"}).orderBy(r.row("exit")).run();
+    return await r.table('listenedRoles').get(doc[0].id).update({exit: Date.now()}).run();
+
 };
 
 db.getListenedRole = async (guild, role, member) => {
-    return await r.table('listenedRoles').getAll([guild], {index: "listenedRoles_guild_role_member"}).run();
+    return await r.table('listenedRoles').getAll([guild, role, member], {index: "listenedRoles_guild_role_member"}).orderBy(r.desc(r.row("exit"))).run();
 };
 
 db.createAnalytic = async (guild, channel, item, member, date) => {
@@ -135,13 +117,8 @@ db.createAnalytic = async (guild, channel, item, member, date) => {
     return await r.table('analytic').insert(query).run();
 };
 
-db.countAnalytic = async (guild, item) => {
-    let query = {
-        guild: guild
-    };
-    let stack = [];
-    if(item !== undefined) query.item = item;
-    let doc = await r.table('analytic').filter(query).run();
+db.countAnalytic = async (guild) => {
+    let doc = await r.table('analytic').getAll([guild], {index: "analytic_guild"}).run();
     console.log(doc);
     let nameStack = [...new Set(doc.map(analytic => analytic.item))];
     if(nameStack.length !== 0) {
@@ -193,6 +170,7 @@ db.countAnalyticByDate = async (guild, min, max) => {
       }
       return stack;
 };
+
 db.fix = async () => {
     const mongo = require('./db');
     let doc = await mongo.getAnalytic().catch(console.error);
