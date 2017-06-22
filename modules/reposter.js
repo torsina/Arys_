@@ -17,24 +17,8 @@ module.exports = {
                 msg.channel.send("You don't have the permission `mod.reposter.get`");
                 return;
             }
-            let member = await db.getListenedRole(msg.guild.id, config.reposter, msg.author.id);
-            let object = [];
-            for (let i = 0; i<member.length; i++) {
-                let enter = new Date(member[i].enter);
-                if(member[i].exit === undefined) {
-                    object[i] = msg.guild.roles.get(member[i].role).name
-                        + " " + client.users.get(member[i].member).tag + " "
-                        + date(enter);
-                }
-                else {
-                    let exit = new Date(member[i].exit);
-                    object[i] = msg.guild.roles.get(member[i].role).name
-                        + " " + client.users.get(member[i].member).tag + " "
-                        + date(enter) + " "
-                        + date(exit);
-                }
-            }
-            msg.channel.send(object);
+            if(args[1] === "all") msg.channel.send(applyDate(msg, client, await db.getListenedRole(msg.guild.id)));
+            else msg.channel.send(applyDate(msg, client, await db.getListenedRole(msg.guild.id, config.reposter, msg.author.id)));
         }
         if(args[0] === "set") {
             if(perms.check("mod.reposter.set", role, msg.author.id) !== true) {
@@ -43,7 +27,7 @@ module.exports = {
             }
             msg.guild.members.filter(m=> m.roles.has(config.reposter));
             msg.guild.roles.get(config.reposter).members.forEach(function (m) {
-                db.createListenedRole(msg.guild.id, config.reposter, m.author.id).catch(console.error);
+                db.createListenedRole(msg.guild.id, config.reposter, m.id).catch(console.error);
              });
         }
         if (args[0] === "clear") {
@@ -65,4 +49,24 @@ function date (obj) {
         + obj.getHours() + ":"
         + obj.getMinutes() + ":"
         + obj.getSeconds();
+}
+
+function applyDate (msg, client, member) {
+    let object = [];
+    for (let i = 0; i<member.length; i++) {
+        let enter = new Date(member[i].enter);
+        if(member[i].exit === undefined) {
+            object[i] = msg.guild.roles.get(member[i].role).name
+                + " " + client.users.get(member[i].member).tag + " "
+                + date(enter);
+        }
+        else {
+            let exit = new Date(member[i].exit);
+            object[i] = msg.guild.roles.get(member[i].role).name
+                + " " + client.users.get(member[i].member).tag + " "
+                + date(enter) + " "
+                + date(exit);
+        }
+    }
+    return object;
 }
