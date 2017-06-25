@@ -5,13 +5,19 @@ const config = require('./config/config');
 const roles = require('./config/perm/roles');
 const db = require('./util/rethinkdb');
 const web = require('./web/server');
+let settings;
 Client.login(config.discord.token.bot).catch(console.error);
-Client.once('ready', () => {
+Client.once('ready', async () => {
     console.time('loading');
     Client.load();
     roles.load();
-    db.init().catch(console.error);
-    Client.user.setGame('type $help');
+    await db.init(Client).catch(console.error);
+    settings = await db.getSetting();
+    let stream = await db.streamSetting().catch(console.error);
+    stream.on('data', data => {
+        settings.set(data.new_val.guild, data.new_val);
+    });
+    Client.user.setGame('type $help').catch(console.error);
     console.timeEnd('loading');
     console.log('I am ready!');
 });
@@ -38,6 +44,11 @@ Client.load = (command) => {
     }
 };
 
+Client.on('guildCreate', async (guild) => {
+    console.info(`Guild "${Client.guilds.get(guild).name}" was added in "setting" table`);
+    await db.createSetting(guild.id).catch(console.error);
+});
+
 Client.on('guildMemberUpdate', (oldMember, newMember) => {
     if (!oldMember.roles.has(config.reposter) && newMember.roles.has(config.reposter)) {
         db.createListenedRole(oldMember.guild.id, config.reposter, oldMember.id).catch(console.error);
@@ -48,6 +59,7 @@ Client.on('guildMemberUpdate', (oldMember, newMember) => {
 });
 
 Client.on('message', message => {
+    if (message.author.bot) return;
     let timestamp = new Date();
     //invite delete system
     if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
@@ -92,22 +104,22 @@ Client.on('message', message => {
         }
     }
     //command handler
-        if (message.content.startsWith(config.discord.prefix)) {
-            if(message.channel.id==="257541472772030464") return;
-            if (message.author.bot) return;
-            let member = message.guild.member(Client.users.get(message.author.id));
-            let role = check(member);
-            let guild = message.guild;
-            let args = message.content.split(' ');
-            let command = args[0].slice(config.discord.prefix.length);
-            args.splice(0, 1);
+    if (message.content.startsWith(config.discord.prefix) || message.content.startsWith(settings.get(message.guild.id).prefix)) {
+        const prefix = (message.content.startsWith(settings.get(message.guild.id).prefix) ? settings.get(message.guild.id).prefix : config.discord.prefix);
+        if (message.channel.id==="257541472772030464") return;
+        let member = message.guild.member(Client.users.get(message.author.id));
+        let role = check(member);
+        let guild = message.guild;
+        let args = message.content.split(' ');
+        let command = args[0].slice(prefix.length);
+        args.splice(0, 1);
 
-            if (command in Client.commands) {
-                console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ' + command);
-                Client.commands[command].func(Client, message, args, role, guild);
-                console.log(args);
-            }
+        if (command in Client.commands) {
+            console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ' + command);
+            Client.commands[command].func(Client, message, args, role, guild);
+            console.log(args);
         }
+    }
 });
 
 function check(member){
