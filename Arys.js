@@ -4,6 +4,7 @@ const Client = new Discord.Client();
 const config = require('./config/config');
 const roles = require('./config/perm/roles');
 const db = require('./util/rethinkdb');
+const log = require('./util/log');
 const web = require('./web/server');
 let settings;
 Client.login(config.discord.token.bot).catch(console.error);
@@ -11,12 +12,18 @@ Client.once('ready', async () => {
     console.time('loading');
     Client.load();
     roles.load();
-    await db.init(Client).catch(console.error);
-    settings = await db.getSetting();
-    let stream = await db.streamSetting().catch(console.error);
-    stream.on('data', data => {
-        settings.set(data.new_val.guild, data.new_val);
+    await db.init(Client).catch(console.error).then(async () => {
+        settings = await db.getSettings();
+        let stream = await db.streamSetting().catch(console.error);
+        stream.on('data', data => {
+            settings.set(data.new_val.guild, data.new_val);
+            console.log(data);
+            log.importSetting(settings);
+        });
     });
+
+    log.importSetting(settings);
+    log.init(Client);
     Client.user.setGame('type $help').catch(console.error);
     console.timeEnd('loading');
     console.log('I am ready!');
@@ -104,7 +111,7 @@ Client.on('message', message => {
         }
     }
     //command handler
-    if (message.content.startsWith(config.discord.prefix) || message.content.startsWith(settings.get(message.guild.id).prefix)) {
+    if (message.content.startsWith(config.discord.prefix) && settings !== undefined || settings !== undefined && message.content.startsWith(settings.get(message.guild.id).prefix)) {
         const prefix = (message.content.startsWith(settings.get(message.guild.id).prefix) ? settings.get(message.guild.id).prefix : config.discord.prefix);
         if (message.channel.id==="257541472772030464") return;
         let member = message.guild.member(Client.users.get(message.author.id));

@@ -1,5 +1,4 @@
 const db = module.exports = {};
-let isLoaded;
 let dbName = "Arys";
 const r = require("rethinkdbdash")({
     host: "192.168.1.30",
@@ -8,7 +7,6 @@ const r = require("rethinkdbdash")({
 });
 const config = require('../config/config');
 db.init = async (Client) => {
-    isLoaded = false;
     let dbs = await r.dbList().run();
     if(!~dbs.indexOf(dbName)) {
         console.info(`Creating database ${dbName}...`);
@@ -51,14 +49,13 @@ db.init = async (Client) => {
     let guildExpected = Client.guilds.keys(); //array of joinned guild id
     for(let guild of guildExpected) { //guild is a single guild id
         let entry = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
-        if(await entry.length === 0) {
+        if(entry.length === 0) {
             await db.createSetting(guild).catch(console.error);
             console.info(`Guild "${Client.guilds.get(guild).name}" was added in "setting" table`);
         }
     }
     await Promise.all(tableWait);
     console.log(`rethinkdb initialized`);
-    isLoaded = true;
     return true;
 };
 
@@ -72,28 +69,6 @@ function indexContainsObject(obj, list) {
 }
 
 db.createSetting = async (guild) => {
-    if(!isLoaded) return;
-    /*
-     let query = {
-     guild: guild,
-     prefix: String,
-     listenedRoles: Array,
-     //perm: Object,
-     report: Number,
-     responses: Object,
-     lastSave: Date.now(),
-     channel: {
-     log: String,
-     nsfw: Array
-     },
-     mod: {
-     purge: {
-     safe: Boolean,
-     value: Number
-     }
-     }
-     };
-    */
     let query = {
         guild: guild,
         enter: Date.now(),
@@ -102,8 +77,7 @@ db.createSetting = async (guild) => {
     return await r.table('setting').insert(query).run();
 };
 
-db.getSetting = async () => {
-    if(!isLoaded) return;
+db.getSettings = async () => {
     let doc =  await r.table('setting').run();
     let map = new Map();
     for(let subDoc of doc) {
@@ -112,30 +86,52 @@ db.getSetting = async () => {
     return map;
 };
 
+db.getSetting = async (guild) => {
+    let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
+    return doc;
+};
+
 db.streamSetting = async () => {
-    if(!isLoaded) return;
     return await r.table('setting').changes().run();
 };
 
 db.setPrefix = async (guild, prefix) => {
-    if(!isLoaded) return;
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({prefix: prefix, lastSave: Date.now()}).run();
 };
 
-db.checkPrefix = async (guild) => {
-    if(!isLoaded) return;
-    let guildObj = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
-    if(guildObj.length === 0) return false;
-    else if(guildObj.length === 1) return guildObj.first().prefix;
-    else return console.error(`multiple guild found while searching for ${guild}`)
+db.getPrefix = async () => {
+    let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
+    return doc[0].prefix;
 };
 
 db.deletePrefix = async (guild) => {
-    if(!isLoaded) return;
-    return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without('prefix')).run();
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without('prefix')).update({lastSave: Date.now()}).run();
+};
+
+db.addLogChannel = async (guild, _channel, _type) => {
+    let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
+    doc[0].lastSave = Date.now();
+    if(doc[0].logChannel === undefined) {
+        doc[0].logChannel = {};
+        if(doc[0].logChannel[_type] === undefined) doc[0].logChannel[_type] = [];
+    }
+    if(doc[0].logChannel[_type].includes(_channel)) return console.error('channel is already registered');
+    else doc[0].logChannel[_type].push(_channel);
+    console.log(doc);
+    return await r.table('setting').get(doc[0].id).update(doc[0]).run();
+};
+
+db.removeLogChannel = async (guild, _channel, _type) => {
+    let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
+    delete doc[0].logChannel[_type][doc[0].logChannel[_type].indexOf(_channel)];
+    return await r.table('setting').get(doc[0].id).update(doc[0]).run();
+};
+
+db.getLogChannel = async (guild) => {
+    let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
+    return doc;
 };
 db.createPost = async (image, message, file, channel, guild) => {
-    if(!isLoaded) return;
     let query = {
         image: image,
         message: message,
@@ -148,23 +144,19 @@ db.createPost = async (image, message, file, channel, guild) => {
 };
 
 db.getPost = async (image, file, guild) => {
-    if(!isLoaded) return;
     return await r.table('post').getAll([guild, file, image], {index: "post_guild_file_image"}).run();
 };
 
 db.reportPost = async (guild, message) => {
-    if(!isLoaded) return;
     let a = await r.table('post').getAll([guild, message], {index: "post_guild_message"}).run();
     return await r.table('post').get(a[0].id).update({report_count: a[0].report_count+1}).run();
 };
 
 db.deletePost = async (guild, message) => {
-    if(!isLoaded) return;
     return await r.table('post').getAll([guild, message], {index: "post_guild_message"}).delete().run();
 };
 
 db.createListenedRole = async (guild, role, member) => {
-    if(!isLoaded) return;
     let query = {
         role: role,
         member: member,
@@ -175,14 +167,12 @@ db.createListenedRole = async (guild, role, member) => {
 };
 
 db.endListenedRole = async (guild, role, member) => {
-    if(!isLoaded) return;
     let doc = await r.table('listenedRoles').getAll([guild, role, member], {index: "listenedRoles_guild_role_member"}).orderBy(r.row("exit")).run();
     return await r.table('listenedRoles').get(doc[0].id).update({exit: Date.now()}).run();
 
 };
 
 db.getListenedRole = async (guild, role, member) => {
-    if(!isLoaded) return;
     if(member === undefined) {
         if(role === undefined) {
             if(guild === undefined) return console.error("please put a guild scope to the query");
@@ -194,7 +184,6 @@ db.getListenedRole = async (guild, role, member) => {
 };
 
 db.createAnalytic = async (guild, channel, item, member, date) => {
-    if(!isLoaded) return;
     let query = {
         item: item,
         user: member,
@@ -206,7 +195,6 @@ db.createAnalytic = async (guild, channel, item, member, date) => {
 };
 
 db.countAnalytic = async (guild) => {
-    if(!isLoaded) return;
     let doc = await r.table('analytic').getAll([guild], {index: "analytic_guild"}).run();
     console.log(doc);
     let nameStack = [...new Set(doc.map(analytic => analytic.item))];
@@ -223,7 +211,6 @@ db.countAnalytic = async (guild) => {
 };
 
 db.countAnalyticByDate = async (guild, min, max) => {
-    if(!isLoaded) return;
     min = min ? new Date(min).getTime() : 0;
     max = max ? new Date(max).getTime() : Date.now();
     console.log("min : " + new Date(min));
@@ -262,7 +249,6 @@ db.countAnalyticByDate = async (guild, min, max) => {
 };
 
 db.fix = async () => {
-    if(!isLoaded) return;
     const mongo = require('./db');
     let doc = await mongo.getAnalytic().catch(console.error);
     for(let i=0;i<doc.length;i++) {
