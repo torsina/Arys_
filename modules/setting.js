@@ -25,15 +25,26 @@ module.exports = {
             case "-log":
                 switch(args[1]) {
                     case "--add":
-                        if(msg.mentions.channels.first() !== undefined) await db.addLogChannel(msg.guild.id, msg.mentions.channels.first().id, "guildMemberAdd").catch(console.error);
+                        if(msg.mentions.channels.first() !== undefined) await db.addLogChannel(msg.guild.id, msg.mentions.channels.first().id, "guildMemberAdd")
+                            .catch((e) => {
+                            console.error(e);
+                            msg.channel.send(e.message)});
                         else return msg.channel.send("please tell in which channel you want me to log this");
                         break;
                     case "--remove":
-                        if(msg.mentions.channels.first() !== undefined) await db.removeLogChannel(msg.guild.id, msg.mentions.channels.first().id, "guildMemberAdd").catch(console.error);
+                        if(msg.mentions.channels.first() !== undefined) await db.removeLogChannel(msg.guild.id, msg.mentions.channels.first().id, "guildMemberAdd")
+                            .catch((e) => {
+                                console.error(e);
+                                msg.channel.send(e.message)});
                         else return msg.channel.send("please tell in which channel you want me to stop sending this");
                         break;
                     default:
                         let doc = await db.getLogChannel(msg.guild.id);
+                        console.log(doc);
+                        console.log(doc.logChannel);
+                        if(doc.logChannel === undefined) return msg.channel.send("there is 0 log channels currently on this server");
+                        else return console.log(doc.logChannel);
+                        break;
                         const embed = new Discord.RichEmbed()
                             .setTitle('Log channels')
                             .setAuthor('Author Name', 'https://goo.gl/rHndF5')
@@ -45,6 +56,8 @@ module.exports = {
                             .addField('Inline Field', 'Hmm 🤔', true)
                             .addField('\u200b', '\u200b', true)
                             .addField('Second (3rd place) Inline Field', 'I\'m in the ZOONE', true);
+                        console.log(doc);
+
                 }
         }
     }

@@ -8,7 +8,7 @@ log.importSetting = (setting) => {
 
 log.init = (Client) => {
     Client.on('guildMemberAdd', member => {
-        if(settings.get(member.guild.id).logChannel.guildMemberAdd !== undefined) {
+        if(settings.get(member.guild.id).logChannel && settings.get(member.guild.id).logChannel.guildMemberAdd !== undefined) {
             Client.channels.get(settings.get(member.guild.id).logChannel.guildMemberAdd[0]).send(Client.users.get(member.id).tag + " joined the server");
         }
     });

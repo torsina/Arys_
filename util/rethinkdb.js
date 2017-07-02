@@ -115,9 +115,10 @@ db.addLogChannel = async (guild, _channel, _type) => {
         doc[0].logChannel = {};
         if(doc[0].logChannel[_type] === undefined) doc[0].logChannel[_type] = [];
     }
-    if(doc[0].logChannel[_type].includes(_channel)) return console.error('channel is already registered');
+    if(doc[0].logChannel[_type].includes(_channel)) {
+        throw new Error('channel is already registered');
+    }
     else doc[0].logChannel[_type].push(_channel);
-    console.log(doc);
     return await r.table('setting').get(doc[0].id).update(doc[0]).run();
 };
 
@@ -129,7 +130,7 @@ db.removeLogChannel = async (guild, _channel, _type) => {
 
 db.getLogChannel = async (guild) => {
     let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
-    return doc;
+    return doc[0];
 };
 db.createPost = async (image, message, file, channel, guild) => {
     let query = {
