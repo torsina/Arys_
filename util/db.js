@@ -7,9 +7,10 @@ let serverSchema = new Schema({
     id: String,
     config: {
         prefix: String,
-        registeredRoles: Array,
-        perm: Object,
+        listenedRoles: Array,
+        //perm: Object,
         report: Number,
+
         channel: {
             log: String,
             nsfw: Array //of object
