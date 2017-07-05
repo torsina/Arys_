@@ -36,7 +36,7 @@ module.exports = {
                 return;
             }
             db.deleteReposter();
-            msg.channel.send("table deleted");
+            msg.channel.send("currently down");
         }
 
     }

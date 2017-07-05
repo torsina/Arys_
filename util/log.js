@@ -6,6 +6,7 @@ log.importSetting = (setting) => {
     settings = setting;
 };
 
+
 log.init = (Client) => {
     Client.on('guildMemberAdd', member => {
         if(settings.get(member.guild.id).logChannel && settings.get(member.guild.id).logChannel.guildMemberAdd !== undefined) {

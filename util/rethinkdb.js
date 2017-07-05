@@ -1,11 +1,12 @@
 const db = module.exports = {};
 let dbName = "Arys";
+const config = require('../config/config');
 const r = require("rethinkdbdash")({
     host: "192.168.1.30",
     port: "28015",
     db: dbName
 });
-const config = require('../config/config');
+
 db.init = async (Client) => {
     let dbs = await r.dbList().run();
     if(!~dbs.indexOf(dbName)) {
@@ -15,7 +16,7 @@ db.init = async (Client) => {
 
     let tableList = await r.tableList().run(), tableWait = [];
     let tablesExpected = [
-        "setting", "post", "listenedRoles", "user", "event", "analytic",
+        "setting", "post", "listenedRoles", "user", "event", "analytic", "guildMember"
     ];
     let indexExpected = [
         {table: "analytic", index: "analytic_guild", rows: ["guild"]},
@@ -26,6 +27,8 @@ db.init = async (Client) => {
         {table: "listenedRoles", index: "listenedRoles_guild_role", rows: ["guild", "role"]},
         {table: "listenedRoles", index: "listenedRoles_guild_role_member", rows: ["guild", "role", "member"]},
         {table: "setting", index: "setting_guild", rows: ["guild"]},
+        {table: "guildMember", index: "guildMember_guild_member", rows: ["guild", "member"]},
+        {table: "user", index: "user_member", rows: ['member']},
     ];
     let indexes = [];
     for(let table of tablesExpected) {
@@ -72,7 +75,8 @@ db.createSetting = async (guild) => {
     let query = {
         guild: guild,
         enter: Date.now(),
-        lastSave: Date.now()
+        lastSave: Date.now(),
+
     };
     return await r.table('setting').insert(query).run();
 };
@@ -99,13 +103,52 @@ db.setPrefix = async (guild, prefix) => {
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({prefix: prefix, lastSave: Date.now()}).run();
 };
 
-db.getPrefix = async () => {
+db.getPrefix = async (guild) => {
     let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
     return doc[0].prefix;
 };
 
 db.deletePrefix = async (guild) => {
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without('prefix')).update({lastSave: Date.now()}).run();
+};
+
+db.setMoneyName = async (guild, name) => {
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {name: name}, lastSave: Date.now()}).run();
+};
+
+db.setMoneyDefaultAmount = async (guild, amount) => {
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {amount: amount}, lastSave: Date.now()}).run();
+};
+
+db.setMoneyWait = async (guild, time) => {
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {wait: time}, lastSave: Date.now()}).run();
+};
+
+db.getUser = async (guild, member) => {
+    return await r.table('user').getAll([guild, member], {index: "user_guild_member"}).run();
+};
+
+db.changeMoney = async (guild, member, amount, isMessage, scope) => {
+    let doc = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
+    let user = await r.table('user').getAll([member], {index: "user_member"}).run();
+    if(!doc) doc = {};
+    let setting = await db.getSetting(guild);
+    setting = setting[0];
+    doc = doc[0];
+    if(!doc.money) { //set
+        doc.money = {};
+        if(setting.money && setting.money.amount) doc.money.amount = setting.money.amount;
+        else doc.money.amount = config.money.amount;
+    } if(isMessage === true) {
+        doc.money.lastGet = Date.now();
+    } if(doc.money.amount + parseInt(amount) < 0) throw new Error('Not enough credits for that.');
+    doc.money.amount += parseInt(amount);
+    if(!doc.id) {
+        doc.member = member;
+        doc.guild = guild;
+         await r.table('guildMember').insert(doc).run();
+    } else await r.table('guildMember').get(doc.id).update(doc).run();
+    return doc;
 };
 
 db.addLogChannel = async (guild, _channel, _type) => {
@@ -247,14 +290,4 @@ db.countAnalyticByDate = async (guild, min, max) => {
         stack[i].end = end;
     }
     return stack;
-};
-
-db.fix = async () => {
-    const mongo = require('./db');
-    let doc = await mongo.getAnalytic().catch(console.error);
-    for(let i=0;i<doc.length;i++) {
-        if(doc[i].date && doc[i].guild) {
-            await db.createAnalytic(doc[i].guild, doc[i].channel, doc[i].item, doc[i].member, parseInt(doc[i].date))
-        }
-    }
 };

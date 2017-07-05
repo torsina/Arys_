@@ -21,7 +21,6 @@ Client.once('ready', async () => {
             log.importSetting(settings);
         });
     });
-
     log.importSetting(settings);
     log.init(Client);
     Client.user.setGame('type $help').catch(console.error);
