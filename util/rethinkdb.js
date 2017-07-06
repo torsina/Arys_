@@ -117,6 +117,7 @@ db.setMoneyName = async (guild, name) => {
 };
 
 db.setMoneyDefaultAmount = async (guild, amount) => {
+    if(amount < 0) throw new Error("you can't use negative number for that");
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {amount: amount}, lastSave: Date.now()}).run();
 };
 
@@ -124,31 +125,82 @@ db.setMoneyWait = async (guild, time) => {
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {wait: time}, lastSave: Date.now()}).run();
 };
 
-db.getUser = async (guild, member) => {
-    return await r.table('user').getAll([guild, member], {index: "user_guild_member"}).run();
+db.getGuildMember = async (guild, member) => {
+    return await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
 };
 
 db.changeMoney = async (guild, member, amount, isMessage, scope) => {
-    let doc = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
-    let user = await r.table('user').getAll([member], {index: "user_member"}).run();
-    if(!doc) doc = {};
+    console.time('money');
+    console.time('db');
+    let guildMember = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
+    let user = await r.table('user').getAll(member, {index: "user_member"}).run();
     let setting = await db.getSetting(guild);
+    console.timeEnd('db');
     setting = setting[0];
-    doc = doc[0];
-    if(!doc.money) { //set
-        doc.money = {};
-        if(setting.money && setting.money.amount) doc.money.amount = setting.money.amount;
-        else doc.money.amount = config.money.amount;
-    } if(isMessage === true) {
-        doc.money.lastGet = Date.now();
-    } if(doc.money.amount + parseInt(amount) < 0) throw new Error('Not enough credits for that.');
-    doc.money.amount += parseInt(amount);
-    if(!doc.id) {
-        doc.member = member;
-        doc.guild = guild;
-         await r.table('guildMember').insert(doc).run();
-    } else await r.table('guildMember').get(doc.id).update(doc).run();
-    return doc;
+    guildMember = guildMember[0];
+    if(!guildMember) {
+        guildMember = {};
+    }
+    if(!user) {
+        user = {};
+    }
+    if(!guildMember.money) { //set
+        guildMember.money = {};
+        if(setting.money && setting.money.amount) {
+            guildMember.money.amount = setting.money.amount;
+        } else {
+            guildMember.money.amount = config.money.amount;
+        }
+    }
+    if(!user.money) {
+        user.money = {};
+        user.money.amount = config.money.amount;
+    }
+    if(!setting.money && guildMember.money || !setting.money.wait && guildMember.money) {
+        if(setting.money && setting.money.wait && guildMember.money.lastGet + setting.money.wait > Date.now()) return;
+    } else {
+        if(guildMember.money.lastGet + config.money.wait > Date.now()) return;
+    }
+    if(isMessage === true) {
+        guildMember.money.lastGet = Date.now();
+        user.money.amount += parseInt(amount);
+    }
+    if(guildMember.money.amount + parseInt(amount) < 0 || user.money.amount + parseInt(amount) < 0) {
+        throw new Error('Not enough credits for that.');
+    }
+    if(!scope) {
+        guildMember.money.amount += parseInt(amount);
+    } else if(isMessage === false) {
+        user.money.amount += parseInt(amount);
+    }
+    console.time('dbb');
+    if(!guildMember.member) {
+        guildMember.member = member;
+        guildMember.guild = guild;
+        await r.table('guildMember').insert(guildMember).run();
+    } else {
+        await r.table('guildMember').get(guildMember.id).update(guildMember).run();
+    }
+    if(!user.member) {
+        user.member = member;
+        await r.table('user').insert(guildMember).run();
+    } else {
+        await r.table('user').get(guildMember.id).update(guildMember).run();
+    }
+    console.timeEnd('dbb');
+    console.log("DONE");
+    console.timeEnd('money');
+    return guildMember;
+};
+
+db.getMoney = async (member, guild) => {
+    if(guild) {
+        let doc = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
+        return doc[0];
+    } else {
+        let doc = await r.table('user').getAll([member], {index: "user_member"}).run();
+        return doc[0];
+    }
 };
 
 db.addLogChannel = async (guild, _channel, _type) => {

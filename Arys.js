@@ -4,6 +4,7 @@ const Client = new Discord.Client();
 const config = require('./config/config');
 const roles = require('./config/perm/roles');
 const db = require('./util/rethinkdb');
+const money = require('./util/money');
 const log = require('./util/log');
 const web = require('./web/server');
 let settings;
@@ -67,6 +68,8 @@ Client.on('guildMemberUpdate', (oldMember, newMember) => {
 Client.on('message', message => {
     if (message.author.bot) return;
     let timestamp = new Date();
+    //money add with message
+    money.perMessage(message.guild.id, message.author.id).catch(console.error);
     //invite delete system
     if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
         Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
@@ -121,7 +124,7 @@ Client.on('message', message => {
         args.splice(0, 1);
 
         if (command in Client.commands) {
-            console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ' + command);
+            console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ['+ message.channel.name + "] " + command);
             Client.commands[command].func(Client, message, args, role, guild);
             console.log(args);
         }
