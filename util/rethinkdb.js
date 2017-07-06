@@ -131,11 +131,9 @@ db.getGuildMember = async (guild, member) => {
 
 db.changeMoney = async (guild, member, amount, isMessage, scope) => {
     console.time('money');
-    console.time('db');
     let guildMember = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
     let user = await r.table('user').getAll(member, {index: "user_member"}).run();
     let setting = await db.getSetting(guild);
-    console.timeEnd('db');
     setting = setting[0];
     guildMember = guildMember[0];
     if(!guildMember) {
@@ -173,7 +171,6 @@ db.changeMoney = async (guild, member, amount, isMessage, scope) => {
     } else if(isMessage === false) {
         user.money.amount += parseInt(amount);
     }
-    console.time('dbb');
     if(!guildMember.member) {
         guildMember.member = member;
         guildMember.guild = guild;
@@ -187,9 +184,6 @@ db.changeMoney = async (guild, member, amount, isMessage, scope) => {
     } else {
         await r.table('user').get(guildMember.id).update(guildMember).run();
     }
-    console.timeEnd('dbb');
-    console.log("DONE");
-    console.timeEnd('money');
     return guildMember;
 };
 
