@@ -26,7 +26,17 @@ module.exports = {
     report: {
         need: 3
     },
-    reposter: "245501778018304001",
+    money: {
+        amount: 200,
+        name: "credits",
+        wait: 120000,
+        range: {
+            min: 10,
+            max: 30
+        }
+    },
+    //303114882147024896
+    reposter: "303114882147024896", //245501778018304001
     env: token.env
 
 };
