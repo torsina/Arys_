@@ -7,6 +7,7 @@ const db = require('./util/rethinkdb');
 const money = require('./util/money');
 const log = require('./util/log');
 const web = require('./web/server');
+let trigger = false;
 let settings;
 Client.login(config.discord.token.bot).catch(console.error);
 Client.once('ready', async () => {
@@ -62,6 +63,14 @@ Client.on('guildMemberUpdate', (oldMember, newMember) => {
     }
     if(oldMember.roles.has(config.reposter) && !newMember.roles.has(config.reposter)) {
         db.endListenedRole(oldMember.guild.id, config.reposter, oldMember.id).catch(console.error);
+    }
+});
+
+Client.on('typingStart', (channel, user) => {
+    if(user.id === '211208289206272001' && trigger === false) { //211208289206272001
+        channel.send("BARRY IS ALIVE FUCKERS");
+        console.log(channel.name + new Date);
+        trigger = true;
     }
 });
 
