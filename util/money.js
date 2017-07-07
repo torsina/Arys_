@@ -9,7 +9,6 @@ money.add = async (guild, member, amount) => {
 money.perMessage = async (guild, member) => {
     let setting = await db.getSetting(guild).catch(console.error);
     let doc = await db.getGuildMember(guild, member);
-    setting = setting[0];
     doc = doc[0];
     if(doc) {
         if(!setting.money && doc.money || !setting.money.wait && doc.money) {

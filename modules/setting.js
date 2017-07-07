@@ -14,7 +14,6 @@ module.exports = {
     help: 'Custom all the things!',
     func: async (client, msg, args, role) => {//TODO make perm for that command
         //if(config.env === "dev") return;
-        console.log(logMap);
         switch(args[0]) {
             case "-prefix":
                 switch(args[1]) {
@@ -66,7 +65,84 @@ module.exports = {
                         for(let setting of logList) {
                             embed.addField(setting.name, setting.desc + "\narguments : " + setting.arg);
                         }
-                        msg.channel.send({embed});
+                        return msg.channel.send({embed});
+                        break;
+                }
+                break;
+            case "-money":
+                switch(args[1]) {
+                    case "--name":
+                        if(args[2]) {
+                            if(args[2] === config.money.name) {
+                                return await db.deleteMoneyName(msg.guild.id).catch(console.error);
+                            }
+                            return await db.setMoneyName(msg.guild.id, args[2]).catch(console.error);
+                        } else {
+                            return msg.channel.send("Please add the new value at the end of the command.")
+                        }
+                        break;
+                    case "--amount":
+                        if(args[2]) {
+                            return await db.setMoneyDefaultAmount(msg.guild.id, args[2]).catch(console.error);
+                        } else {
+                            return msg.channel.send("Please add the new value at the end of the command.")
+                        }
+                        break;
+                    case "--wait":
+                        if(!isNaN(parseInt(args[2]))) {
+                            return await db.setMoneyWait(msg.guild.id, args[2]).catch(console.error);
+                        } else {
+                            return msg.channel.send("Please add the new value at the end of the command.")
+                        }
+                        break;
+                    case "--range":
+                        if(args.indexOf("--from") === -1 && args.indexOf("--to") === -1) {
+                            return msg.channel.send("Please use the arguments `--from` and `--to` to set a new range.")
+                        }
+                        let _min, _max;
+                        if(args.indexOf("--from") !== -1) {
+                            _min = parseInt(args[args.indexOf("--from")+1]);
+                        }
+                        if(args.indexOf("--to") !== -1) {
+                            _max = parseInt(args[args.indexOf("--to")+1]);
+                        }
+                        if(isNaN(_min) || isNaN(_max)) {
+                        return msg.channel.send("Please don't use letters to set the new range.");
+                        }
+                        if(_min > _max) {
+                            return msg.channel.send("Please put a valid range.");
+                        }
+                        return await db.setMoneyRange(msg.guild.id, _min, _max).catch(console.error);
+                        break;
+                    default:
+                        let setting = await db.getSetting(msg.guild.id).catch(console.error);
+                        let name, amount, min, max, wait;
+                        if(setting.money) {
+                            name = setting.money.name || config.money.name;
+                            amount = setting.money.amount || config.money.amount;
+                            wait = (setting.money.wait || config.money.wait);
+                            if(setting.money.range) {
+                                min = setting.money.range.min || config.money.range.min;
+                                max = setting.money.range.max || config.money.range.max;
+                            } else {
+                                min = config.money.range.min;
+                                max = config.money.range.max;
+                            }
+                        } else {
+                            name = config.money.name;
+                            amount = config.money.amount;
+                            wait = config.money.wait;
+                            min = config.money.range.min;
+                            max = config.money.range.max;
+                        }
+
+                        let embed = new Discord.RichEmbed()
+                            .addField('name of the currency:', name)
+                            .addField('default amount of money:', amount)
+                            .addField('wait between money earned by being active:', wait/1000 + " seconds")
+                            .addField('range of money earned by being active', `[${min} to ${max}]`);
+                        return msg.channel.send({embed});
+                        break;
                 }
         }
     }

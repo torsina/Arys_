@@ -92,7 +92,7 @@ db.getSettings = async () => {
 
 db.getSetting = async (guild) => {
     let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
-    return doc;
+    return doc[0];
 };
 
 db.streamSetting = async () => {
@@ -116,6 +116,14 @@ db.setMoneyName = async (guild, name) => {
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {name: name}, lastSave: Date.now()}).run();
 };
 
+db.deleteMoneyName = async (guild) => {
+    let doc = await db.getSetting(guild);
+    doc = doc[0];
+    delete doc.money.name;
+    doc.lastSave = Date.now();
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).update(doc).run();
+};
+
 db.setMoneyDefaultAmount = async (guild, amount) => {
     if(amount < 0) throw new Error("you can't use negative number for that");
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {amount: amount}, lastSave: Date.now()}).run();
@@ -123,6 +131,10 @@ db.setMoneyDefaultAmount = async (guild, amount) => {
 
 db.setMoneyWait = async (guild, time) => {
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {wait: time}, lastSave: Date.now()}).run();
+};
+
+db.setMoneyRange = async (guild, min, max) => {
+        return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {range: {min: min, max: max}}, lastSave: Date.now()}).run();
 };
 
 db.getGuildMember = async (guild, member) => {
@@ -134,7 +146,6 @@ db.changeMoney = async (guild, member, amount, isMessage, scope) => {
     let guildMember = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
     let user = await r.table('user').getAll(member, {index: "user_member"}).run();
     let setting = await db.getSetting(guild);
-    setting = setting[0];
     guildMember = guildMember[0];
     if(!guildMember) {
         guildMember = {};
@@ -153,11 +164,6 @@ db.changeMoney = async (guild, member, amount, isMessage, scope) => {
     if(!user.money) {
         user.money = {};
         user.money.amount = config.money.amount;
-    }
-    if(!setting.money && guildMember.money || !setting.money.wait && guildMember.money) {
-        if(setting.money && setting.money.wait && guildMember.money.lastGet + setting.money.wait > Date.now()) return;
-    } else {
-        if(guildMember.money.lastGet + config.money.wait > Date.now()) return;
     }
     if(isMessage === true) {
         guildMember.money.lastGet = Date.now();
@@ -190,10 +196,10 @@ db.changeMoney = async (guild, member, amount, isMessage, scope) => {
 db.getMoney = async (member, guild) => {
     if(guild) {
         let doc = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
-        return doc[0];
+        return doc[0].money;
     } else {
         let doc = await r.table('user').getAll([member], {index: "user_member"}).run();
-        return doc[0];
+        return doc[0].money;
     }
 };
 
