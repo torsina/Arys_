@@ -104,22 +104,17 @@ module.exports = {
         }
         if(categoryArray.includes(args[0])) {
             let items = await db.getShops(msg.guild.id, args[0]);
-            console.log(items.length);
-            //for(let i=0;i<items.length;i+=config.money.shop.max) {
-                let stream = await money.shop(msg.guild.id, args[0], msg, 0);
-                let buffers = [];
-                let end;
-                stream.on('data', function (chunk) {
-                    buffers.push(chunk);
-                });
-                stream.on('end', function () {
-                    end = Buffer.concat(buffers);
-                    msg.channel.send({ files: [ { attachment: end, name: "name.png" } ] });
-                });
-            //}
+            let obj = [];
+            for(let i=0;i<items.length;i+=18) {
+                obj[i] = {};
+                console.log(i);
+                obj[i].buffer = await money.shop(msg.guild.id, args[0], msg, i);
+                //console.log(typeof obj[i].buffer);
+                //console.log(obj[i].buffer);
+                msg.channel.send({ files: [ { attachment: obj[i].buffer, name: "name.png" } ] });
+            }
 
         }
 
     }
 };
-

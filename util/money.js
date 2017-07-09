@@ -46,29 +46,43 @@ money.getName = async (guild) => {
 
 };
 
-money.shop = async (guild, category, msg) => {
+money.shop = async (guild, category, msg, int) => {
     let list = await db.getShops(guild, category);
-    let canvas = new Canvas(402*2, list.length*16*2);
+    let max;
+    if (list.length - int >= 18) {
+        max = int + 18;
+    } else {
+        max = list.length - int;
+    }
+    console.log(list);
+    let canvas = new Canvas(402 * 2, max * 16 * 2);
     let ctx = canvas.getContext('2d');
     ctx.antialias = 'subpixel';
-    for(let i=0;i<list.length;i++) {
+    for (let i = 0; i < list.length; i++) {
         ctx.fillStyle = isOdd(i) === 1 ? '#32363B' : '#36393E';
-        ctx.fillRect(0, (i)*16*2, 402*2, 16*2);
+        ctx.fillRect(0, (i) * 16 * 2, 402 * 2, 16 * 2);
     }
     ctx.font = 'normal normal 24px Whitney';
     ctx.shadowColor = "black";
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
     ctx.shadowBlur = 0;
-    for(let i=0;i<list.length;i++) {
+
+    for (let i = 0; i < max; i++) {
         //let length = Math.log(parseInt(list[i].price)) * Math.LOG10E + 1 | 0;
         //if(length > 9) return console.error("element price was too big");
-        ctx.fillStyle = msg.guild.roles.find("name", list[i].item).hexColor;
-        ctx.fillText(list[i].item, 28, (i+1)*24 + i*8);
+        console.log("TRIGGER " + i+int);
+        ctx.fillStyle = msg.guild.roles.find("name", list[i+int].item).hexColor;
+        ctx.fillText(list[i+int].item, 28, (i + 1) * 24 + i * 8);
         ctx.fillStyle = "white";
-        ctx.fillText(list[i].price, 402*2-65*2, (i+1)*24 + i*8);
+        ctx.fillText(list[i+int].price, 402 * 2 - 65 * 2, (i + 1) * 24 + i * 8);
     }
-    return canvas.createPNGStream(); //.pipe(fs.createWriteStream(path.join(__dirname, 'font.png')))
+    return new Promise((resolve, reject) => {
+        canvas.toBuffer((err, buf) => {
+            if (err) reject(err);
+            resolve(buf);
+        });
+    });
 };
 
 function fontFile (name) {

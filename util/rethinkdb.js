@@ -178,14 +178,15 @@ db.changeMoney = async (guild, member, amount, isMessage, scope) => {
         user.money = {};
         user.money.amount = config.money.amount;
     }
+    if(isNaN(amount)) throw new Error('Amount is not a number.');
     if(isMessage === true) {
         guildMember.money.lastGet = Date.now();
         user.money.amount += parseInt(amount);
     }
-    if(guildMember.money.amount + parseInt(amount) < 0 || user.money.amount + parseInt(amount) < 0) {
+    if((guildMember.money.amount + parseInt(amount)) < 0 || scope === "general" && (user.money.amount + parseInt(amount)) < 0) {
         throw new Error('Not enough credits for that.');
     }
-    if(!scope) {
+    if(!scope) { //guild is default scope
         guildMember.money.amount += parseInt(amount);
     } else if(isMessage === false) {
         user.money.amount += parseInt(amount);
@@ -203,7 +204,7 @@ db.changeMoney = async (guild, member, amount, isMessage, scope) => {
     } else {
         await r.table('user').get(guildMember.id).update(guildMember).run();
     }
-    return guildMember;
+    return true;
 };
 
 db.getMoney = async (member, guild) => {
