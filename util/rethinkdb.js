@@ -16,7 +16,7 @@ db.init = async (Client) => {
 
     let tableList = await r.tableList().run(), tableWait = [];
     let tablesExpected = [
-        "setting", "post", "listenedRoles", "user", "event", "analytic", "guildMember"
+        "setting", "post", "listenedRoles", "user", "event", "analytic", "guildMember", "shopItem", "shopCategory"
     ];
     let indexExpected = [
         {table: "analytic", index: "analytic_guild", rows: ["guild"]},
@@ -28,7 +28,12 @@ db.init = async (Client) => {
         {table: "listenedRoles", index: "listenedRoles_guild_role_member", rows: ["guild", "role", "member"]},
         {table: "setting", index: "setting_guild", rows: ["guild"]},
         {table: "guildMember", index: "guildMember_guild_member", rows: ["guild", "member"]},
-        {table: "user", index: "user_member", rows: ['member']},
+        {table: "user", index: "user_member", rows: ["member"]},
+        {table: "shopItem", index: "shopItem_guild", rows: ["guild"]},
+        {table: "shopItem", index: "shopItem_guild_category", rows: ["guild", "category"]},
+        {table: "shopItem", index: "shopItem_guild_category_item", rows: ["guild", "category", "item"]},
+        {table: "shopCategory", index: "shopCategory_guild", rows: ["guild"]},
+        {table: "shopCategory", index: "shopCategory_guild_category", rows: ["guild", "category"]}
     ];
     let indexes = [];
     for(let table of tablesExpected) {
@@ -117,11 +122,7 @@ db.setMoneyName = async (guild, name) => {
 };
 
 db.deleteMoneyName = async (guild) => {
-    let doc = await db.getSetting(guild);
-    doc = doc[0];
-    delete doc.money.name;
-    doc.lastSave = Date.now();
-    return await r.table('setting').getAll([guild], {index: "setting_guild"}).update(doc).run();
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without({money: {name: true}})).run();
 };
 
 db.setMoneyDefaultAmount = async (guild, amount) => {
@@ -129,12 +130,24 @@ db.setMoneyDefaultAmount = async (guild, amount) => {
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {amount: amount}, lastSave: Date.now()}).run();
 };
 
+db.deleteMoneyDefaultAmount = async (guild) => {
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without({money: {amount: true}})).run();
+};
+
 db.setMoneyWait = async (guild, time) => {
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {wait: time}, lastSave: Date.now()}).run();
 };
 
+db.deleteMoneyWait = async (guild) => {
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without({money: {wait: true}})).run();
+};
+
 db.setMoneyRange = async (guild, min, max) => {
         return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {range: {min: min, max: max}}, lastSave: Date.now()}).run();
+};
+
+db.deleteMoneyRange = async (guild) => {
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without({money: {range: true}})).run();
 };
 
 db.getGuildMember = async (guild, member) => {
@@ -203,8 +216,61 @@ db.getMoney = async (member, guild) => {
     }
 };
 
+db.addShopCategory = async (_guild, _category, _header, _type) => {
+    let doc = {
+        guild: _guild,
+        category: _category,
+        header: _header,
+        type: _type
+    };
+    return await r.table('shopCategory').insert(doc).run();
+};
+
+db.getShopsCategory = async (_guild, _category) => {
+    if(_guild) {
+        if(_category) {
+            let doc = await r.table('shopCategory').getAll([_guild, _category], {index: "shopCategory_guild_category"}).run();
+            doc = doc[0];
+            return doc;
+        } else {
+            let doc = await r.table('shopCategory').getAll([_guild], {index: "shopCategory_guild"}).run();
+            let array = [];
+            for(let item of doc) {
+                array.push(item);
+            }
+            return array;
+        }
+    } else {
+        throw new Error('No guild scope was used');
+    }
+};
+
+db.addShopItem = async (_guild, _category, _item, _price) => {
+    let doc = {
+        guild: _guild,
+        category: _category,
+        item: _item,
+        price: _price
+    };
+    return await r.table('shopItem').insert(doc).run();
+};
+
+db.getShops = async (guild, category, item) => {
+    if(guild) {
+        if(category) {
+            if(item) {
+                return await r.table('shopItem').getAll([guild, category, item], {index: "shopItem_guild_category_item"}).run();
+            }
+            return await r.table('shopItem').getAll([guild, category], {index: "shopItem_guild_category"}).orderBy(r.desc('price')).run();
+        }
+        return await r.table('shopItem').getAll(guild, {index: "shopItem_guild"}).run();
+    } else {
+        throw new Error('No guild scope was used');
+    }
+};
+
 db.addLogChannel = async (guild, _channel, _type) => {
-    let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
+    let doc = await db.getSetting(guild);
     doc[0].lastSave = Date.now();
     if(doc[0].logChannel === undefined) {
         doc[0].logChannel = {};

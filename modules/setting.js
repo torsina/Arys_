@@ -72,27 +72,43 @@ module.exports = {
             case "-money":
                 switch(args[1]) {
                     case "--name":
-                        if(args[2]) {
+                        if(args[2] && args[2].length < config.money.maxCharName) {
                             if(args[2] === config.money.name) {
                                 return await db.deleteMoneyName(msg.guild.id).catch(console.error);
                             }
                             return await db.setMoneyName(msg.guild.id, args[2]).catch(console.error);
-                        } else {
-                            return msg.channel.send("Please add the new value at the end of the command.")
+                        } else if(!args[2]) {
+                            return msg.channel.send("Please add the new value at the end of the command.");
+                        } else if(args[2].length > config.money.maxCharName) {
+                            return msg.channel.send("The name you tried to set is too long.");
                         }
                         break;
                     case "--amount":
-                        if(args[2]) {
-                            return await db.setMoneyDefaultAmount(msg.guild.id, args[2]).catch(console.error);
-                        } else {
-                            return msg.channel.send("Please add the new value at the end of the command.")
+                        if(!isNaN(parseInt(args[2])) && parseInt(args[2]) < config.money.maxInt) {
+                            if(parseInt(args[2]) === config.money.amount) {
+                                return await db.deleteMoneyDefaultAmount(msg.guild.id).catch(console.error);
+                            }
+                            return await db.setMoneyDefaultAmount(msg.guild.id, parseInt(args[2])).catch(console.error);
+                        } else if(!args[2]){
+                            return msg.channel.send("Please add the new value at the end of the command.");
+                        } else if(parseInt(args[2]) > config.money.maxInt) {
+                            return msg.channel.send("The number you entered is too high.");
                         }
                         break;
                     case "--wait":
-                        if(!isNaN(parseInt(args[2]))) {
-                            return await db.setMoneyWait(msg.guild.id, args[2]).catch(console.error);
-                        } else {
+                        console.log(parseInt(args[2]));
+                        console.log(args[2]);
+                        console.log(config.money.maxInt);
+                        console.log(typeof config.money.maxInt);
+                        if(!isNaN(parseInt(args[2])) && parseInt(args[2]) < config.money.maxInt) {
+                            if(parseInt(args[2]) * 1000 === config.money.wait) {
+                                return await db.deleteMoneyWait(msg.guild.id).catch(console.error);
+                            }
+                            return await db.setMoneyWait(msg.guild.id, parseInt(args[2])*1000).catch(console.error);
+                        } else if(!args[2]){
                             return msg.channel.send("Please add the new value at the end of the command.")
+                        } else if(parseInt(args[2]) > config.money.maxInt) {
+                            return msg.channel.send("The number you entered is too high.");
                         }
                         break;
                     case "--range":
@@ -111,6 +127,12 @@ module.exports = {
                         }
                         if(_min > _max) {
                             return msg.channel.send("Please put a valid range.");
+                        }
+                        if(_min > config.money.maxInt || _max > config.money.maxInt) {
+                            return msg.channel.send("The numbers you entered is too high.");
+                        }
+                        if(_min === config.money.range.min && _max === config.money.range.max) {
+                            return await db.deleteMoneyRange(msg.guild.id).catch(console.error);
                         }
                         return await db.setMoneyRange(msg.guild.id, _min, _max).catch(console.error);
                         break;
@@ -137,6 +159,7 @@ module.exports = {
                         }
 
                         let embed = new Discord.RichEmbed()
+                            .setTitle('Money settings')
                             .addField('name of the currency:', name)
                             .addField('default amount of money:', amount)
                             .addField('wait between money earned by being active:', wait/1000 + " seconds")

@@ -30,9 +30,15 @@ module.exports = {
         amount: 200,
         name: "credits",
         wait: 120000,
+        maxCharName: 40,
+        maxInt: 32768,
         range: {
             min: 10,
             max: 30
+        },
+        shop: {
+            type: ["role"],
+            max: 18
         }
     },
     //303114882147024896
