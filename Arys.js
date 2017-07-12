@@ -33,6 +33,7 @@ Client.once('ready', async () => {
 
 
 Client.load = (command) => {
+
     let commandsList = fs.readdirSync('./modules/');
     if (command) {
         if (commandsList.indexOf(`${command}.js`) >= 0) {
@@ -68,15 +69,23 @@ Client.on('guildMemberUpdate', (oldMember, newMember) => {
 
 Client.on('typingStart', (channel, user) => {
     if(user.id === '211208289206272001' && trigger === false) { //211208289206272001
-        channel.send("BARRY IS ALIVE FUCKERS");
+        channel.send("barry is writing");
         console.log(channel.name + new Date);
         trigger = true;
+    }
+});
+
+Client.on('presenceUpdate', (oldMember, newMember) => {
+    if(oldMember.id === '306418399242747906') {
+        Client.channels.get('297150134834167809').send("barry went " + newMember.presence.status);
+        console.log("barry went " + newMember.presence.status + " at " + Date.now());
     }
 });
 
 Client.on('message', message => {
     if (message.author.bot) return;
     let timestamp = new Date();
+    if(config.env === "dev" && message.author.id !== config.discord.owner) return ;
     //money add with message
     money.perMessage(message.guild.id, message.author.id).catch(console.error);
     //invite delete system
