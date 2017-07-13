@@ -6,6 +6,7 @@ const roles = require('./config/perm/roles');
 const db = require('./util/rethinkdb');
 const money = require('./util/money');
 const log = require('./util/log');
+const perm = require('./util/perm');
 const web = require('./web/server');
 let trigger = false;
 let settings;
@@ -25,6 +26,7 @@ Client.once('ready', async () => {
     });
     log.importSetting(settings);
     log.init(Client);
+    perm.load();
     Client.user.setGame('type $help').catch(console.error);
     console.timeEnd('loading');
     console.log('I am ready!');
@@ -75,14 +77,7 @@ Client.on('typingStart', (channel, user) => {
     }
 });
 
-Client.on('presenceUpdate', (oldMember, newMember) => {
-    if(oldMember.id === '306418399242747906') {
-        Client.channels.get('297150134834167809').send("barry went " + newMember.presence.status);
-        console.log("barry went " + newMember.presence.status + " at " + Date.now());
-    }
-});
-
-Client.on('message', message => {
+Client.on('message', async message => {
     if (message.author.bot) return;
     let timestamp = new Date();
     if(config.env === "dev" && message.author.id !== config.discord.owner) return ;
@@ -92,25 +87,25 @@ Client.on('message', message => {
     if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
         Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
             if(m.guild.id === "242655328410402816") {
-                message.channel.send("from 9i");
+                return message.channel.send("from 9i");
             } else {
-                message.channel.send("from other");
+                return message.channel.send("from other");
             }
         });
     }
     //interaction
     if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
-        message.channel.send("throw her in a pit and let me do the rest")
+        return message.channel.send("throw her in a pit and let me do the rest")
     }
     if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of him ?")) {
-        message.channel.send("throw him in a pit and let me do the rest")
+        return message.channel.send("throw him in a pit and let me do the rest")
     }
     //emoji delete system
     if (isEmoji(message.content) === true && message.channel.id !== "249626680434491392" && config.env !== "dev") {
         if (message.author.bot) return;
         console.log(timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + "there is an emoji here : " + message.channel.name + " ,by : " + message.author.username + '#' + message.author.discriminator);
         message.delete();
-        message.reply("***GTFO RETARD AND READ THE RULES IN *** <#242655328410402816> <:feelsrageman:246603943768096769>").then(m => {
+        return message.reply("***GTFO RETARD AND READ THE RULES IN *** <#242655328410402816> <:feelsrageman:246603943768096769>").then(m => {
             setTimeout(function() {
                 m.delete();
             }, 7000);
@@ -125,7 +120,7 @@ Client.on('message', message => {
                 let emote = "<:" + serverEmotes[i].name + ":" + serverEmotes[i].id + ">";
                 if (emoteStack.includes(emote)) {
                     db.createAnalytic(message.guild.id, message.channel.id, emote, message.author.id).catch(console.error);
-                    console.log(emote);
+                    return console.log(emote);
                 }
             }
         }
@@ -133,17 +128,22 @@ Client.on('message', message => {
     //command handler
     if (message.content.startsWith(config.discord.prefix) && settings !== undefined || settings !== undefined && message.content.startsWith(settings.get(message.guild.id).prefix)) {
         const prefix = (message.content.startsWith(settings.get(message.guild.id).prefix) ? settings.get(message.guild.id).prefix : config.discord.prefix);
-        if (message.channel.id==="257541472772030464") return;
         let member = message.guild.member(Client.users.get(message.author.id));
         let role = check(member);
-        let guild = message.guild;
+        let roles = member.roles;
+        let roleArray = [];
+        roles.forEach(function (item) {
+            roleArray.push(item.id);
+        });
         let args = message.content.split(' ');
         let command = args[0].slice(prefix.length);
+        let guildMember = await db.getGuildMember(message.guild.id, message.author.id);
         args.splice(0, 1);
 
         if (command in Client.commands) {
+            //await perm.processUser(message.guild.id, roleArray, message.author.id).catch(console.error);
             console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ['+ message.channel.name + "] " + command);
-            Client.commands[command].func(Client, message, args, role, guild);
+            Client.commands[command].func(Client, message, args, role, guildMember);
             console.log(args);
         }
     }

@@ -1,6 +1,7 @@
 const db = module.exports = {};
 let dbName = "Arys";
 const config = require('../config/config');
+const assign = require('assign-deep');
 const r = require("rethinkdbdash")({
     host: "192.168.1.30",
     port: "28015",
@@ -16,7 +17,7 @@ db.init = async (Client) => {
 
     let tableList = await r.tableList().run(), tableWait = [];
     let tablesExpected = [
-        "setting", "post", "listenedRoles", "user", "event", "analytic", "guildMember", "shopItem", "shopCategory"
+        "setting", "post", "listenedRoles", "user", "event", "analytic", "guildMember", "shopItem", "shopCategory", "roles"
     ];
     let indexExpected = [
         {table: "analytic", index: "analytic_guild", rows: ["guild"]},
@@ -33,7 +34,9 @@ db.init = async (Client) => {
         {table: "shopItem", index: "shopItem_guild_category", rows: ["guild", "category"]},
         {table: "shopItem", index: "shopItem_guild_category_item", rows: ["guild", "category", "item"]},
         {table: "shopCategory", index: "shopCategory_guild", rows: ["guild"]},
-        {table: "shopCategory", index: "shopCategory_guild_category", rows: ["guild", "category"]}
+        {table: "shopCategory", index: "shopCategory_guild_category", rows: ["guild", "category"]},
+        {table: "roles", index: "roles_guild", rows: ["guild"]},
+        {table: "roles", index: "roles_guild_role", rows: ["guild", "role"]}
     ];
     let indexes = [];
     for(let table of tablesExpected) {
@@ -151,15 +154,15 @@ db.deleteMoneyRange = async (guild) => {
 };
 
 db.getGuildMember = async (guild, member) => {
-    return await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
+    let doc = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
+    return doc[0];
 };
 
 db.changeMoney = async (guild, member, amount, isMessage, scope) => {
     console.time('money');
-    let guildMember = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
+    let guildMember = await db.getGuildMember(guild, member);
     let user = await r.table('user').getAll(member, {index: "user_member"}).run();
     let setting = await db.getSetting(guild);
-    guildMember = guildMember[0];
     if(!guildMember) {
         guildMember = {};
     }
@@ -294,6 +297,51 @@ db.getLogChannel = async (guild) => {
     let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
     return doc[0];
 };
+
+db.setRolePerm = async (_guild, _role, _bitField, _message) => {
+    let doc = await db.getRolePerm(_guild, _role);
+    if(!doc) {
+        doc = {
+            guild: _guild,
+            role: _role,
+            position: _message.guild.roles.get(_role).position
+        };
+        doc.perm = _bitField;
+        return await r.table('roles').insert(doc).run();
+    } else {
+        doc.perm = assign(doc.perm, _bitField);
+        if(doc.position !== _message.guild.roles.get(_role).position) doc.position = _message.guild.roles.get(_role).position;
+        return await r.table('roles').get(doc.id).replace(doc).run();
+    }
+};
+
+db.getRolePerm = async (_guild, _role) => {
+    if(!_guild) throw new Error('No guild scope provided');
+    if(_role) {
+        let doc = await r.table('roles').getAll([_guild, _role], {index: "roles_guild_role"}).run();
+        return doc[0];
+    } else {
+        return await r.table('roles').getAll([_guild], {index: "roles_guild"}).orderBy('position').run();
+    }
+};
+
+db.setGuildMemberPerm = async (_guild, _member, _bitFields) => {
+    if(!_bitFields instanceof Object) throw new Error('bitField must be an object');
+    console.log(_bitFields);
+    let guildMember = await db.getGuildMember(_guild, _member);
+    if(!guildMember) {
+        guildMember = {};
+        guildMember.guild = _guild;
+        guildMember.member = _member;
+        guildMember.perm = _bitFields;
+        return await r.table('guildMember').insert(guildMember).run();
+    } else {
+        guildMember.perm = _bitFields;
+        return await r.table('guildMember').get(guildMember.id).update(guildMember);
+    }
+
+};
+
 db.createPost = async (image, message, file, channel, guild) => {
     let query = {
         image: image,
@@ -311,8 +359,8 @@ db.getPost = async (image, file, guild) => {
 };
 
 db.reportPost = async (guild, message) => {
-    let a = await r.table('post').getAll([guild, message], {index: "post_guild_message"}).run();
-    return await r.table('post').get(a[0].id).update({report_count: a[0].report_count+1}).run();
+    let doc = await r.table('post').getAll([guild, message], {index: "post_guild_message"}).run();
+    return await r.table('post').get(doc[0].id).update({report_count: doc[0].report_count+1}).run();
 };
 
 db.deletePost = async (guild, message) => {
