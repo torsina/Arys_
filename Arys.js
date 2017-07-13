@@ -2,7 +2,6 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const Client = new Discord.Client();
 const config = require('./config/config');
-const roles = require('./config/perm/roles');
 const db = require('./util/rethinkdb');
 const money = require('./util/money');
 const log = require('./util/log');
@@ -14,7 +13,6 @@ Client.login(config.discord.token.bot).catch(console.error);
 Client.once('ready', async () => {
     console.time('loading');
     Client.load();
-    roles.load();
     await db.init(Client).catch(console.error).then(async () => {
         settings = await db.getSettings();
         let stream = await db.streamSetting().catch(console.error);
@@ -129,7 +127,6 @@ Client.on('message', async message => {
     if (message.content.startsWith(config.discord.prefix) && settings !== undefined || settings !== undefined && message.content.startsWith(settings.get(message.guild.id).prefix)) {
         const prefix = (message.content.startsWith(settings.get(message.guild.id).prefix) ? settings.get(message.guild.id).prefix : config.discord.prefix);
         let member = message.guild.member(Client.users.get(message.author.id));
-        let role = check(member);
         let roles = member.roles;
         let roleArray = [];
         roles.forEach(function (item) {
@@ -141,53 +138,13 @@ Client.on('message', async message => {
         args.splice(0, 1);
 
         if (command in Client.commands) {
-            //await perm.processUser(message.guild.id, roleArray, message.author.id).catch(console.error);
+            await perm.processUser(message.guild.id, roleArray, message.author.id).catch(console.error);
             console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ['+ message.channel.name + "] " + command);
-            Client.commands[command].func(Client, message, args, role, guildMember);
+            Client.commands[command].func(Client, message, args, guildMember);
             console.log(args);
         }
     }
 });
-
-function check(member){
-    if(member.id === config.discord.owner) {
-        return "bot_owner";
-    }
-    if(member.roles.has(roles.id.admin)) {
-        return "admin";
-    }
-    else if(member.roles.has(roles.id.smurf)) {
-        return "smurf";
-    }
-    else if(member.roles.has(roles.id.eye)) {
-        return "eye";
-    }
-    else if(member.roles.has(roles.id.nsfw_god)) {
-        return "nsfw_god";
-    }
-    else if(member.roles.has(roles.id.hot)) {
-        return "hot";
-    }
-    else if(member.roles.has(roles.id.oldfag)) {
-        return "oldfag";
-    }
-    else if(member.roles.has(roles.id.op)) {
-        return "op";
-    }
-    else if(member.roles.has(roles.id.captain)) {
-        return "captain";
-    }
-    else if(member.roles.has(roles.id.trending)) {
-        return "trending";
-    }
-    else if(member.roles.has(roles.id.fresh)) {
-        return "fresh";
-    }
-    else {
-        return "none";
-    }
-}
-
 function isEmoji(str) {
     //'\ud83c[\udf00-\udfff]', // U+1F300 to U+1F3FF
     //'\ud83d[\udc00-\ude4f]', // U+1F400 to U+1F64F // U+1F680 to U+1F6FF // U+263A // 1F600 - 1F636 // U+1F621

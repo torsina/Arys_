@@ -1,13 +1,15 @@
 const fs = require('fs');
-const perms = require('../config/perm/perms');
+const perms = require('../util/perm');
+
+const bitField = {
+    help: 1 << 0,
+    base: 1 << 1
+};
+
 module.exports = {
     help: 'Plz send help!!',
-    func: (Client, msg, args, role) => {
-        if(perms.check("help.base", role, msg.author.id) !== true) {
-            msg.channel.send("You don't have the permission `help.base`");
-            return;
-        }
-
+    func: async(Client, msg, args, guildMember) => {
+        try{await perms.check(guildMember, "help.base")}catch(e) {return msg.channel.send(e.message)}
         if (args[0] in Client.commands && Client.commands[args[0]].help)
             msg.channel.sendCode('asciidoc', `${args[0]} :: ${Client.commands[args[0]].help}`);
         else {
@@ -19,3 +21,4 @@ module.exports = {
         }
     }
 };
+module.exports.bitField = bitField;

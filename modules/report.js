@@ -2,7 +2,7 @@ const Arys = require('../Arys');
 const post = require('./post');
 const config = require('../config/config');
 const db = require('../util/rethinkdb');
-const perms = require('../config/perm/perms');
+const perms = require('../util/perm');
 
 
 let image = [];
@@ -10,24 +10,25 @@ for(let id=0; id<post.line; id++){
     image[id] = [];
 }
 
-
+const bitField = {
+    help: 1 << 0,
+    base: 1 << 1,
+    force: 1 << 2
+};
 
 module.exports = {
     help: 'Use this if some retard placed loli in my lists, usage : $report (id)',
-    func: (client, msg, args, role) => {
+    func: async(client, msg, args, guildMember) => {
         if(config.env === "dev") return;
         setTimeout(function() {
             msg.delete();
         }, config.discord.wait);
-        if(perms.check("report.base", role, msg.author.id) !== true) {
-            msg.channel.send("You don't have the permission `report.base`");
-            return;
-        }
+        try{await perms.check(guildMember, "report.base")}catch(e) {return msg.channel.send(e.message)}
         if(args[0] === undefined) {
             msg.channel.send("please enter the id of the image you want to report")
         }
 
-        db.getPost(args[0], config.post.file, msg.guild.id).then(query => {
+        db.getPost(args[0], config.post.file, msg.guild.id).then(async query => {
             let report = parseInt(query.report_count) + 1;
             if(perms.check("report.force", role, msg.author.id) === true && args[1]==='--force'){
                 msg.channel.fetchMessage(query.message)
@@ -40,7 +41,7 @@ module.exports = {
                 return;
 
             }
-            else if(perms.check("report.force", role, msg.author.id) !== true && args[1]==='--force') {
+            else if(await perms.check("report.force", role, msg.author.id) !== true && args[1]==='--force') {
                 msg.channel.send("You don't have the permission `report.force`");
                 return;
             }
@@ -81,3 +82,4 @@ module.exports = {
 
     }
 };
+module.exports.bitField = bitField;

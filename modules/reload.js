@@ -1,16 +1,17 @@
 const Arys = require('../Arys');
 const wait = Arys.wait;
-const perms = require('../config/perm/perms');
+const perms = require('../util/perm');
+
+const bitField = {
+    help: 1 << 0,
+    base: 1 << 1,
+};
+
 module.exports = {
     help: 'Reload the commands',
-    func: (client, msg, args, role) => {
-        if(perms.check("mod.reload.base", role, msg.author.id) !== true) {
-            msg.channel.send("You don't have the permission `mod.reload.base`");
-            return;
-        }
+    func: async(client, msg, args, guildMember) => {
+        try{await perms.check(guildMember, "reload.base")}catch(e) {return msg.channel.send(e.message)}
         console.time('reload');
-        msg.delete();
-
         if (args.length > 0 && perms.check("reload.command", role, msg.author.id) === true){
             client.load(args[0]);
             msg.channel.send('Command '+ args[0] + ' reloaded').then(m => {
@@ -35,3 +36,4 @@ module.exports = {
         }
     }
 };
+module.exports.bitField = bitField;

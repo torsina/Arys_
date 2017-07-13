@@ -1,11 +1,17 @@
-const perms = require('../config/perm/perms');
+const perms = require('../util/perm');
 const config = require('../config/config');
 const db = require('../util/rethinkdb');
 const money = require('../util/money');
+
+const bitField = {
+    help: 1 << 0,
+    base: 1 << 1
+};
+
 module.exports = {
     help: 'Ping, Pong',
-    func: async (client, msg, args, role) => {
-        //if(config.env === "dev") return;
+    func: async (client, msg, args, guildMember) => {
+        try{await perms.check(guildMember, "buy.base")}catch(e) {return msg.channel.send(e.message)}
         if(!args[0]) {
             return msg.channel.send("Please use this command like the following:\n`$buy <category> <item>`")
         } else {
@@ -16,7 +22,6 @@ module.exports = {
             });
             let name = "";
             for(let i = 1;i<args.length;i++) {
-
                 if(i === args.length-1) {
                     name += args[i]
                 } else {
@@ -57,3 +62,4 @@ function includesObject (search, array) {
     }
     return false;
 }
+module.exports.bitField = bitField;

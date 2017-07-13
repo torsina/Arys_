@@ -1,13 +1,16 @@
-const perms = require('../config/perm/perms');
+const perms = require('../util/perm');
 const db = require('../util/rethinkdb');
+
+const bitField = {
+    help: 1 << 0,
+    get: 1 << 1
+};
+
 module.exports = {
     help: 'get dem data',
-    func: (client, msg, args, role) => {
-        if(perms.check("mod.analytic.base", role, msg.author.id) !== true) {
-            msg.channel.send("You don't have the permission `mod.analytic.base`");
-            return;
-        }
-        if(args[0] === "get") { // 0 = get ; 1 = <orderby(least used; highest used; user> ; 2 = <emoji>  ;
+    func: async (client, msg, args, guildMember) => {
+        if(args[0] === "get") {// 0 = get ; 1 = <orderby(least used; highest used; user> ; 2 = <emoji>  ;
+            try{await perms.check(guildMember, "analytic.get")}catch(e) {return msg.channel.send(e.message)}
             if (args[1] === "inc") {
                 db.countAnalytic(msg.guild.id).then(doc => {
                     msg.channel.send(compare(doc)).catch(console.error);
@@ -43,11 +46,6 @@ module.exports = {
                     msg.channel.send("you did not set the limits of the search \nplease use `-from <date>` and/or `-to <date>` to set the limits of the search");
                 }
             }
-            //db.getAnalyticByName("<:feelssmugman:246765996684083210>").then(doc => {console.log(Object.keys(doc).length)})
-        }
-
-        if(args[0] === "delete") {
-            db.deleteAnalytic();
         }
     }
 };
@@ -66,3 +64,4 @@ function compare(doc) {
     }
     return str;
 }
+module.exports.bitField = bitField;

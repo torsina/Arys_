@@ -24,7 +24,7 @@ perm.load = () => {
  * @returns {Promise.<void>}
  */
 perm.processUser = async (_guild, _roles, _member) => {
-    if(_member === config.discord.owner) return await db.setGuildMemberPerm(_guild, _member, bitFields); //all values to true
+    //if(_member === config.discord.owner) return await db.setGuildMemberPerm(_guild, _member, bitFields); //all values to true
     let roles = [];
     for(let i=0;i<_roles.length;i++) {
         let doc = await db.getRolePerm(_guild, _roles[i]);
@@ -57,7 +57,7 @@ perm.check = async (_guildMember, _perm) => {
     permName = permName.join("_");
     permName = permName.slice(1, permName.length);
     let output = !!(_guildMember.perm[command] & bitFields[command][permName]);
-    if(output === true) return;
+    if(output === true) return true;
     if(output === false) throw new Error("You lack the permission " + _perm)
 };
 

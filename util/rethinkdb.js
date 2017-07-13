@@ -158,6 +158,10 @@ db.getGuildMember = async (guild, member) => {
     return doc[0];
 };
 
+db.deleteGuildMember = async (guild, member) => {
+    return await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).delete().run();
+};
+
 db.changeMoney = async (guild, member, amount, isMessage, scope) => {
     console.time('money');
     let guildMember = await db.getGuildMember(guild, member);

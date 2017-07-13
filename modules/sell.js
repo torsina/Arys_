@@ -1,11 +1,17 @@
-const perms = require('../config/perm/perms');
+const perms = require('../util/perm');
 const config = require('../config/config');
 const db = require('../util/rethinkdb');
 const money = require('../util/money');
 
+const bitField = {
+    help: 1 << 0,
+    base: 1 << 1
+};
+
 module.exports = {
     help: 'haxxed',
-    func: async (client, msg, args, role) => {
+    func: async (client, msg, args, guildMember) => {
+        try{await perms.check(guildMember, "sell.base")}catch(e) {return msg.channel.send(e.message)}
         if(!args[0]) {
             return msg.channel.send("Please use this command like the following:\n`$sell <category> <item>`")
         } else {
@@ -57,3 +63,4 @@ function includesObject (search, array) {
     }
     return false;
 }
+module.exports.bitField = bitField;

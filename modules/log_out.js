@@ -1,13 +1,18 @@
-const perms = require('../config/perm/perms');
+const perms = require('../util/perm');
+
+const bitField = {
+    help: 1 << 0,
+    base: 1 << 1
+};
+
 module.exports = {
     help: 'Disconect the bot',
-    func: (client, msg, args, role) => {
-        if(perms.check("mod.logout.base", role, msg.author.id) !== true) {
-            msg.channel.send("You don't have the permission `mod.logout.base`");
-        }
-        else {
-            msg.reply(' has shut me down');
-            client.destroy((err) => {console.log(err);});
-        }
+    func: async(client, msg, args, guildMember) => {
+        try{await perms.check(guildMember, "log_out.base")}catch(e) {return msg.channel.send(e.message)}
+        msg.reply(' has shut me down');
+        client.destroy((err) => {console.log(err);});
+
+
     }
 };
+module.exports.bitField = bitField;

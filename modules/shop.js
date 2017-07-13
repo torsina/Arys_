@@ -1,12 +1,18 @@
-const perms = require('../config/perm/perms');
+const perms = require('../util/perm');
 const config = require('../config/config');
 const db = require('../util/rethinkdb');
 const money = require('../util/money');
 const Discord = require('discord.js');
 
+const bitField = {
+    help: 1 << 0,
+    base: 1 << 1,
+    add: 1 << 2
+};
+
 module.exports = {
     help: 'Buy all the things!',
-    func: async (client, msg, args, role) => {
+    func: async (client, msg, args, guildMember) => {
         let shops = await db.getShopsCategory(msg.guild.id);
         let categoryArray = [];
         shops.forEach(function (doc) {
@@ -15,6 +21,7 @@ module.exports = {
         //if(config.env === "dev") return;
         switch(args[0]) {
             case "-add":
+                try{await perms.check(guildMember, "shop.add")}catch(e) {return msg.channel.send(e.message)}
                 switch(args[1]) {
                     case "--role": //0 = -add ; 1 = --role; 2 = category; 3 = role; 4 = --price; 5 = price
                         let roleInput = "";
@@ -91,6 +98,7 @@ module.exports = {
                 }
                 break;
             case undefined:
+                try{await perms.check(guildMember, "shop.base")}catch(e) {return msg.channel.send(e.message)}
                 let embed = new Discord.RichEmbed()
                     .setFooter('asked by ' + msg.author.tag)
                     .setTimestamp()
@@ -118,3 +126,4 @@ module.exports = {
 
     }
 };
+module.exports.bitField = bitField;

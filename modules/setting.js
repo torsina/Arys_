@@ -28,7 +28,7 @@ const bitField = {
 };
 module.exports = {
     help: 'Custom all the things!',
-    func: async (client, msg, args, role, guildMember) => {//TODO make perm for that command
+    func: async (client, msg, args, guildMember) => {//TODO make perm for that command
         //if(config.env === "dev") return;
         switch(args[0]) {
             case "-prefix":
@@ -217,10 +217,10 @@ module.exports = {
                         break;
                     }
                     case "--see": {
-                        try{await perms.check(guildMember, "setting.perm.role.see")}catch(e) {return msg.channel.send(e.message)}
+                        //try{await perms.check(guildMember, "setting.perm.role.see")}catch(e) {return msg.channel.send(e.message)}
                         let array = [];
                         for(let i=0;i<args.length;i++) {
-                            if (i > 0 && i <= args.length - 1) array.push(args[i]);
+                            if (i > 1 && i <= args.length - 1) array.push(args[i]);
                         }
                         let roleName = array.join(" ");
                         console.log(roleName);
@@ -231,7 +231,7 @@ module.exports = {
                         return msg.channel.send(bits);
                     }
                     default: {
-                        try{await perms.check(guildMember, "setting.perm.set")}catch(e) {return msg.channel.send(e.message)}
+                        //try{await perms.check(guildMember, "setting.perm.see")}catch(e) {return msg.channel.send(e.message)}
                         let permArray = [];
                         let bitFields = perms.getBitField();
                         let commands = Object.keys(bitFields);
