@@ -2,7 +2,6 @@ const perms = require('../util/perm');
 const money = require('../util/money');
 const config = require('../config/config');
 const Discord = require('discord.js');
-moment().format();
 
 const bitField = {
     help: 1 << 0,
