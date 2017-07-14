@@ -168,7 +168,7 @@ module.exports = {
                     default:
                         try{await perms.check(guildMember, "setting.money.see")}catch(e) {return msg.channel.send(e.message)}
                         let setting = await db.getSetting(msg.guild.id).catch(console.error);
-                        let name, amount, min, max, wait;
+                        let name, amount, min, max, wait, daily_amount, daily_min, daily_max;
                         if (setting.money) {
                             name = setting.money.name || config.money.name;
                             amount = setting.money.amount || config.money.amount;
@@ -180,19 +180,31 @@ module.exports = {
                                 min = config.money.range.min;
                                 max = config.money.range.max;
                             }
+                            if(setting.money.daily) {
+                                daily_amount = setting.money.daily.amount || config.money.daily.amount;
+                                daily_min = setting.money.daily.range.min || config.money.daily.range.min;
+                                daily_max = setting.money.daily.range.max || config.money.daily.range.max;
+                            } else {
+                                daily_amount = config.money.daily.amount;
+                                daily_min = config.money.daily.range.min;
+                                daily_max = config.money.daily.range.max;
+                            }
                         } else {
                             name = config.money.name;
                             amount = config.money.amount;
                             wait = config.money.wait;
                             min = config.money.range.min;
                             max = config.money.range.max;
+
                         }
                         let embed = new Discord.RichEmbed()
                             .setTitle('Money settings')
                             .addField('name of the currency:', name)
                             .addField('default amount of money:', amount)
                             .addField('wait between money earned by being active:', wait / 1000 + " seconds")
-                            .addField('range of money earned by being active', `[${min} to ${max}]`);
+                            .addField('range of money earned by being active', `[${min} to ${max}]`)
+                            .addField('money earned by daily', daily_amount)
+                            .addField('range of bonus money earned by daily to other', `[${daily_min} to ${daily_max}]`);
                         return msg.channel.send({embed});
                         break;
                 }
@@ -225,8 +237,8 @@ module.exports = {
                             if (i > 1 && i <= args.length - 1) array.push(args[i]);
                         }
                         let roleName = array.join(" ");
-                        console.log(roleName);
                         let id = msg.guild.roles.find("name", roleName).id;
+                        console.log(id);
                         let role = await db.getRolePerm(msg.guild.id, id);
                         console.log(role);
                         let permArray = [];
@@ -237,7 +249,7 @@ module.exports = {
                             let perms = Object.keys(obj);
                             for(let perm of perms) {
                                 console.log(command);
-                                if(role.perm[command] && !!(role.perm[command].allow & bitFields[command][perm])) {
+                                if(role.perm && role.perm[command] && !!(role.perm[command].allow & bitFields[command][perm])) {
                                     perm = perm.split("_");
                                     perm = perm.join(".");
                                     permArray.push(":white_check_mark:\t" +command + "." + perm + "\n");

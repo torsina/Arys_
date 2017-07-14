@@ -336,7 +336,7 @@ db.getRolePerm = async (_guild, _role, _message) => {
     if(_role) {
         let doc = await r.table('roles').getAll([_guild, _role], {index: "roles_guild_role"}).run();
         if(!doc) {
-            db.setRolePerm(_guild, _role, {}, _message).catch(console.error);
+            return db.setRolePerm(_guild, _role, {}, _message).catch(console.error);
         }
         return doc[0];
     } else {

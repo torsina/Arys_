@@ -14,6 +14,7 @@ module.exports = {
     func: async (client, msg, args, guildMember) => {
         if(!msg.mentions.users) {
             try{await perms.check(guildMember, "give.self")}catch(e) {return msg.channel.send(e.message)}
+            msg.channel.send("You gave yourself " + args[0]);
             db.changeMoney(msg.guild.id, msg.author.id, args[0]).catch(console.error);
         } else {
             try{await perms.check(guildMember, "give.other")}catch(e) {return msg.channel.send(e.message)}

@@ -14,13 +14,15 @@ module.exports = {
         //if(config.env === "dev") return;
         try{await perms.check(guildMember, "daily.base")}catch(e) {return msg.channel.send(e.message)}
         if(guildMember.daily && guildMember.daily + 86400000 < Date.now() || !guildMember.daily) {//guildMember.daily && guildMember.daily + 86400000 < Date.now() //guildMember.daily && guildMember.daily + 86400000 < Date.now() || !guildMember.daily
+            let setting = await db.getSetting(msg.guild.id).catch(console.error);
+            let prefix = setting.money.name || config.money.name;
             if(!msg.mentions.users.first()) {
                 let daily = await money.getDaily(msg.guild.id, msg.author.id).catch(console.error);
                 let embed = new Discord.RichEmbed()
                     .setColor(0x00AE86)
                     .setFooter('asked by ' + msg.author.tag)
                     .setTimestamp()
-                    .setDescription(msg.author.toString() + " you recieved your daily " + daily);
+                    .setDescription(msg.author.toString() + " you received your daily " + daily + " " + prefix);
                 msg.channel.send({embed});
             } else if(msg.mentions.users.first() !== msg.author && msg.mentions.users.first() !== msg.author.bot) {
                 let daily = await money.getDaily(msg.guild.id, msg.mentions.users.first().id, true).catch(console.error);
@@ -28,7 +30,7 @@ module.exports = {
                     .setColor(0x00AE86)
                     .setFooter('asked by ' + msg.author.tag)
                     .setTimestamp()
-                    .setDescription(msg.author.toString() + " you gave your " + daily + " dailies to " + msg.mentions.users.first().toString());
+                    .setDescription(msg.author.toString() + " you gave your " + daily + " " + prefix + " dailies to " + msg.mentions.users.first().toString());
                 msg.channel.send({embed});
             }
         } else {
