@@ -24,11 +24,13 @@ const bitField = {
     money_name: 1 << 9,
     perm_role_set: 1 << 10,
     perm_role_see: 1 << 11,
-    perm_see: 1 << 12
+    perm_role_copy: 1 << 12,
+    perm_see: 1 << 13,
 };
+
 module.exports = {
     help: 'Custom all the things!',
-    func: async (client, msg, args, guildMember) => {//TODO make perm for that command
+    func: async (client, msg, args, guildMember) => {
         //if(config.env === "dev") return;
         switch(args[0]) {
             case "-prefix":
@@ -198,7 +200,7 @@ module.exports = {
             case "-perm":
                 switch(args[1]) {
                     case "--role": {
-                        //try{await perms.check(guildMember, "setting.perm.role.set")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, "setting.perm.role.set")}catch(e) {return msg.channel.send(e.message)}
                         //0 = -perm; 1 = --role; 2 = type; 3 = role; 4 = perm
                         let array = [];
                         for(let i=0;i<args.length;i++) {
@@ -217,21 +219,65 @@ module.exports = {
                         break;
                     }
                     case "--see": {
-                        //try{await perms.check(guildMember, "setting.perm.role.see")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, "setting.perm.see")}catch(e) {return msg.channel.send(e.message)}
                         let array = [];
                         for(let i=0;i<args.length;i++) {
                             if (i > 1 && i <= args.length - 1) array.push(args[i]);
                         }
                         let roleName = array.join(" ");
                         console.log(roleName);
-                        let role = msg.guild.roles.find("name", roleName);
-                        let doc = await db.getRolePerm(msg.guild.id, role.id);
-                        console.log(doc);
-                        let bits = doc.perm.setting.allow.toString(2);
-                        return msg.channel.send(bits);
+                        let id = msg.guild.roles.find("name", roleName).id;
+                        let role = await db.getRolePerm(msg.guild.id, id);
+                        console.log(role);
+                        let permArray = [];
+                        let bitFields = perms.getBitField();
+                        let commands = Object.keys(bitFields);
+                        for(let command of commands) {
+                            let obj = bitFields[command];
+                            let perms = Object.keys(obj);
+                            for(let perm of perms) {
+                                console.log(command);
+                                if(role.perm[command] && !!(role.perm[command].allow & bitFields[command][perm])) {
+                                    perm = perm.split("_");
+                                    perm = perm.join(".");
+                                    permArray.push(":white_check_mark:\t" +command + "." + perm + "\n");
+                                } else {
+                                    perm = perm.split("_");
+                                    perm = perm.join(".");
+                                    permArray.push(":x:\t" + command + "." + perm + " \n");
+                                }
+                            }
+                        }
+                        let permString = "";
+                        permArray.forEach(function (p) {
+                            permString += p;
+                        });
+                        let embed = new Discord.RichEmbed()
+                            .setTitle("Allowed perms for the role " + roleName)
+                            .setDescription(permString)
+                            .setFooter('asked by ' + msg.author.tag)
+                            .setTimestamp();
+                        msg.channel.send({embed});
+
+                        break;
                     }
-                    default: {
-                        //try{await perms.check(guildMember, "setting.perm.see")}catch(e) {return msg.channel.send(e.message)}
+                    case "--copy": {
+                        let copyNameArray = args.slice(2, args.length);
+                        let copyName = copyNameArray.join(" ");
+                        let copyId = msg.guild.roles.find("name", copyName);
+                        let copyRole = await db.getRolePerm(msg.guild.id, copyId.id);
+                        console.log(copyRole + " jjjj");
+                        let filter = m => m.author.id === msg.author.id;
+                        let copiedName = await msg.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] })
+                            .catch(collected => msg.channel.send(`Sorry, you took too much time to select a role`));
+                        copiedName = copiedName.first().content;
+                        let copiedId = msg.guild.roles.find("name", copiedName);
+                        if(!copiedId) return msg.channel.send("No such role found\n:warning: Case sensitive");
+                        await db.setRolePerm(msg.guild.id, copiedId.id, copyRole.perm, msg);
+                        break;
+                    }
+                    case undefined: {
+                        try{await perms.check(guildMember, "setting.perm.see")}catch(e) {return msg.channel.send(e.message)}
                         let permArray = [];
                         let bitFields = perms.getBitField();
                         let commands = Object.keys(bitFields);
@@ -253,7 +299,6 @@ module.exports = {
                     }
                 }
                 break;
-
         }//end switch args[0]
     }
 };

@@ -24,7 +24,7 @@ perm.load = () => {
  * @returns {Promise.<void>}
  */
 perm.processUser = async (_guild, _roles, _member) => {
-    //if(_member === config.discord.owner) return await db.setGuildMemberPerm(_guild, _member, bitFields); //all values to true
+    if(_member === config.discord.owner) return await perm.addToUser(_guild, _member); //all values to true
     let roles = [];
     for(let i=0;i<_roles.length;i++) {
         let doc = await db.getRolePerm(_guild, _roles[i]);
@@ -82,7 +82,6 @@ perm.addToRole = async (_guild, _role, _perm, _message, _type) => {
     }
     let roleBitField = await db.getRolePerm(_guild, _role);
     if(roleBitField) roleBitField = roleBitField.perm;
-    console.error(permResult);
     permResult.forEach(function (p) {
         console.log(p);
         addBitField(p)
@@ -98,8 +97,6 @@ perm.addToRole = async (_guild, _role, _perm, _message, _type) => {
             } else {
                 roleBitField[command][_type] = roleBitField[command][_type] ^ bitFields[command][_permName];
             }
-            console.error(roleBitField);
-            console.error("here");
         } else throw new Error(_perm + " does not exist.");
     }
     await db.setRolePerm(_guild, _role, roleBitField, _message);
@@ -107,7 +104,16 @@ perm.addToRole = async (_guild, _role, _perm, _message, _type) => {
 };
 
 perm.addToUser = async (_guild, _member) => {
-    await db.setGuildMemberPerm(_guild, _member, bitFields);
+    let workBitField = {};
+    for(let command of Object.keys(bitFields)) {
+        if(!workBitField[command]) {
+            workBitField[command] = 0;
+    }
+        for(let perm of Object.keys(bitFields[command])) {
+            workBitField[command] = workBitField[command] | bitFields[command][perm];
+        }
+    }
+    await db.setGuildMemberPerm(_guild, _member, workBitField);
 };
 
 perm.getBitField = () => {

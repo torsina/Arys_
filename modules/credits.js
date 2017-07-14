@@ -14,7 +14,7 @@ module.exports = {
     help: 'How rich are you?',
     func: async (client, msg, args, guildMember) => {
         //if(config.env === "dev") return;
-        if(!msg.mentions.users) {
+        if(!msg.mentions.users.first()) {
             try{await perms.check(guildMember, "credits.self")}catch(e) {return msg.channel.send(e.message)}
             let setting = await db.getSetting(msg.guild.id);
             let _money = await money.get(msg.author.id, msg.guild.id);
@@ -28,20 +28,24 @@ module.exports = {
                 embed.setDescription(`<@${msg.author.id}>,You have ${_money.amount} ${config.money.name}`);
             }
             msg.channel.send({embed});
-        } else {
+        } else if(msg.mentions.users.first() !== msg.author){
             try{await perms.check(guildMember, "credits.other")}catch(e) {return msg.channel.send(e.message)}
             let setting = await db.getSetting(msg.guild.id);
+            let _money = await money.get(msg.author.id, msg.guild.id);
             let embed = new Discord.RichEmbed()
                 .setColor(0x00AE86)
                 .setFooter('asked by ' + msg.author.tag)
                 .setTimestamp();
             if(setting.money && setting.money.name) {
-                embed.setDescription(`<@${msg.author.id}>,You transferred ${_money.amount} ${setting.money.name} to <@${msg.mentions.users.first().id}>`);
+                embed.setDescription(`<@${msg.author.id}>,You transferred ${args[args.length-1]} ${setting.money.name} to <@${msg.mentions.users.first().id}>`);
             } else {
-                embed.setDescription(`<@${msg.author.id}>,You transferred ${_money.amount} ${config.money.name} to <@${msg.mentions.users.first().id}>`);
+                embed.setDescription(`<@${msg.author.id}>,You transferred ${args[args.length-1]} ${config.money.name} to <@${msg.mentions.users.first().id}>`);
             }
-            await db.changeMoney(msg.guild.id, msg.mentions.users.first().id, args[args.length-1]).catch(e => msg.channel.send(e.message));
+            await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[args.length-1])).catch(e => msg.channel.send(e.message));
+            await db.changeMoney(msg.guild.id, msg.mentions.users.first().id, parseInt(args[args.length-1])).catch(e => msg.channel.send(e.message));
             msg.channel.send({embed});
+        } else {
+            return msg.channel.send("You can't give money to yourself!")
         }
 
     }

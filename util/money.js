@@ -15,9 +15,9 @@ money.perMessage = async (guild, member) => {
     let doc = await db.getGuildMember(guild, member);
     if(doc) {
         if(!setting.money && doc.money || !setting.money.wait && doc.money) {
-            if(doc.money.lastGet + config.money.wait > Date.now()) return;
+            if(doc.money && doc.money.lastGet + config.money.wait > Date.now()) return;
         } else {
-            if(doc.money.lastGet + setting.money.wait > Date.now()) return;
+            if(doc.money && doc.money.lastGet + setting.money.wait > Date.now()) return;
         }
     }
     let money;
@@ -43,6 +43,31 @@ money.getName = async (guild) => {
         return config.money.name;
     }
 
+};
+
+money.getDaily = async (_guild, _member, _isOther) => {
+    await db.setDaily(_guild, _member).catch(console.error);
+    console.log("trigger");
+    let setting = await db.getSetting(_guild);
+    let daily;
+    if(setting.money && setting.money.daily && setting.money.daily.amount) {
+        daily = setting.money.daily.amount;
+    } else {
+        daily = config.money.daily.amount;
+    }
+    if(!_isOther) {
+        await db.changeMoney(_guild, _member, parseInt(daily)).catch(console.error);
+        return daily;
+    } else if(_isOther === true){
+        let min, max;
+        if(setting.money && setting.money.daily && setting.money.daily.min)min = setting.money.daily.min;
+        else min = config.money.daily.range.min;
+        if(setting.money && setting.money.daily && setting.money.daily.max)max = setting.money.daily.max;
+        else max = config.money.daily.range.max;
+        let money = daily + Math.random() * (max - min) + min;
+        await db.changeMoney(_guild, _member, Math.floor(parseInt(money))).catch(console.error);
+        return Math.floor(parseInt(money));
+    }
 };
 
 money.shop = async (guild, category, msg, int) => {

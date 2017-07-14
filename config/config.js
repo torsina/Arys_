@@ -32,6 +32,13 @@ module.exports = {
         wait: 120000,
         maxCharName: 40,
         maxInt: 32768,
+        daily: {
+            amount: 250,
+            range: {
+                min: 0,
+                max: 100
+            }
+        },
         range: {
             min: 10,
             max: 30

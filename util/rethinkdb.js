@@ -153,6 +153,14 @@ db.deleteMoneyRange = async (guild) => {
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without({money: {range: true}})).run();
 };
 
+db.setMonetDaily = async (_guild, _value) => {
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {daily: {amount: _value}}, lastSave: Date.now()}).run();
+};
+
+db.deleteMoneyDaily = async (_guild) => {
+    return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without({money: {daily: {amount: true}}})).run();
+};
+
 db.getGuildMember = async (guild, member) => {
     let doc = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
     return doc[0];
@@ -212,6 +220,10 @@ db.changeMoney = async (guild, member, amount, isMessage, scope) => {
         await r.table('user').get(guildMember.id).update(guildMember).run();
     }
     return true;
+};
+
+db.setDaily = async (_guild, _member) => {
+    return await r.table('guildMember').getAll([_guild, _member], {index: "guildMember_guild_member"}).update({daily: Date.now(), lastSave: Date.now()}).run();
 };
 
 db.getMoney = async (member, guild) => {
@@ -319,10 +331,13 @@ db.setRolePerm = async (_guild, _role, _bitField, _message) => {
     }
 };
 
-db.getRolePerm = async (_guild, _role) => {
+db.getRolePerm = async (_guild, _role, _message) => {
     if(!_guild) throw new Error('No guild scope provided');
     if(_role) {
         let doc = await r.table('roles').getAll([_guild, _role], {index: "roles_guild_role"}).run();
+        if(!doc) {
+            db.setRolePerm(_guild, _role, {}, _message).catch(console.error);
+        }
         return doc[0];
     } else {
         return await r.table('roles').getAll([_guild], {index: "roles_guild"}).orderBy('position').run();
@@ -331,7 +346,6 @@ db.getRolePerm = async (_guild, _role) => {
 
 db.setGuildMemberPerm = async (_guild, _member, _bitFields) => {
     if(!_bitFields instanceof Object) throw new Error('bitField must be an object');
-    console.log(_bitFields);
     let guildMember = await db.getGuildMember(_guild, _member);
     if(!guildMember) {
         guildMember = {};

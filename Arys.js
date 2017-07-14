@@ -78,7 +78,13 @@ Client.on('typingStart', (channel, user) => {
 Client.on('message', async message => {
     if (message.author.bot) return;
     let timestamp = new Date();
-    if(config.env === "dev" && message.author.id !== config.discord.owner) return ;
+    let roles = message.guild.member(Client.users.get(message.author.id)).roles;
+    let roleArray = [];
+    roles.forEach(function (item) {
+        roleArray.push(item.id);
+    });
+    await perm.processUser(message.guild.id, roleArray, message.author.id).catch(console.error);
+    //if(config.env === "dev" && message.author.id !== config.discord.owner) return ;
     //money add with message
     money.perMessage(message.guild.id, message.author.id).catch(console.error);
     //invite delete system
@@ -126,19 +132,12 @@ Client.on('message', async message => {
     //command handler
     if (message.content.startsWith(config.discord.prefix) && settings !== undefined || settings !== undefined && message.content.startsWith(settings.get(message.guild.id).prefix)) {
         const prefix = (message.content.startsWith(settings.get(message.guild.id).prefix) ? settings.get(message.guild.id).prefix : config.discord.prefix);
-        let member = message.guild.member(Client.users.get(message.author.id));
-        let roles = member.roles;
-        let roleArray = [];
-        roles.forEach(function (item) {
-            roleArray.push(item.id);
-        });
         let args = message.content.split(' ');
         let command = args[0].slice(prefix.length);
         let guildMember = await db.getGuildMember(message.guild.id, message.author.id);
         args.splice(0, 1);
 
         if (command in Client.commands) {
-            await perm.processUser(message.guild.id, roleArray, message.author.id).catch(console.error);
             console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ['+ message.channel.name + "] " + command);
             Client.commands[command].func(Client, message, args, guildMember);
             console.log(args);
