@@ -291,22 +291,22 @@ db.getShops = async (guild, category, item) => {
 
 db.addLogChannel = async (guild, _channel, _type) => {
     let doc = await db.getSetting(guild);
-    doc[0].lastSave = Date.now();
-    if(doc[0].logChannel === undefined) {
-        doc[0].logChannel = {};
-        if(doc[0].logChannel[_type] === undefined) doc[0].logChannel[_type] = [];
+    doc.lastSave = Date.now();
+    if(!doc.logChannel) doc.logChannel = {};
+    if(!doc.logChannel[_type]) doc.logChannel[_type] = [];
+    if(doc.logChannel[_type].includes(_channel)) {
+        throw new Error('Channel is already registered');
     }
-    if(doc[0].logChannel[_type].includes(_channel)) {
-        throw new Error('channel is already registered');
-    }
-    else doc[0].logChannel[_type].push(_channel);
-    return await r.table('setting').get(doc[0].id).update(doc[0]).run();
+    else doc.logChannel[_type].push(_channel);
+    return await r.table('setting').get(doc.id).update(doc).run();
 };
 
-db.removeLogChannel = async (guild, _channel, _type) => {
-    let doc = await r.table('setting').getAll([guild], {index: "setting_guild"}).run();
-    delete doc[0].logChannel[_type][doc[0].logChannel[_type].indexOf(_channel)];
-    return await r.table('setting').get(doc[0].id).update(doc[0]).run();
+db.removeLogChannel = async (_guild, _channel, _type) => {
+    let doc = await db.getSetting(_guild);
+    let index = doc.logChannel[_type].indexOf(_channel);
+    doc.logChannel[_type].splice(index, 1);
+    if(doc.logChannel[_type].length === 0) delete doc.logChannel[_type];
+    return await r.table('setting').get(doc.id).replace(doc).run();
 };
 
 db.getLogChannel = async (guild) => {

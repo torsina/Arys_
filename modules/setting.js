@@ -4,8 +4,9 @@ const perms = require('../util/perm');
 const Discord = require('discord.js');
 
 let logList = [
-    {name: 'guildMemberAdd',desc: 'trigger each time a user join the guild' ,arg: 'optional'},
-    {name: 'guildMemberUpdate',desc: 'trigger each time the roles of a user are changed', arg: 'needed'}];
+    {name: 'join',desc: 'Trigger each time an user join the guild.'},
+    {name: 'leave', desc: 'Trigger each time an user leave the guild.\n:warning: Without the "View Audit Log" perm, all banned and kicked users will show here as well.'},
+    {name: 'ban', desc: 'Trigger each time an user gets banned.\n:warning: Without the "View Audit Log" perm, the reason and the author of the ban will not show up.'}];
 let logMap = new Map();
 for(let setting of logList) {
     logMap.set(setting.name, setting);
@@ -51,50 +52,93 @@ module.exports = {
                         break;
                 }
                 break;
-            case "-log":
+            case "-log":{
                 switch (args[1]) {
-                    case "--add":
+                    case "--add": {
+                        //0 = -log; 1 = --add; 2 = channel; 3 = log
                         try{await perms.check(guildMember, "setting.log.change")}catch(e) {return msg.channel.send(e.message)}
-                            if (msg.mentions.channels.first() !== undefined) await db.addLogChannel(msg.guild.id, msg.mentions.channels.first().id, "guildMemberAdd")
-                                .catch((e) => {
-                                    console.error(e);
-                                    msg.channel.send(e.message)
-                                });
-                            else return msg.channel.send("please tell in which channel you want me to log this");
+                        let log;
+                        for(let validLog of logList) {
+                            if(validLog.name === args[3]) {
+                                log = args[3];
+                            }
+                        }
+                        if(!log) return msg.channel.send("This log type doesn't exist, please refer to `$setting -log --list` for a list of all the log");
+                        if (msg.mentions.channels.first() !== undefined) await db.addLogChannel(msg.guild.id, msg.mentions.channels.first().id, log)
+                            .catch((e) => {
+                                console.error(e);
+                                msg.channel.send(e.message)
+                            });
+                        else return msg.channel.send("please tell in which channel you want me to log this");
                         break;
-                    case "--remove":
+                    }
+                    case "--remove":{
                         try{await perms.check(guildMember, "setting.log.change")}catch(e) {return msg.channel.send(e.message)}
-                        if (msg.mentions.channels.first() !== undefined) await db.removeLogChannel(msg.guild.id, msg.mentions.channels.first().id, "guildMemberAdd")
+                        let log;
+                        for(let validLog of logList) {
+                            if(validLog.name === args[3]) {
+                                log = args[3];
+                            }
+                        }
+                        if(!log) return msg.channel.send("This log type doesn't exist, please refer to `$setting -log` for a list of all the log");
+                        if (msg.mentions.channels.first() !== undefined) await db.removeLogChannel(msg.guild.id, msg.mentions.channels.first().id, log)
                             .catch((e) => {
                                 console.error(e);
                                 msg.channel.send(e.message)
                             });
                         else return msg.channel.send("please tell in which channel you want me to stop sending this");
                         break;
-                    case "--list":
+                    }
+                    case "--list":{
                         try{await perms.check(guildMember, "setting.log.see")}catch(e) {return msg.channel.send(e.message)}
                         let doc = await db.getLogChannel(msg.guild.id);
-                        console.log(doc);
-                        console.log(doc.logChannel);
-                        if (doc.logChannel === undefined) return msg.channel.send("there is 0 log channels currently on this server");
-                        else return console.log(doc.logChannel);
-                        console.log(doc);
+                        if (!doc.logChannel) return msg.channel.send("there is 0 log channels currently on this server");
+                        else {
+                            let embed = new Discord.RichEmbed()
+                                .setTitle('Log channels: ')
+                                .setColor("GOLD")
+                                .setFooter('asked by ' + msg.author.tag)
+                                .setTimestamp();
+                            let channelMap = new Map;
+                            let types = Object.keys(doc.logChannel);
+                            for(let type of types) {
+                                doc.logChannel[type].forEach(function (c) {
+                                    console.log("triggered" + type + " " + c);
+                                    if(!channelMap.get(c)) channelMap.set(c, [type]);
+                                    else {
+                                        let doc = channelMap.get(c);
+                                        if(doc.indexOf(type) < 0) {
+                                            doc.push(type);
+                                        }
+                                    }
+                                });
+                            }
+                            console.log(channelMap);
+                            let snowflakes = channelMap.keys();
+                            console.log(typeof snowflakes);
+                            channelMap.forEach(function (value, key) {
+                                embed.addField(client.channels.get(key).name + ":", value);
+                            });
+                            return msg.channel.send({embed})
+                        }
                         break;
-                    default:
+                    }
+                    default:{
                         let embed = new Discord.RichEmbed()
                             .setTitle('Log options: ')
                             .setColor(0x00AE86)
                             .setFooter('asked by ' + msg.author.tag)
-                            .setTimestamp()
-                            .addField('\u200b', '\u200b');
-                        for (let setting of logList) {
-                            embed.addField(setting.name, setting.desc + "\narguments : " + setting.arg);
+                            .setTimestamp();
+                        for (let log of logList) {
+                            embed.addField(log.name, log.desc);
                         }
                         return msg.channel.send({embed});
                         break;
+                    }
                 }
                 break;
-            case "-money":
+            }
+            case "-money":{
                 switch (args[1]) {
                     case "--name":
                         try{await perms.check(guildMember, "setting.money.name")}catch(e) {return msg.channel.send(e.message)}
@@ -209,7 +253,8 @@ module.exports = {
                         break;
                 }
                 break;
-            case "-perm":
+            }
+            case "-perm":{
                 switch(args[1]) {
                     case "--role": {
                         try{await perms.check(guildMember, "setting.perm.role.set")}catch(e) {return msg.channel.send(e.message)}
@@ -311,6 +356,7 @@ module.exports = {
                     }
                 }
                 break;
+            }
         }//end switch args[0]
     }
 };
