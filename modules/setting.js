@@ -124,6 +124,15 @@ module.exports = {
                         break;
                     }
                     default:{
+                        let main = new Discord.RichEmbed()
+                            .setTitle('Log commands: ')
+                            .setColor(0x00AE86)
+                            .setFooter('asked by ' + msg.author.tag)
+                            .setTimestamp()
+                            .setDescription("How to:")
+                            .addField("Add a log channel:", "`$setting -log --add <channel> <log>`")
+                            .addField("Remove a log channel:", "`$setting -log --remove <channel> <log>`")
+                            .addField("List the log channels:", "`$setting -log --list`");
                         let embed = new Discord.RichEmbed()
                             .setTitle('Log options: ')
                             .setColor(0x00AE86)
@@ -132,7 +141,8 @@ module.exports = {
                         for (let log of logList) {
                             embed.addField(log.name, log.desc);
                         }
-                        return msg.channel.send({embed});
+                        msg.channel.send({embed: main});
+                        msg.channel.send({embed});
                         break;
                     }
                 }
