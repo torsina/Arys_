@@ -76,6 +76,7 @@ Client.on('typingStart', (channel, user) => {
 });
 
 Client.on('message', async message => {
+    if(message.author.id !== config.discord.owner) return;
     if (message.author.bot) return;
     let timestamp = new Date();
     let roles = message.guild.member(Client.users.get(message.author.id)).roles;

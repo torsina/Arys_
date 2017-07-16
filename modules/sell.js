@@ -22,7 +22,6 @@ module.exports = {
             });
             let name = "";
             for(let i = 1;i<args.length;i++) {
-
                 if(i === args.length-1) {
                     name += args[i]
                 } else {
@@ -30,7 +29,9 @@ module.exports = {
                 }
             }
             if(includesObject(args[0], array)) {
-                let item = await db.getShops(msg.guild.id, args[0], name);
+                if(!name) return msg.channel.send("Please enter a valid role name");
+                let role = msg.guild.roles.find("name", name);
+                let item = await db.getShops(msg.guild.id, args[0], role.id);
                 item = item[0];
                 if(!item) {
                     return msg.channel.send("This item does not exist.");
