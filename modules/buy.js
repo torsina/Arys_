@@ -29,8 +29,10 @@ module.exports = {
                 }
             }
             if(includesObject(args[0], array)) {
+                if(!name) return msg.channel.send("Please enter a valid role name");
                 let item = await db.getShops(msg.guild.id, args[0], name);
                 item = item[0];
+                console.log(item);
                 if(!item) {
                     return msg.channel.send("This item does not exist.");
                 } else {
