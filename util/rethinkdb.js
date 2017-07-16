@@ -153,12 +153,12 @@ db.deleteMoneyRange = async (guild) => {
     return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without({money: {range: true}})).run();
 };
 
-db.setMonetDaily = async (_guild, _value) => {
-    return await r.table('setting').getAll([guild], {index: "setting_guild"}).update({money: {daily: {amount: _value}}, lastSave: Date.now()}).run();
+db.setMoneyDaily = async (_guild, _value) => {
+    return await r.table('setting').getAll([_guild], {index: "setting_guild"}).update({money: {daily: {amount: _value}}, lastSave: Date.now()}).run();
 };
 
 db.deleteMoneyDaily = async (_guild) => {
-    return await r.table('setting').getAll([guild], {index: "setting_guild"}).replace(r.row.without({money: {daily: {amount: true}}})).run();
+    return await r.table('setting').getAll([_guild], {index: "setting_guild"}).replace(r.row.without({money: {daily: {amount: true}}})).run();
 };
 
 db.getGuildMember = async (guild, member) => {

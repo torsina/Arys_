@@ -27,6 +27,7 @@ const bitField = {
     perm_role_see: 1 << 11,
     perm_role_copy: 1 << 12,
     perm_see: 1 << 13,
+    money_daily: 1 << 14
 };
 
 module.exports = {
@@ -219,6 +220,21 @@ module.exports = {
                         }
                         return await db.setMoneyRange(msg.guild.id, _min, _max).catch(console.error);
                         break;
+                    case "--daily": {
+                        try{await perms.check(guildMember, "setting.money.daily")}catch(e) {return msg.channel.send(e.message)}
+                        if (!isNaN(parseInt(args[2])) && parseInt(args[2]) < config.money.maxInt) {
+                            if (parseInt(args[2]) === config.money.daily.amount) {
+                                return await db.deleteMoneyDaily(msg.guild.id).catch(console.error);
+                            }
+                            console.log("triggered");
+                            return await db.setMoneyDaily(msg.guild.id, parseInt(args[2])).catch(console.error);
+                        } else if (!args[2]) {
+                            return msg.channel.send("Please add the new value at the end of the command.")
+                        } else if (parseInt(args[2]) > config.money.maxInt) {
+                            return msg.channel.send("The number you entered is too high.");
+                        }
+                        break;
+                    }
                     default:
                         try{await perms.check(guildMember, "setting.money.see")}catch(e) {return msg.channel.send(e.message)}
                         let setting = await db.getSetting(msg.guild.id).catch(console.error);
@@ -236,12 +252,15 @@ module.exports = {
                             }
                             if(setting.money.daily) {
                                 daily_amount = setting.money.daily.amount || config.money.daily.amount;
-                                daily_min = setting.money.daily.range.min || config.money.daily.range.min;
-                                daily_max = setting.money.daily.range.max || config.money.daily.range.max;
+                                if(setting.money.daily.range) {
+                                    daily_min = setting.money.daily.range.min || config.money.daily.range.min;
+                                    daily_max = setting.money.daily.range.max || config.money.daily.range.max;
+                                } else {
+                                    daily_min = config.money.daily.range.min;
+                                    daily_max = config.money.daily.range.max;
+                                }
                             } else {
                                 daily_amount = config.money.daily.amount;
-                                daily_min = config.money.daily.range.min;
-                                daily_max = config.money.daily.range.max;
                             }
                         } else {
                             name = config.money.name;
