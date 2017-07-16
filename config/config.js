@@ -46,6 +46,9 @@ module.exports = {
         shop: {
             type: ["role"],
             max: 18
+        },
+        bet: {
+            multiplier: 1.98
         }
     },
     //303114882147024896

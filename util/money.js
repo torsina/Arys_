@@ -57,7 +57,7 @@ money.getDaily = async (_guild, _member, _other) => {
     if(!_other) {
         await db.changeMoney(_guild, _member, parseInt(daily)).catch(console.error);
         return daily;
-    } else if(_other === true){
+    } else if(_other){
         let min, max;
         if(setting.money && setting.money.daily && setting.money.daily.min)min = setting.money.daily.min;
         else min = config.money.daily.range.min;
