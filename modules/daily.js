@@ -26,7 +26,7 @@ module.exports = {
                     .setDescription(msg.author.toString() + " you received your daily " + daily + " " + prefix);
                 msg.channel.send({embed});
             } else if(msg.mentions.users.first() !== msg.author && msg.mentions.users.first() !== msg.author.bot) {
-                let daily = await money.getDaily(msg.guild.id, msg.mentions.users.first().id, true).catch(console.error);
+                let daily = await money.getDaily(msg.guild.id, msg.author.id, msg.mentions.users.first().id).catch(console.error);
                 let embed = new Discord.RichEmbed()
                     .setColor(0x00AE86)
                     .setFooter('asked by ' + msg.author.tag)
