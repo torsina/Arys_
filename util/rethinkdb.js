@@ -32,7 +32,7 @@ db.init = async (Client) => {
         {table: "user", index: "user_member", rows: ["member"]},
         {table: "shopItem", index: "shopItem_guild", rows: ["guild"]},
         {table: "shopItem", index: "shopItem_guild_category", rows: ["guild", "category"]},
-        {table: "shopItem", index: "shopItem_guild_category_item", rows: ["guild", "category", "item"]},
+        {table: "shopItem", index: "shopItem_guild_category_id", rows: ["guild", "category", "id"]},
         {table: "shopCategory", index: "shopCategory_guild", rows: ["guild"]},
         {table: "shopCategory", index: "shopCategory_guild_category", rows: ["guild", "category"]},
         {table: "roles", index: "roles_guild", rows: ["guild"]},
@@ -265,21 +265,26 @@ db.getShopsCategory = async (_guild, _category) => {
     }
 };
 
-db.addShopItem = async (_guild, _category, _item, _price) => {
+db.addShopItem = async (_guild, _category, _item, _id, _price) => {
     let doc = {
         guild: _guild,
         category: _category,
         item: _item,
+        id: _id,
         price: _price
     };
     return await r.table('shopItem').insert(doc).run();
+};
+
+db.deleteShopItem = async (_guild, _category, _id) => {
+    return await r.table('shopItem').getAll([_guild, _category, _id], {index: "shopItem_guild_category_id"}).delete().run();
 };
 
 db.getShops = async (guild, category, item) => {
     if(guild) {
         if(category) {
             if(item) {
-                return await r.table('shopItem').getAll([guild, category, item], {index: "shopItem_guild_category_item"}).run();
+                return await r.table('shopItem').getAll([guild, category, item], {index: "shopItem_guild_category_id"}).run();
             }
             return await r.table('shopItem').getAll([guild, category], {index: "shopItem_guild_category"}).orderBy(r.desc('price')).run();
         }

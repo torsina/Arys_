@@ -71,6 +71,12 @@ money.getDaily = async (_guild, _member, _other) => {
 
 money.shop = async (guild, category, msg, int) => {
     let list = await db.getShops(guild, category);
+    for(let i=0;i<list.length;i++) {
+        if(!msg.guild.roles.get(list[i].id)) {
+            await db.deleteShopItem(guild, category, list[i].name).catch(console.error);
+            list.slice(i, 1);
+        }
+    }
     let max;
     if (list.length - int >= 18) {
         max = int + 18;
@@ -95,7 +101,7 @@ money.shop = async (guild, category, msg, int) => {
         //let length = Math.log(parseInt(list[i].price)) * Math.LOG10E + 1 | 0;
         //if(length > 9) return console.error("element price was too big");
         console.log("TRIGGER " + i+int);
-        ctx.fillStyle = msg.guild.roles.find("name", list[i+int].item).hexColor;
+        ctx.fillStyle = msg.guild.roles.get(list[i+int].id).hexColor;
         ctx.fillText(list[i+int].item, 28, (i + 1) * 24 + i * 8);
         ctx.fillStyle = "white";
         ctx.fillText(list[i+int].price, 402 * 2 - 65 * 2, (i + 1) * 24 + i * 8);

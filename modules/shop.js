@@ -84,7 +84,7 @@ module.exports = {
                                         await db.addShopCategory(msg.guild.id, args[2], headerInput, typeInput);
                                     }
                                 }
-                                await db.addShopItem(msg.guild.id, args[2], roleName, parseInt(args[args.indexOf("--price") + 1]), "role").catch(console.error);
+                                await db.addShopItem(msg.guild.id, args[2], roleName, msg.guild.roles.find("name", roleName).id, parseInt(args[args.indexOf("--price") + 1]), "role").catch(console.error);
                                 return msg.channel.send("added the role " + roleName);
                             }
                             return msg.channel.send("Please put a valid price here.");
