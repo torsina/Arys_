@@ -27,7 +27,7 @@ module.exports = {
                 msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
                 db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)});
             } else {
-                msg.channel.send("You loose " + args[1] + " " + name + ".");
+                msg.channel.send("You lose " + args[1] + " " + name + ".");
                 db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
             }
         } else { //tails
@@ -35,7 +35,7 @@ module.exports = {
                 msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
                 db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)});
             } else {
-                msg.channel.send("You loose " + args[1] + " " + name + ".");
+                msg.channel.send("You lose " + args[1] + " " + name + ".");
                 db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
             }
         }
