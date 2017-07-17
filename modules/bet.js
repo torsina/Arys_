@@ -18,6 +18,8 @@ module.exports = {
         let setting = await db.getSetting(msg.guild.id);
         let multiplier;
         let name = await money.getName(msg.guild.id);
+        let amount = await money.getAmount(msg.author.id, msg.guild.id);
+        if(amount < parseInt(args[1])) return msg.channel.send("You don't have enough credits for that.");
         if(setting.money && setting.money.bet)multiplier = setting.money.bet.multiplier;
         else multiplier = config.money.bet.multiplier;
         if(random < 0.5) { //head
