@@ -35,7 +35,7 @@ module.exports = {
                 let amount = await money.getAmount(msg.author.id, msg.guild.id);
                 let moneyName = await money.getName(msg.guild.id);
                 item = item[0];
-                if(amount < item.price) return msg.channel.send("You don't have enough " + amount + " to do that.");
+                if(amount < item.price) return msg.channel.send("You don't have enough " + amount + " to do that. ");
                 if(!item) {
                     return msg.channel.send("This item does not exist.");
                 } else {
