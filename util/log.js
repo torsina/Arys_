@@ -22,7 +22,7 @@ log.init = (Client) => {
             auditLog = auditLog.entries.first();
             if(member.id !== auditLog.target.id) {
                 settings.get(member.guild.id).logChannel.leave.forEach(function (log) {
-                    Client.channels.get(log).send(Client.users.get(member.id).tag + " leaved the server");
+                    Client.channels.get(log).send(Client.users.get(member.id).tag + " left the server");
                 });
             }
         }
