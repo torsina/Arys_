@@ -21,14 +21,21 @@ module.exports = {
         if(setting.money && setting.money.bet)multiplier = setting.money.bet.multiplier;
         else multiplier = config.money.bet.multiplier;
         if(random < 0.5) { //head
-            if(choice === "head") {
-                msg.channel.send("You won " + Math.floor(parseInt(args[1]*1.98)) + " " + name + "!");
-                db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)})
+            if(choice === "h") {
+                msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
+                db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)});
             } else {
-                
+                msg.channel.send("You loose " + args[1] + " " + name + ".");
+                db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
             }
         } else { //tails
-
+            if(choice === "t") {
+                msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
+                db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)});
+            } else {
+                msg.channel.send("You loose " + args[1] + " " + name + ".");
+                db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
+            }
         }
     }
 };

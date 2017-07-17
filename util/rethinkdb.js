@@ -198,7 +198,6 @@ db.changeMoney = async (guild, member, amount, isMessage, scope) => {
         guildMember.money.lastGet = Date.now();
         user.money.amount += parseInt(amount);
     }
-    if(parseInt(amount) <= 0) throw new Error("Amount can't be negative");
     if((guildMember.money.amount + parseInt(amount)) < 0 || scope === "general" && (user.money.amount + parseInt(amount)) < 0) {
         throw new Error('Not enough credits for that.');
     }
