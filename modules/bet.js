@@ -22,6 +22,7 @@ module.exports = {
         if(amount < parseInt(args[1])) return msg.channel.send("You don't have enough credits for that.");
         if(setting.money && setting.money.bet)multiplier = setting.money.bet.multiplier;
         else multiplier = config.money.bet.multiplier;
+        await db.setMoneyBetted(msg.guild.id, parseInt(args[1]));
         if(random < 0.5) { //head
             if(choice === "h") {
                 msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");

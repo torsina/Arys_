@@ -161,6 +161,27 @@ db.deleteMoneyDaily = async (_guild) => {
     return await r.table('setting').getAll([_guild], {index: "setting_guild"}).replace(r.row.without({money: {daily: {amount: true}}})).run();
 };
 
+db.setMoneyBetted = async (_guild, _amount) => {
+    if(!isNaN(parseInt(_amount)) && parseInt(_amount) >= 0) {
+        let setting = await db.getSetting(_guild);
+        if(!setting.money) setting.money = {};
+        if(!setting.money.betted) setting.money.betted = parseInt(_amount);
+        else setting.money.betted += parseInt(_amount);
+        setting.money.lastSave = Date.now();
+        return await r.table('setting').get(setting.id).update(setting).run();
+    } else if(isNaN(parseInt(_amount))) {
+        throw new Error('Amount is not a number');
+    } else if(parseInt(_amount) < 0) {
+        throw new Error("Amount can't be negative")
+    }
+};
+
+db.getMoneyBetted = async (_guild) => {
+    let doc = await db.getSetting(_guild);
+    if(!doc.money || !doc.money.betted) return db.setMoneyBetted(_guild, 0);
+    return doc.money.betted;
+};
+
 db.getGuildMember = async (guild, member) => {
     let doc = await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).run();
     return doc[0];
@@ -170,7 +191,7 @@ db.deleteGuildMember = async (guild, member) => {
     return await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).delete().run();
 };
 
-db.changeMoney = async (guild, member, amount, isMessage, scope) => {
+db.changeMoney = async (guild, member, amount, isMessage, scope, force) => {
     console.time('money');
     let guildMember = await db.getGuildMember(guild, member);
     let user = await r.table('user').getAll(member, {index: "user_member"}).run();
@@ -198,7 +219,7 @@ db.changeMoney = async (guild, member, amount, isMessage, scope) => {
         guildMember.money.lastGet = Date.now();
         user.money.amount += parseInt(amount);
     }
-    if((guildMember.money.amount + parseInt(amount)) < 0 || scope === "general" && (user.money.amount + parseInt(amount)) < 0) {
+    if((guildMember.money.amount + parseInt(amount)) < 0 && force === false || scope === "general" && (user.money.amount + parseInt(amount)) < 0 && force === false) {
         throw new Error('Not enough credits for that.');
     }
     if(!scope) { //guild is default scope

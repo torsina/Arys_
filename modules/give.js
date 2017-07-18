@@ -17,11 +17,11 @@ module.exports = {
         if(!msg.mentions.users) {
             try{await perms.check(guildMember, "give.self")}catch(e) {return msg.channel.send(e.message)}
             msg.channel.send("You gave yourself " + args[0] + " " + name);
-            db.changeMoney(msg.guild.id, msg.author.id, args[0]).catch(console.error);
+            await db.changeMoney(msg.guild.id, msg.author.id, args[0], undefined, undefined, true).catch(console.error);
         } else {
             try{await perms.check(guildMember, "give.other")}catch(e) {return msg.channel.send(e.message)}
             msg.channel.send("You gave " + args[args.length-1] + " " + name + " to " + msg.mentions.users.first().toString());
-            db.changeMoney(msg.guild.id, msg.mentions.users.first().id, args[args.length-1]).catch(console.error);
+            await db.changeMoney(msg.guild.id, msg.mentions.users.first().id, args[args.length-1], undefined, undefined, true).catch(console.error);
         }
     }
 };
