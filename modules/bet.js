@@ -13,11 +13,11 @@ module.exports = {
     func: async(client, msg, args,  guildMember) => {
         //if(config.env === "dev") return;
         try{await perms.check(guildMember, "bet.base")}catch(e) {return msg.channel.send(e.message)}
+        if(parseInt(args[1]) < 200) return msg.channel.send("Your bid is too low!");
         let random = Math.random();
         let chance;
-        if(parseInt(args[1]) > 5000) chance = 0.2;
-        else if(parseInt(args[1] > 4000))chance = 0.35;
-        else chance = 0.40;
+        if(parseInt(args[1]) >= 4800) chance = 0.2;
+        else chance = 0.30;
         let choice = args[0];
         let setting = await db.getSetting(msg.guild.id);
         let multiplier;
@@ -29,7 +29,7 @@ module.exports = {
         await db.setMoneyBetted(msg.guild.id, parseInt(args[1]));
         if(random > 0 && random < chance) { //head
             if(choice === "h") {
-                msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
+                msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier+args[1])) + " " + name + "!");
                 await db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)});
             } else {
                 msg.channel.send("You lost " + args[1] + " " + name + ".");
@@ -37,10 +37,11 @@ module.exports = {
             }
         } else if(random > chance && random < chance * 2) { //tails
             if(choice === "t") {
-                msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
+                msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier+args[1])) + " " + name + "!");
                 await db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)});
             } else {
                 msg.channel.send("You lost " + args[1] + " " + name + ".");
+                await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
 
             }
         } else {
