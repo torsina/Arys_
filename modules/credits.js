@@ -35,6 +35,7 @@ module.exports = {
                 .setDescription(`${msg.mentions.users.first()} has ${_money.amount} ${moneyName}`);
             msg.channel.send({embed});
         } else if(msg.mentions.users.first() !== msg.author){
+            if(parseInt(args[args.length-1]) < 0) return msg.channel.send("You can't send negative amounts");
             try{await perms.check(guildMember, "credits.other")}catch(e) {return msg.channel.send(e.message)}
             let moneyName = await money.getName(msg.guild.id);
             let _money = await money.get(msg.author.id, msg.guild.id);
