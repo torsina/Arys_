@@ -12,7 +12,7 @@ log.init = (Client) => {
     Client.on('guildMemberAdd', member => {
         if(settings.get(member.guild.id).logChannel && settings.get(member.guild.id).logChannel.join !== undefined) {
             settings.get(member.guild.id).logChannel.join.forEach(function (log) {
-                Client.channels.get(log).send(Client.users.get(member.id).tag + " joined the server");
+                Client.channels.get(log).send(Client.users.get(member.id).toString() + " joined the server");
             });
         }
     });
@@ -22,7 +22,7 @@ log.init = (Client) => {
             auditLog = auditLog.entries.first();
             if(member.id !== auditLog.target.id) {
                 settings.get(member.guild.id).logChannel.leave.forEach(function (log) {
-                    Client.channels.get(log).send(Client.users.get(member.id).tag + " left the server");
+                    Client.channels.get(log).send(Client.users.get(member.id).toString() + " left the server");
                 });
             }
         }
