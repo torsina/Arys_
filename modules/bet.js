@@ -17,8 +17,7 @@ module.exports = {
         let chance;
         if(parseInt(args[1]) > 5000) chance = 0.2;
         else if(parseInt(args[1] > 4000))chance = 0.35;
-        else if(parseInt(args[1] > 3000))chance = 0.45;
-        else chance = 0.45;
+        else chance = 0.40;
         let choice = args[0];
         let setting = await db.getSetting(msg.guild.id);
         let multiplier;
