@@ -14,6 +14,11 @@ module.exports = {
         //if(config.env === "dev") return;
         try{await perms.check(guildMember, "bet.base")}catch(e) {return msg.channel.send(e.message)}
         let random = Math.random();
+        let chance;
+        if(parseInt(args[1]) > 5000) chance = 0.2;
+        else if(parseInt(args[1] > 4000))chance = 0.35;
+        else if(parseInt(args[1] > 3000))chance = 0.45;
+        else chance = 0.5;
         let choice = args[0];
         let setting = await db.getSetting(msg.guild.id);
         let multiplier;
@@ -23,22 +28,25 @@ module.exports = {
         if(setting.money && setting.money.bet)multiplier = setting.money.bet.multiplier;
         else multiplier = config.money.bet.multiplier;
         await db.setMoneyBetted(msg.guild.id, parseInt(args[1]));
-        if(random < 0.5) { //head
+        if(random > 0 && random < chance) { //head
             if(choice === "h") {
                 msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
                 await db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)});
             } else {
-                msg.channel.send("You lose " + args[1] + " " + name + ".");
+                msg.channel.send("You lost " + args[1] + " " + name + ".");
                 await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
             }
-        } else { //tails
+        } else if(random > chance && random < chance * 2) { //tails
             if(choice === "t") {
                 msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
                 await db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)});
             } else {
-                msg.channel.send("You lose " + args[1] + " " + name + ".");
-                await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
+                msg.channel.send("You lost " + args[1] + " " + name + ".");
+
             }
+        } else {
+            msg.channel.send("You lost " + args[1] + " " + name + ".");
+            await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
         }
     }
 };
