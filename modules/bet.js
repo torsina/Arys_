@@ -2,6 +2,7 @@ const perms = require('../util/perm');
 const db = require('../util/rethinkdb');
 const money = require('../util/money');
 const config = require('../config/config');
+const Discord = require('discord.js');
 
 const bitField = {
     help: 1 << 0,
@@ -16,7 +17,9 @@ module.exports = {
         if(parseInt(args[1]) < 200) return msg.channel.send("Your bid is too low!");
         let random = Math.random();
         let chance;
-        chance = 0.18;
+        if(parseInt(args[1]) >= 5000) chance = 0.30;
+        else if(parseInt(args[1]) >=3000) chance = 0.35;
+        else chance = 0.43;
         let choice = args[0];
         let setting = await db.getSetting(msg.guild.id);
         let multiplier;
@@ -26,26 +29,47 @@ module.exports = {
         if(setting.money && setting.money.bet)multiplier = setting.money.bet.multiplier;
         else multiplier = config.money.bet.multiplier;
         await db.setMoneyBetted(msg.guild.id, parseInt(args[1]));
+        let embed = new Discord.RichEmbed();
+        embed.setColor("GOLD");
         if(random > 0 && random < chance) { //head
             if(choice === "h") {
-                msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier+args[1])) + " " + name + "!");
-                await db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)});
+                await db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*multiplier))).catch(e => {msg.channel.send(e.message)}).then(async () => {
+                    embed.setDescription(msg.author.toString() + ", you won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
+                    embed.addField("Old amount: ", amount + " " + name);
+                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id));
+                    msg.channel.send({embed});
+                });
             } else {
-                msg.channel.send("You lost " + args[1] + " " + name + ".");
-                await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
+                await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)}).then(async () => {
+                    embed.setDescription(msg.author.toString() + ", you've lost " + parseInt(args[1]) + " " + name + "!");
+                    embed.addField("Old amount: ", amount + " " + name);
+                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id));
+                    msg.channel.send({embed});
+                });
             }
         } else if(random > chance && random < chance * 2) { //tails
             if(choice === "t") {
-                msg.channel.send("You won " + Math.floor(parseInt(args[1]*multiplier+args[1])) + " " + name + "!");
-                await db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*1.98))).catch(e => {msg.channel.send(e.message)});
+                await db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*multiplier))).catch(e => {msg.channel.send(e.message)}).then(async () => {
+                    embed.setDescription(msg.author.toString() + ", you won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
+                    embed.addField("Old amount: ", amount + " " + name);
+                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id));
+                    msg.channel.send({embed});
+                });
             } else {
-                msg.channel.send("You lost " + args[1] + " " + name + ".");
-                await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
-
+                await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)}).then(async () => {
+                    embed.setDescription(msg.author.toString() + ", you lost " + parseInt(args[1]) + " " + name + "!");
+                    embed.addField("Old amount: ", amount + " " + name);
+                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id));
+                    msg.channel.send({embed});
+                });
             }
         } else {
-            msg.channel.send("You lost " + args[1] + " " + name + ".");
-            await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)});
+            await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)}).then(async () => {
+                embed.setDescription(msg.author.toString() + ", you lost " + parseInt(args[1]) + " " + name + "!");
+                embed.addField("Old amount: ", amount + " " + name);
+                embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id));
+                msg.channel.send({embed});
+            });
         }
     }
 };
