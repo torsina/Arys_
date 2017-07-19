@@ -60,9 +60,9 @@ log.init = (Client) => {
             settings.get(oldMember.guild.id).listenedRoles.forEach(async function (_role) {
                 if (!oldMember.roles.has(_role) && newMember.roles.has(_role)) {
                     try {
-                        await db.addGuildMemberListenedRole(oldMember.guild.id, oldMember.id, _role)
+                        await db.addGuildMemberListenedRole(oldMember.guild.id, oldMember.id, _role);
                     } catch (e) {
-                        return
+                        return;
                     }
                     if (settings.get(oldMember.guild.id).logChannel && settings.get(oldMember.guild.id).logChannel.listenedRoles !== undefined) {
                         let embed = new Discord.RichEmbed()

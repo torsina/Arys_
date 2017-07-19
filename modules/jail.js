@@ -24,6 +24,16 @@ module.exports = {
             .setTimestamp()
             .setFooter("asked by " + msg.author.tag);
         switch (args[0]) {
+            case "-start": {
+                let array = await db.getListenedRole(msg.guild.id);
+                array.forEach(function (_role) {
+                    msg.guild.members.filter(m=> m.roles.has(_role));
+                    msg.guild.roles.get(_role).members.forEach(async function (m) {
+                        await db.addGuildMemberListenedRole(msg.guild.id, m.id, _role).catch(console.error);
+                    });
+                });
+                break;
+            }
             case "-set": {
                 if (msg.mentions.roles.first()) {
                     try {
