@@ -17,16 +17,13 @@ db.init = async (Client) => {
 
     let tableList = await r.tableList().run(), tableWait = [];
     let tablesExpected = [
-        "setting", "post", "listenedRoles", "user", "event", "analytic", "guildMember", "shopItem", "shopCategory", "roles"
+        "setting", "post", "user", "event", "analytic", "guildMember", "shopItem", "shopCategory", "roles"
     ];
     let indexExpected = [
         {table: "analytic", index: "analytic_guild", rows: ["guild"]},
         {table: "analytic", index: "analytic_guild_date", rows: ["guild", "date"]},
         {table: "post", index: "post_guild_message", rows: ["guild", "message"]},
         {table: "post", index: "post_guild_file_image", rows: ["guild", "file", "image"]},
-        {table: "listenedRoles", index: "listenedRoles_guild", rows: ["guild"]},
-        {table: "listenedRoles", index: "listenedRoles_guild_role", rows: ["guild", "role"]},
-        {table: "listenedRoles", index: "listenedRoles_guild_role_member", rows: ["guild", "role", "member"]},
         {table: "setting", index: "setting_guild", rows: ["guild"]},
         {table: "guildMember", index: "guildMember_guild_member", rows: ["guild", "member"]},
         {table: "user", index: "user_member", rows: ["member"]},
@@ -411,33 +408,52 @@ db.deletePost = async (guild, message) => {
     return await r.table('post').getAll([guild, message], {index: "post_guild_message"}).delete().run();
 };
 
-db.createListenedRole = async (guild, role, member) => {
-    let query = {
-        role: role,
-        member: member,
-        guild: guild,
-        enter: Date.now()
-    };
-    return await r.table('listenedRoles').insert(query).run();
+db.createListenedRole = async (_guild, _role) => {
+    let setting = await db.getSetting(_guild);
+    if (!setting.listenedRoles) setting.listenedRoles = [];
+    if (setting.listenedRoles.indexOf(_role) > 0) throw new Error("Listened role is already registered.");
+    setting.listenedRoles.push(_role);
+    return await r.table('setting').get(setting.id).update(setting).run();
 };
 
-db.endListenedRole = async (guild, role, member) => {
-    let doc = await r.table('listenedRoles').getAll([guild, role, member], {index: "listenedRoles_guild_role_member"}).orderBy(r.row("exit")).run();
-    return await r.table('listenedRoles').get(doc[0].id).update({exit: Date.now()}).run();
-
+db.deleteListenedRole = async (_guild, _role) => {
+    let setting = await db.getSetting(_guild);
+    if (setting.listenedRoles.indexOf(_role) < 0) throw new Error("Listened role doesn't exist");
+    setting.listenedRoles.splice(setting.listenedRoles.indexOf(_role), 1);
+    if (setting.listenedRoles.length === 0) delete setting.listenedRoles;
+    return await r.table('setting').get(setting.id).replace(setting).run();
 };
 
-db.getListenedRole = async (guild, role, member) => {
-    if(member === undefined) {
-        if(role === undefined) {
-            if(guild === undefined) return console.error("please put a guild scope to the query");
-            return await r.table('listenedRoles').getAll([guild], {index: "listenedRoles_guild"}).orderBy(r.desc(r.row("exit"))).run();
-        }
-        return await r.table('listenedRoles').getAll([guild, role], {index: "listenedRoles_guild_role"}).orderBy(r.desc(r.row("exit"))).run();
+db.getListenedRole = async (_guild) => {
+    let setting = await db.getSetting(_guild);
+    return setting.listenedRoles;
+};
+
+db.addGuildMemberListenedRole = async (_guild, _member, _role) => {
+    let guildMember = await db.getGuildMember(_guild, _member);
+    if (!guildMember) {
+        guildMember = {};
     }
-    return await r.table('listenedRoles').getAll([guild, role, member], {index: "listenedRoles_guild_role_member"}).orderBy(r.desc(r.row("exit"))).run();
+    if (!guildMember.listenedRoles) guildMember.listenedRoles = [];
+    if (guildMember.listenedRoles.includes(_role)) throw new Error("Listened role is already registered.");
+    guildMember.listenedRoles.push(_role);
+    if (!guildMember.guild) {
+        guildMember.guild = _guild;
+        guildMember.member = _member;
+        return await r.table('guildMember').insert(guildMember).run()
+    } else {
+        return await r.table('guildMember').get(guildMember.id).update(guildMember).run();
+    }
+
 };
 
+db.deleteGuildMemberListenedRoles = async (_guild, _member, _role) => {
+    let guildMember = await db.getGuildMember(_guild, _member);
+    if (guildMember.listenedRoles.indexOf(_role) < 0) throw new Error("Listened role doesn't exist");
+    guildMember.listenedRoles.splice(guildMember.listenedRoles.indexOf(_role), 1);
+    if (guildMember.listenedRoles.length === 0) delete guildMember.listenedRoles;
+    return await r.table('guildMember').get(guildMember.id).replace(guildMember).run();
+};
 db.createAnalytic = async (guild, channel, item, member, date) => {
     let query = {
         item: item,

@@ -58,15 +58,6 @@ Client.on('guildCreate', async (guild) => {
     await db.createSetting(guild.id).catch(console.error);
 });
 
-Client.on('guildMemberUpdate', (oldMember, newMember) => {
-    if (!oldMember.roles.has(config.reposter) && newMember.roles.has(config.reposter)) {
-        db.createListenedRole(oldMember.guild.id, config.reposter, oldMember.id).catch(console.error);
-    }
-    if(oldMember.roles.has(config.reposter) && !newMember.roles.has(config.reposter)) {
-        db.endListenedRole(oldMember.guild.id, config.reposter, oldMember.id).catch(console.error);
-    }
-});
-
 Client.on('typingStart', (channel, user) => {
     if(user.id === '211208289206272001' && trigger === false) { //211208289206272001
         channel.send("barry is writing");
@@ -76,7 +67,7 @@ Client.on('typingStart', (channel, user) => {
 });
 
 Client.on('message', async message => {
-    //if(message.author.id !== config.discord.owner) return;
+    if (config.env === "dev" && message.author.id !== config.discord.owner) return;
     if (message.author.bot) return;
     let timestamp = new Date();
     let roles = message.guild.member(Client.users.get(message.author.id)).roles;
@@ -85,7 +76,7 @@ Client.on('message', async message => {
         roleArray.push(item.id);
     });
     await perm.processUser(message.guild.id, roleArray, message.author.id).catch(console.error);
-    //if(config.env === "dev" && message.author.id !== config.discord.owner) return ;
+
     //money add with message
     money.perMessage(message.guild.id, message.author.id).catch(console.error);
     //invite delete system

@@ -4,9 +4,16 @@ const perms = require('../util/perm');
 const Discord = require('discord.js');
 
 let logList = [
-    {name: 'join',desc: 'Trigger each time an user join the guild.'},
-    {name: 'leave', desc: 'Trigger each time an user leave the guild.\n:warning: Without the "View Audit Log" perm, all banned and kicked users will show here as well.'},
-    {name: 'ban', desc: 'Trigger each time an user gets banned.\n:warning: Without the "View Audit Log" perm, the reason and the author of the ban will not show up.'}];
+    {name: 'join', desc: 'Trigger each time an user joins the guild.'},
+    {
+        name: 'leave',
+        desc: 'Trigger each time a user leaves the guild.\n:warning: Without the "View Audit Log" perm, all banned and kicked users will show here as well.'
+    },
+    {
+        name: 'ban',
+        desc: 'Trigger each time a user gets banned.\n:warning: Without the "View Audit Log" perm, the reason and the author of the ban will not show up.'
+    },
+    {name: 'listenedRoles', desc: 'Trigger each time a user leave or join while he had a listened role on him'}];
 let logMap = new Map();
 for(let setting of logList) {
     logMap.set(setting.name, setting);
