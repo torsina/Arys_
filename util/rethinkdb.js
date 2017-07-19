@@ -284,29 +284,35 @@ db.getShopsCategory = async (_guild, _category) => {
 };
 
 db.addShopItem = async (_guild, _category, _item, _id, _price) => {
-    let doc = {
-        guild: _guild,
-        category: _category,
-        item: _item,
-        id: _id,
-        price: _price
-    };
-    return await r.table('shopItem').insert(doc).run();
+    let doc = await db.getShops(_guild, _category, _id);
+    if(!doc) {
+        doc = {
+            guild: _guild,
+            category: _category,
+            item: _item,
+            id: _id,
+            price: _price
+        };
+        return await r.table('shopItem').insert(doc).run();
+    } else throw new Error('This item is already registered.')
 };
 
 db.deleteShopItem = async (_guild, _category, _id) => {
+    let doc = await db.getShops(_guild, _category, _id);
+    if(!doc) throw new Error("This item does not exist in this category.");
     return await r.table('shopItem').getAll([_guild, _category, _id], {index: "shopItem_guild_category_id"}).delete().run();
 };
 
-db.getShops = async (guild, category, item) => {
-    if(guild) {
-        if(category) {
-            if(item) {
-                return await r.table('shopItem').getAll([guild, category, item], {index: "shopItem_guild_category_id"}).run();
+db.getShops = async (_guild, _category, _id) => {
+    if(_guild) {
+        if(_category) {
+            if(_id) {
+                let doc = await r.table('shopItem').getAll([_guild, _category, _id], {index: "shopItem_guild_category_id"}).run();
+                return doc[0];
             }
-            return await r.table('shopItem').getAll([guild, category], {index: "shopItem_guild_category"}).orderBy(r.desc('price')).run();
+            return await r.table('shopItem').getAll([_guild, _category], {index: "shopItem_guild_category"}).orderBy(r.desc('price')).run();
         }
-        return await r.table('shopItem').getAll(guild, {index: "shopItem_guild"}).run();
+        return await r.table('shopItem').getAll(_guild, {index: "shopItem_guild"}).run();
     } else {
         throw new Error('No guild scope was used');
     }

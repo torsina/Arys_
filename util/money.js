@@ -79,11 +79,10 @@ money.shop = async (guild, category, msg, int) => {
     }
     let max;
     if (list.length - int >= 18) {
-        max = int + 18;
+        max = 18;
     } else {
         max = list.length - int;
     }
-    console.log(list);
     let canvas = new Canvas(402 * 2, max * 16 * 2);
     let ctx = canvas.getContext('2d');
     ctx.antialias = 'subpixel';
@@ -100,7 +99,11 @@ money.shop = async (guild, category, msg, int) => {
     for (let i = 0; i < max; i++) {
         //let length = Math.log(parseInt(list[i].price)) * Math.LOG10E + 1 | 0;
         //if(length > 9) return console.error("element price was too big");
-        console.log("TRIGGER " + i+int);
+        if(parseInt(i+int) >= list.length) break;
+        if(config.env === "dev") {
+            console.log("TRIGGER " + parseInt(i+int));
+            console.log(list[i+int]);
+        }
         ctx.fillStyle = msg.guild.roles.get(list[i+int].id).hexColor;
         ctx.fillText(list[i+int].item, 28, (i + 1) * 24 + i * 8);
         ctx.fillStyle = "white";

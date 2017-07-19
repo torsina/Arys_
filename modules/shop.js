@@ -81,10 +81,15 @@ module.exports = {
                                                 typeInput += doc[i] + " "
                                             }
                                         }
-                                        await db.addShopCategory(msg.guild.id, args[2], headerInput, typeInput);
+                                        await db.addShopCategory(msg.guild.id, args[2], headerInput, typeInput).catch(console.error);
                                     }
                                 }
-                                await db.addShopItem(msg.guild.id, args[2], roleName, msg.guild.roles.find("name", roleName).id, parseInt(args[args.indexOf("--price") + 1]), "role").catch(console.error);
+                                try{
+                                    await db.addShopItem(msg.guild.id, args[2], roleName, msg.guild.roles.find("name", roleName).id, parseInt(args[args.indexOf("--price") + 1]), "role");
+                                }
+                                catch(e) {
+                                    return msg.channel.send(e.message);
+                                }
                                 return msg.channel.send("added the role " + roleName);
                             }
                             return msg.channel.send("Please put a valid price here.");
@@ -93,10 +98,34 @@ module.exports = {
                         break;
                     default:
                         return msg.channel.send("Synthax:\n" +
-                            "-add [--role] <category> <role name> <price>");
+                            "`-add [--role] <category> <role name> <price>`");
                         break;
                 }
                 break;
+            case "-remove": {
+                switch(args[1]) {
+                    case "--role": {
+                        let name = args.slice();
+                        name.splice(0, 3);
+                        name = name.join(" ");
+                        console.log(name);
+                        let role = msg.guild.roles.find("name", name);
+                        if(!role) return msg.channel.send("No such role found\n:warning: case sensitive.");
+                        try {
+                            await db.deleteShopItem(msg.guild.id, args[2], role.id);
+                        }
+                        catch(e) {
+                            return msg.channel.send(e.message)
+                        }
+                        return msg.channel.send("The role " + name + " was deleted from the shop " + args[2]);
+                    }
+                    case undefined: {
+                        return msg.channel.send("Synthax:\n" +
+                            "`-remove [--role] <category> <role name>`");
+                    }
+                }
+                break;
+            }
             case undefined:
                 try{await perms.check(guildMember, "shop.base")}catch(e) {return msg.channel.send(e.message)}
                 let embed = new Discord.RichEmbed()
