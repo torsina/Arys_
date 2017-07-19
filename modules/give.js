@@ -14,7 +14,7 @@ module.exports = {
     help: 'haxxed',
     func: async (client, msg, args, guildMember) => {
         let name = await money.getName(msg.guild.id);
-        if(!msg.mentions.users) {
+        if(!msg.mentions.users.first()) {
             try{await perms.check(guildMember, "give.self")}catch(e) {return msg.channel.send(e.message)}
             msg.channel.send("You gave yourself " + args[0] + " " + name);
             await db.changeMoney(msg.guild.id, msg.author.id, args[0], undefined, undefined, true).catch(console.error);
