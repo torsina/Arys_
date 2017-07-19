@@ -13,7 +13,7 @@ module.exports = {
     func: async (client, msg, args, guildMember) => {
         //if(config.env === "dev") return;
         try {
-            await perms.check(guildMember, "jail.set")
+            await perms.check(guildMember, "jail.change")
         } catch (e) {
             return msg.channel.send(e.message)
         }
