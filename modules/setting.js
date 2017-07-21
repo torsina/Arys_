@@ -305,6 +305,18 @@ module.exports = {
                         let doc = await db.getRolePerm(msg.guild.id, role.id);
                         break;
                     }
+                    case "--channel": {
+                        if(msg.mentions.channels.first()) {
+                            try{await perms.check(guildMember, msg.channel.id, "setting.perm.channel.set")}catch(e) {return msg.channel.send(e.message)}
+                            //0 = -perm; 1 = --channel; 2 = type; 3 = channel; 4 = perm
+                            let perm = args[args.length-1];
+                            let type = args[2];
+                            let value = await perms.addToChannel(msg.guild.id, msg.mentions.channels.first().id, perm, msg, type).catch(console.error);
+                            if(value === true)msg.channel.send("The permission " + perm + " is now " + type + "ed for the channel " + msg.mentions.channels.first().name + ".");
+                            if(value === false)msg.channel.send("The permission " + perm + " is no more " + type + "ed for the channel " + msg.mentions.channels.first().name + ".");
+                        } else msg.channel.send("Please tag the channel you want to modify.");
+                        break;
+                    }
                     case "--see": {
                         try{await perms.check(guildMember, msg.channel.id, "setting.perm.see")}catch(e) {return msg.channel.send(e.message)}
                         let array = [];
