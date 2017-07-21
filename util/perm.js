@@ -54,7 +54,7 @@ perm.processUser = async (_guild, _roles, _member) => {
 //compare with result
 perm.check = async (_guildMember, _channel, _perm) => {
     let channel = await db.getChannel(_guildMember.guild, _channel);
-    channel = channel.own;
+    if(channel && channel.own)channel = channel.own;
     let command = _perm.split(".")[0];
     let permName =_perm.split(".");
     delete permName[0];
