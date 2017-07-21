@@ -36,14 +36,14 @@ module.exports = {
                 await db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*multiplier))).catch(e => {msg.channel.send(e.message)}).then(async () => {
                     embed.setDescription(msg.author.toString() + ", you won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
                     embed.addField("Old amount: ", amount + " " + name);
-                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id));
+                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id) + " " + name);
                     msg.channel.send({embed});
                 });
             } else {
                 await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)}).then(async () => {
                     embed.setDescription(msg.author.toString() + ", you've lost " + parseInt(args[1]) + " " + name + "!");
                     embed.addField("Old amount: ", amount + " " + name);
-                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id));
+                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id) + " " + name);
                     msg.channel.send({embed});
                 });
             }
@@ -52,14 +52,14 @@ module.exports = {
                 await db.changeMoney(msg.guild.id, msg.author.id, Math.floor(parseInt(args[1]*multiplier))).catch(e => {msg.channel.send(e.message)}).then(async () => {
                     embed.setDescription(msg.author.toString() + ", you won " + Math.floor(parseInt(args[1]*multiplier)) + " " + name + "!");
                     embed.addField("Old amount: ", amount + " " + name);
-                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id));
+                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id) + " " + name);
                     msg.channel.send({embed});
                 });
             } else {
                 await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)}).then(async () => {
                     embed.setDescription(msg.author.toString() + ", you lost " + parseInt(args[1]) + " " + name + "!");
                     embed.addField("Old amount: ", amount + " " + name);
-                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id));
+                    embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id) + " " + name);
                     msg.channel.send({embed});
                 });
             }
@@ -67,7 +67,7 @@ module.exports = {
             await db.changeMoney(msg.guild.id, msg.author.id, -parseInt(args[1])).catch(e => {msg.channel.send(e.message)}).then(async () => {
                 embed.setDescription(msg.author.toString() + ", you lost " + parseInt(args[1]) + " " + name + "!");
                 embed.addField("Old amount: ", amount + " " + name);
-                embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id));
+                embed.addField("New amount: ", await money.getAmount(msg.author.id, msg.guild.id) + " " + name);
                 msg.channel.send({embed});
             });
         }
