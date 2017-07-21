@@ -18,7 +18,6 @@ Client.once('ready', async () => {
         let stream = await db.streamSetting().catch(console.error);
         stream.on('data', data => {
             settings.set(data.new_val.guild, data.new_val);
-            console.log(data);
             log.importSetting(settings);
         });
     });
@@ -33,7 +32,6 @@ Client.once('ready', async () => {
 
 
 Client.load = (command) => {
-
     let commandsList = fs.readdirSync('./modules/');
     if (command) {
         if (commandsList.indexOf(`${command}.js`) >= 0) {
