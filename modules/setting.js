@@ -319,46 +319,65 @@ module.exports = {
                     }
                     case "--see": {
                         try{await perms.check(guildMember, msg.channel.id, "setting.perm.see")}catch(e) {return msg.channel.send(e.message)}
-                        let array = [];
-                        for(let i=0;i<args.length;i++) {
-                            if (i > 1 && i <= args.length - 1) array.push(args[i]);
-                        }
-                        let roleName = array.join(" ");
-                        let id = msg.guild.roles.find("name", roleName).id;
-                        console.log(id);
-                        let role = await db.getRolePerm(msg.guild.id, id);
-                        console.log(role);
-                        let permArray = [];
-                        let bitFields = perms.getBitField();
-                        let commands = Object.keys(bitFields);
-                        for(let command of commands) {
-                            let obj = bitFields[command];
-                            let perms = Object.keys(obj);
-                            for(let perm of perms) {
-                                console.log(command);
-                                if(role.perm && role.perm[command] && !!(role.perm[command].allow & bitFields[command][perm])) {
-                                    perm = perm.split("_");
-                                    perm = perm.join(".");
-                                    permArray.push(":white_check_mark:\t" +command + "." + perm + "\n");
-                                } else {
-                                    perm = perm.split("_");
-                                    perm = perm.join(".");
-                                    permArray.push(":x:\t" + command + "." + perm + " \n");
+                        if(msg.mentions.channels.first()) {
+                            let channel = await db.getChannel(msg.guild.id, msg.mentions.channels.first().id);
+                            let permArray = [];
+                            let bitFields = perms.getBitField();
+                            let commands = Object.keys(bitFields);
+                            for(let command of commands) {
+                                let obj = bitFields[command];
+                                let perms = Object.keys(obj);
+                                for(let perm of perms) {
+                                    console.log(command);
+                                    if(role.perm && role.perm[command] && !!(role.perm[command].allow & bitFields[command][perm])) {
+                                        perm = perm.split("_");
+                                        perm = perm.join(".");
+                                        permArray.push(":white_check_mark:\t" +command + "." + perm + "\n");
+                                    } else {
+                                        perm = perm.split("_");
+                                        perm = perm.join(".");
+                                        permArray.push(":x:\t" + command + "." + perm + " \n");
+                                    }
                                 }
                             }
+                        } else {
+                            let array = [];
+                            for(let i=0;i<args.length;i++) {
+                                if (i > 1 && i <= args.length - 1) array.push(args[i]);
+                            }
+                            let roleName = array.join(" ");
+                            let id = msg.guild.roles.find("name", roleName).id;
+                            let role = await db.getRolePerm(msg.guild.id, id);
+                            let permArray = [];
+                            let bitFields = perms.getBitField();
+                            let commands = Object.keys(bitFields);
+                            for(let command of commands) {
+                                let obj = bitFields[command];
+                                let perms = Object.keys(obj);
+                                for(let perm of perms) {
+                                    if(role.perm && role.perm[command] && !!(role.perm[command].allow & bitFields[command][perm])) {
+                                        perm = perm.split("_");
+                                        perm = perm.join(".");
+                                        permArray.push(":white_check_mark:\t" +command + "." + perm + "\n");
+                                    } else {
+                                        perm = perm.split("_");
+                                        perm = perm.join(".");
+                                        permArray.push(":x:\t" + command + "." + perm + " \n");
+                                    }
+                                }
+                            }
+                            let permString = "";
+                            permArray.forEach(function (p) {
+                                permString += p;
+                            });
+                            let embed = new Discord.RichEmbed()
+                                .setTitle("Allowed perms for the role " + roleName)
+                                .setDescription(permString)
+                                .setFooter('asked by ' + msg.author.tag)
+                                .setTimestamp();
+                            msg.channel.send({embed});
+                            break;
                         }
-                        let permString = "";
-                        permArray.forEach(function (p) {
-                            permString += p;
-                        });
-                        let embed = new Discord.RichEmbed()
-                            .setTitle("Allowed perms for the role " + roleName)
-                            .setDescription(permString)
-                            .setFooter('asked by ' + msg.author.tag)
-                            .setTimestamp();
-                        msg.channel.send({embed});
-
-                        break;
                     }
                     case "--copy": {
                         let copyNameArray = args.slice(2, args.length);

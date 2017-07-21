@@ -74,7 +74,7 @@ Client.on('message', async message => {
         roleArray.push(item.id);
     });
     await perm.processUser(message.guild.id, roleArray, message.author.id).catch(console.error);
-    await db.setChannelPerm(message.guild.id, message.channel.id, {});
+    await db.setChannelPerm(message.guild.id, message.channel.id, undefined);
     //money add with message
     money.perMessage(message.guild.id, message.author.id).catch(console.error);
     //invite delete system
