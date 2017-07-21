@@ -10,7 +10,7 @@ module.exports = {
     help: "\u00af\\_(\u30c4)_\/\u00af",
     func: async(client, msg, args, guildMember) => {
         if(config.env === "dev") return;
-        try{await perms.check(guildMember, "shrug.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "shrug.base")}catch(e) {return msg.channel.send(e.message)}
         msg.delete();
         msg.channel.send("\u00af\\_(\u30c4)_\/\u00af");
     }

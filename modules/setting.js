@@ -24,12 +24,13 @@ const bitField = {
     money_wait: 1 << 7,
     money_range: 1 << 8,
     money_name: 1 << 9,
+    money_daily: 1 << 14,
     perm_role_set: 1 << 10,
     perm_role_see: 1 << 11,
     perm_role_copy: 1 << 12,
+    perm_channel_set: 1 << 15,
     perm_see: 1 << 13,
-    money_daily: 1 << 14
-};
+}; //15
 
 module.exports = {
     help: 'Custom all the things!',
@@ -39,17 +40,17 @@ module.exports = {
             case "-prefix":
                 switch (args[1]) {
                     case "--reset":
-                        try{await perms.check(guildMember, "setting.prefix.change")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.prefix.change")}catch(e) {return msg.channel.send(e.message)}
                         await db.deletePrefix(msg.guild.id);
                         return msg.channel.send("Your customized prefix has been removed.");
                         break;
                     case "--set":
-                        try{await perms.check(guildMember, "setting.prefix.change")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.prefix.change")}catch(e) {return msg.channel.send(e.message)}
                         await await db.setPrefix(msg.guild.id, args[2]).catch(console.error);
                         return msg.channel.send("My prefix for this server is now `" + args[2] + "`.");
                         break;
                     default:
-                        try{await perms.check(guildMember, "setting.prefix.see")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.prefix.see")}catch(e) {return msg.channel.send(e.message)}
                         return msg.channel.send(await db.getPrefix()); //TODO make embed for that
                         break;
                 }
@@ -58,7 +59,7 @@ module.exports = {
                 switch (args[1]) {
                     case "--add": {
                         //0 = -log; 1 = --add; 2 = channel; 3 = log
-                        try{await perms.check(guildMember, "setting.log.change")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.log.change")}catch(e) {return msg.channel.send(e.message)}
                         let log;
                         for(let validLog of logList) {
                             if(validLog.name === args[3]) {
@@ -75,7 +76,7 @@ module.exports = {
                         break;
                     }
                     case "--remove":{
-                        try{await perms.check(guildMember, "setting.log.change")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.log.change")}catch(e) {return msg.channel.send(e.message)}
                         let log;
                         for(let validLog of logList) {
                             if(validLog.name === args[3]) {
@@ -92,7 +93,7 @@ module.exports = {
                         break;
                     }
                     case "--list":{
-                        try{await perms.check(guildMember, "setting.log.see")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.log.see")}catch(e) {return msg.channel.send(e.message)}
                         let doc = await db.getLogChannel(msg.guild.id);
                         if (!doc.logChannel) return msg.channel.send("there is 0 log channels currently on this server");
                         else {
@@ -153,7 +154,7 @@ module.exports = {
             case "-money":{
                 switch (args[1]) {
                     case "--name":
-                        try{await perms.check(guildMember, "setting.money.name")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.money.name")}catch(e) {return msg.channel.send(e.message)}
                         if (args[2] && args[2].length < config.money.maxCharName) {
                             if (args[2] === config.money.name) {
                                 return await db.deleteMoneyName(msg.guild.id).catch(console.error);
@@ -166,7 +167,7 @@ module.exports = {
                         }
                         break;
                     case "--amount":
-                        try{await perms.check(guildMember, "setting.money.amount")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.money.amount")}catch(e) {return msg.channel.send(e.message)}
                         if (!isNaN(parseInt(args[2])) && parseInt(args[2]) < config.money.maxInt) {
                             if (parseInt(args[2]) === config.money.amount) {
                                 return await db.deleteMoneyDefaultAmount(msg.guild.id).catch(console.error);
@@ -179,7 +180,7 @@ module.exports = {
                         }
                         break;
                     case "--wait":
-                        try{await perms.check(guildMember, "setting.money.wait")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.money.wait")}catch(e) {return msg.channel.send(e.message)}
                         console.log(parseInt(args[2]));
                         console.log(args[2]);
                         console.log(config.money.maxInt);
@@ -196,7 +197,7 @@ module.exports = {
                         }
                         break;
                     case "--range":
-                        try{await perms.check(guildMember, "setting.money.range")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.money.range")}catch(e) {return msg.channel.send(e.message)}
                         if (args.indexOf("--from") === -1 && args.indexOf("--to") === -1) {
                             return msg.channel.send("Please use the arguments `--from` and `--to` to set a new range.")
                         }
@@ -222,7 +223,7 @@ module.exports = {
                         return await db.setMoneyRange(msg.guild.id, _min, _max).catch(console.error);
                         break;
                     case "--daily": {
-                        try{await perms.check(guildMember, "setting.money.daily")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.money.daily")}catch(e) {return msg.channel.send(e.message)}
                         if (!isNaN(parseInt(args[2])) && parseInt(args[2]) < config.money.maxInt) {
                             if (parseInt(args[2]) === config.money.daily.amount) {
                                 return await db.deleteMoneyDaily(msg.guild.id).catch(console.error);
@@ -237,7 +238,7 @@ module.exports = {
                         break;
                     }
                     default:
-                        try{await perms.check(guildMember, "setting.money.see")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.money.see")}catch(e) {return msg.channel.send(e.message)}
                         let setting = await db.getSetting(msg.guild.id).catch(console.error);
                         let name, amount, min, max, wait, daily_amount, daily_min, daily_max;
                         if (setting.money) {
@@ -287,7 +288,7 @@ module.exports = {
             case "-perm":{
                 switch(args[1]) {
                     case "--role": {
-                        try{await perms.check(guildMember, "setting.perm.role.set")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.perm.role.set")}catch(e) {return msg.channel.send(e.message)}
                         //0 = -perm; 1 = --role; 2 = type; 3 = role; 4 = perm
                         let array = [];
                         for(let i=0;i<args.length;i++) {
@@ -302,11 +303,10 @@ module.exports = {
                         if(value === true)msg.channel.send("The permission " + perm + " is now " + type + "ed for the role " + role.name + ".");
                         if(value === false)msg.channel.send("The permission " + perm + " is no more " + type + "ed for the role " + role.name + ".");
                         let doc = await db.getRolePerm(msg.guild.id, role.id);
-                        console.log(doc);
                         break;
                     }
                     case "--see": {
-                        try{await perms.check(guildMember, "setting.perm.see")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.perm.see")}catch(e) {return msg.channel.send(e.message)}
                         let array = [];
                         for(let i=0;i<args.length;i++) {
                             if (i > 1 && i <= args.length - 1) array.push(args[i]);
@@ -364,7 +364,7 @@ module.exports = {
                         break;
                     }
                     case undefined: {
-                        try{await perms.check(guildMember, "setting.perm.see")}catch(e) {return msg.channel.send(e.message)}
+                        try{await perms.check(guildMember, msg.channel.id, "setting.perm.see")}catch(e) {return msg.channel.send(e.message)}
                         let permArray = [];
                         let bitFields = perms.getBitField();
                         let commands = Object.keys(bitFields);

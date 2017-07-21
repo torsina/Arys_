@@ -10,7 +10,7 @@ const bitField = {
 module.exports = {
     help: 'Reload the commands',
     func: async(client, msg, args, guildMember) => {
-        try{await perms.check(guildMember, "reload.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "reload.base")}catch(e) {return msg.channel.send(e.message)}
         console.time('reload');
         if (args.length > 0 && perms.check("reload.command", role, msg.author.id) === true){
             client.load(args[0]);
@@ -22,10 +22,6 @@ module.exports = {
             console.timeEnd('reload');
         }
         else {
-            if(perms.check("mod.reload.command", role, msg.author.id) !== true) {
-                msg.channel.send("You don't have the permission `mod.reload.base`");
-                return;
-            }
             client.load();
             msg.channel.send('Commands reloaded.').then(m => {
                 setTimeout(function() {

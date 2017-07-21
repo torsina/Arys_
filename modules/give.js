@@ -15,11 +15,11 @@ module.exports = {
     func: async (client, msg, args, guildMember) => {
         let name = await money.getName(msg.guild.id);
         if(!msg.mentions.users.first()) {
-            try{await perms.check(guildMember, "give.self")}catch(e) {return msg.channel.send(e.message)}
+            try{await perms.check(guildMember, msg.channel.id, "give.self")}catch(e) {return msg.channel.send(e.message)}
             msg.channel.send("You gave yourself " + args[0] + " " + name);
             await db.changeMoney(msg.guild.id, msg.author.id, args[0], undefined, undefined, true).catch(console.error);
         } else {
-            try{await perms.check(guildMember, "give.other")}catch(e) {return msg.channel.send(e.message)}
+            try{await perms.check(guildMember, msg.channel.id, "give.other")}catch(e) {return msg.channel.send(e.message)}
             msg.channel.send("You gave " + args[args.length-1] + " " + name + " to " + msg.mentions.users.first().toString());
             await db.changeMoney(msg.guild.id, msg.mentions.users.first().id, args[args.length-1], undefined, undefined, true).catch(console.error);
         }

@@ -29,7 +29,7 @@ module.exports = {
     help: 'usage: $post (number of image, the number cant be more than 5 for obvious reasons)',
     func: async(client, msg, args, guildMember) => {
     if(config.env === "dev") return;
-        try{await perms.check(guildMember, "post.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "post.base")}catch(e) {return msg.channel.send(e.message)}
         if(msg.channel.id==='275280722531581952' || role === "bot_owner"){
             if (args.length < 1){
                 msg.reply("please add the number of image you want (._. )").then(m => {
@@ -39,7 +39,7 @@ module.exports = {
                 });
                 return;
             }
-            if (args[0] > config.post.safe && await perms.check(guildMember, "post.bypass.number") !== true){ //
+            if (args[0] > config.post.safe && await perms.check(guildMember, msg.channel.id, "post.bypass.number") !== true){ //
                 msg.reply("don't make me use all of my material you horny fuck !"+"\n" + "Go fap to your girlfriend, Oh wait..").then(m => {
                     setTimeout(function() {
                         m.delete();

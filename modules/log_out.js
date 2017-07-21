@@ -8,7 +8,7 @@ const bitField = {
 module.exports = {
     help: 'Disconect the bot',
     func: async(client, msg, args, guildMember) => {
-        try{await perms.check(guildMember, "log_out.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "log_out.base")}catch(e) {return msg.channel.send(e.message)}
         msg.reply(' has shut me down');
         client.destroy((err) => {console.log(err);});
 

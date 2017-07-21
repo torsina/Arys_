@@ -23,14 +23,14 @@ module.exports = {
         setTimeout(function() {
             msg.delete();
         }, config.discord.wait);
-        try{await perms.check(guildMember, "report.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "report.base")}catch(e) {return msg.channel.send(e.message)}
         if(args[0] === undefined) {
             msg.channel.send("please enter the id of the image you want to report")
         }
 
         db.getPost(args[0], config.post.file, msg.guild.id).then(async query => {
             let report = parseInt(query.report_count) + 1;
-            if(perms.check("report.force", role, msg.author.id) === true && args[1]==='--force'){
+            if(await perms.check(guildMember, msg.channel.id, "report.force") === true && args[1]==='--force'){
                 msg.channel.fetchMessage(query.message)
                     .then(m => {
                         m.delete();

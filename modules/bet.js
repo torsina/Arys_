@@ -13,7 +13,7 @@ module.exports = {
     help: 'Get lucky, or not.',
     func: async(client, msg, args,  guildMember) => {
         //if(config.env === "dev") return;
-        try{await perms.check(guildMember, "bet.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "bet.base")}catch(e) {return msg.channel.send(e.message)}
         if(parseInt(args[1]) < 200) return msg.channel.send("Your bid is too low!");
         let random = Math.random();
         let chance;

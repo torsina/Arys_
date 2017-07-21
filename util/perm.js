@@ -17,10 +17,11 @@ perm.load = () => {
      console.log(bitFields);
 };
 /**
+ *  Create the permission numbers for a guild member
  *
- * @param _guild {String} - guild ID
- * @param _roles {Array} - Array of all the roles name of the guildMember
- * @param _member {String} - member ID
+ * @param _guild {Snowflake} - guild ID
+ * @param _roles Array<Snowflake> - Array of all the roles of the guildMember
+ * @param _member {Snowflake} - member ID
  * @returns {Promise.<void>}
  */
 perm.processUser = async (_guild, _roles, _member) => {
@@ -49,14 +50,29 @@ perm.processUser = async (_guild, _roles, _member) => {
     }
     return await db.setGuildMemberPerm(_guild, _member, userBitFields);
 };
-
-perm.check = async (_guildMember, _perm) => {
+//process channel
+//compare with result
+perm.check = async (_guildMember, _channel, _perm) => {
+    let channel = await db.getChannel(_guildMember.guild, _channel);
+    channel = channel.own;
     let command = _perm.split(".")[0];
     let permName =_perm.split(".");
     delete permName[0];
     permName = permName.join("_");
     permName = permName.slice(1, permName.length);
-    let output = !!(_guildMember.perm[command] & bitFields[command][permName]);
+    let commands = Object.keys(bitFields);
+    let channelBitField = {};
+    let userBitFields = {};
+    for(let i=0;i<commands.length;i++) {
+        channelBitField[commands[i]] = {};
+        if(channel[commands[i]] && channel[commands[i]].allow) channelBitField[commands[i]].allow = channelBitField[commands[i]].allow | channel[commands[i]].allow;
+        if(channel[commands[i]] && channel[commands[i]].deny) channelBitField[commands[i]].deny = channelBitField[commands[i]].deny | channel[commands[i]].deny;
+
+        if(!channelBitField[commands[i]].allow) channelBitField[commands[i]].allow = 0;
+        if(!channelBitField[commands[i]].deny) channelBitField[commands[i]].deny = 0;
+        userBitFields[commands[i]] = (_guildMember.perm[commands[i]] | channelBitField[commands[i]].allow) & ~channelBitField[commands[i]].deny;
+    }
+    let output = !!(userBitFields[command] & bitFields[command][permName]);
     if(output === true) return true;
     if(output === false) throw new Error("You lack the permission " + _perm)
 };
@@ -83,7 +99,6 @@ perm.addToRole = async (_guild, _role, _perm, _message, _type) => {
     let roleBitField = await db.getRolePerm(_guild, _role);
     if(roleBitField) roleBitField = roleBitField.perm;
     permResult.forEach(function (p) {
-        console.log(p);
         addBitField(p)
     });
     function addBitField (_permName) {
@@ -101,6 +116,48 @@ perm.addToRole = async (_guild, _role, _perm, _message, _type) => {
     }
     await db.setRolePerm(_guild, _role, roleBitField, _message);
     return !!(roleBitField[command][_type] & bitFields[command][permName]); //if perm was added or removed
+};
+
+perm.addToChannel = async (_guild, _channel, _perm, _message, _type) => {
+    if(!_type) throw new Error("No type provided.");
+    if(_type !== "allow" && _type !== "deny") throw new Error("Wrong type provided");
+    let command = _perm.split(".")[0];
+    let permName =_perm.split(".");
+    delete permName[0];
+    permName = permName.join("_");
+    permName = permName.slice(1, permName.length);
+    let permResult = [];
+    let permList = Object.keys(bitFields[command]);
+    for(let i = 0;i<permList.length;i++) {
+        if(permList[i] === permName) {
+            permResult = [permName];
+            break;
+        } else if(permList[i].includes(permName)) {
+            permResult.push(permList[i]);
+        }
+    }
+    let workBitField = await db.getChannel(_guild, _channel);
+    if(workBitField && workBitField.own) workBitField = workBitField.own;
+    permResult.forEach(function (p) {
+        console.log(p);
+        addBitField(p)
+    });
+    function addBitField (_permName) {
+        if(bitFields[command][_permName]) {
+            if(!workBitField) {
+                workBitField = {}
+            }
+            if(!workBitField[command]) {
+                workBitField[command] = {};
+                workBitField[command][_type] = bitFields[command][_permName];
+            } else {
+                workBitField[command][_type] = workBitField[command][_type] ^ bitFields[command][_permName];
+            }
+        } else throw new Error(_perm + " does not exist.");
+    }
+    console.error(workBitField);
+    await db.setChannelPerm(_guild, _channel, workBitField);
+    return !!(workBitField[command][_type] & bitFields[command][permName]); //if perm was added or removed
 };
 
 perm.addToUser = async (_guild, _member) => {

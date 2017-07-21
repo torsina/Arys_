@@ -21,7 +21,7 @@ module.exports = {
         //if(config.env === "dev") return;
         switch(args[0]) {
             case "-add":
-                try{await perms.check(guildMember, "shop.add")}catch(e) {return msg.channel.send(e.message)}
+                try{await perms.check(guildMember, msg.channel.id, "shop.add")}catch(e) {return msg.channel.send(e.message)}
                 switch(args[1]) {
                     case "--role": //0 = -add ; 1 = --role; 2 = category; 3 = role; 4 = --price; 5 = price
                         let roleInput = "";
@@ -127,7 +127,7 @@ module.exports = {
                 break;
             }
             case undefined:
-                try{await perms.check(guildMember, "shop.base")}catch(e) {return msg.channel.send(e.message)}
+                try{await perms.check(guildMember, msg.channel.id, "shop.base")}catch(e) {return msg.channel.send(e.message)}
                 let embed = new Discord.RichEmbed()
                     .setFooter('asked by ' + msg.author.tag)
                     .setTimestamp()

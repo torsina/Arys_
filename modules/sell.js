@@ -11,7 +11,7 @@ const bitField = {
 module.exports = {
     help: 'haxxed',
     func: async (client, msg, args, guildMember) => {
-        try{await perms.check(guildMember, "sell.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "sell.base")}catch(e) {return msg.channel.send(e.message)}
         if(!args[0]) {
             return msg.channel.send("Please use this command like the following:\n`$sell <category> <item>`")
         } else {

@@ -11,7 +11,7 @@ const bitField = {
 module.exports = {
     help: 'Ping, Pong',
     func: async (client, msg, args, guildMember) => {
-        try{await perms.check(guildMember, "buy.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "buy.base")}catch(e) {return msg.channel.send(e.message)}
         if(!args[0]) {
             return msg.channel.send("Please use this command like the following:\n`$buy <category> <item>`")
         } else {

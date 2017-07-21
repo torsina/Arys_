@@ -10,7 +10,7 @@ module.exports = {
     help: "Are you in need of some confidence, maybe a pat in the head, a kiss in the cheek, you expect so much while giving so little, you're laughable",
     func: async(client, msg, args, guildMember) => {
         if(config.env === "dev") return;
-        try{await perms.check(guildMember, "pet.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "pet.base")}catch(e) {return msg.channel.send(e.message)}
         let array = [
             "Are you in need of some confidence? The best way to build confidence is to first recognize your insecurities. <@"+msg.author.id+">, can you write down all the ways you feel unworthy, ashamed, or inferior?",
             "On second thought, you don't need to, look at how good you are at being an exampe of it",

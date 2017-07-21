@@ -13,7 +13,7 @@ module.exports = {
     help: 'Monies for everyone!',
     func: async(client, msg, args,  guildMember) => {
         //if(config.env === "dev") return;
-        try{await perms.check(guildMember, "daily.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "daily.base")}catch(e) {return msg.channel.send(e.message)}
         if(guildMember.daily && guildMember.daily + 86400000 < Date.now() || !guildMember.daily) {//guildMember.daily && guildMember.daily + 86400000 < Date.now() //guildMember.daily && guildMember.daily + 86400000 < Date.now() || !guildMember.daily
             let setting = await db.getSetting(msg.guild.id).catch(console.error);
             let prefix = setting.money.name || config.money.name;

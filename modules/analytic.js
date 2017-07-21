@@ -10,7 +10,7 @@ module.exports = {
     help: 'get dem data',
     func: async (client, msg, args, guildMember) => {
         if(args[0] === "get") {// 0 = get ; 1 = <orderby(least used; highest used; user> ; 2 = <emoji>  ;
-            try{await perms.check(guildMember, "analytic.get")}catch(e) {return msg.channel.send(e.message)}
+            try{await perms.check(guildMember, msg.channel.id, "analytic.get")}catch(e) {return msg.channel.send(e.message)}
             if (args[1] === "inc") {
                 db.countAnalytic(msg.guild.id).then(doc => {
                     msg.channel.send(compare(doc)).catch(console.error);

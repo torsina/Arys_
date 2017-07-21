@@ -12,7 +12,7 @@ const bitField = {
 module.exports = {
     help: 'Delete messages \nSynthax: $purge <number> [--force(if number>25)]\n$purge user <user> <number> [--force(if number>25)]',
     func: async(client, msg, args, guildMember) => {
-        try{await perms.check(guildMember, "purge.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "purge.base")}catch(e) {return msg.channel.send(e.message)}
         if(config.env === "dev") return;
         if (msg.channel.type === 'dm') {
             msg.channel.send("You can't do that in a DM, dummy!");
@@ -24,7 +24,7 @@ module.exports = {
         }
         let bot_permissions = msg.channel.permissionsFor(client.user);
         let user_permissions = msg.channel.permissionsFor(msg.author);
-        if (!user_permissions.hasPermission("MANAGE_MESSAGES") && await perms.check(guildMember, "purge.bypass.rank") !== true) {
+        if (!user_permissions.hasPermission("MANAGE_MESSAGES") && await perms.check(guildMember, msg.channel.id, "purge.bypass.rank") !== true) {
             msg.channel.send("Sorry, your permissions doesn't allow that.");
             return;
         }
@@ -36,7 +36,7 @@ module.exports = {
             msg.channel.send("The maximum is " + config.purge.max + ", " + config.purge.safe + " without `--force`.");
             return;
         }
-        if (args[0] === "user" && args[2] < config.purge.safe && perms.check(guildMember, "purge.user") === true) { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
+        if (args[0] === "user" && args[2] < config.purge.safe && perms.check(guildMember, msg.channel.id, "purge.user") === true) { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
 
             let messagecount = parseInt(args[2]);
             msg.channel.fetchMessages({
@@ -54,12 +54,12 @@ module.exports = {
                 });
             return;
         }
-        try{await perms.check(guildMember, "purge.user")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "purge.user")}catch(e) {return msg.channel.send(e.message)}
         if (args[0] === "user" && args[2] > config.purge.safe && args[3] !== "--force") {
             msg.channel.send("I can't delete that much messages of that user in safe-mode, add `--force` to your message to force me to delete.");
             return;
         }
-        if (args[0] === "user" && args[2] < config.purge.max && args[3] === "--force" && await perms.check(guildMember, "purge.force") === true) { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
+        if (args[0] === "user" && args[2] < config.purge.max && args[3] === "--force" && await perms.check(guildMember, msg.channel.id, "purge.force") === true) { //args[0] = user; args[1] = <user>; args[2] = <number>; args[3] = "--force"
 
             msg.channel.fetchMessages({
                 limit: 100,
@@ -86,7 +86,7 @@ module.exports = {
                 .catch(console.error);
             return;
         }
-        try{await perms.check(guildMember, "purge.force")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "purge.force")}catch(e) {return msg.channel.send(e.message)}
         if (args[0] > config.purge.safe && args[1] !== "--force"){
             msg.channel.send("I can't delete that much messages in safe-mode, add `--force` to your message to force me to delete.");
             return;

@@ -10,7 +10,7 @@ module.exports = {
     help: 'Ping, Pong',
     func: async(client, msg, args,  guildMember) => {
         //if(config.env === "dev") return;
-        try{await perms.check(guildMember, "ping.base")}catch(e) {return msg.channel.send(e.message)}
+        try{await perms.check(guildMember, msg.channel.id, "ping.base")}catch(e) {return msg.channel.send(e.message)}
         msg.channel.send("pong dev");
     }
 };

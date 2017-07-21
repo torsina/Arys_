@@ -15,7 +15,7 @@ module.exports = {
     func: async (client, msg, args, guildMember) => {
         //if(config.env === "dev") return;
         if(!msg.mentions.users.first()) {
-            try{await perms.check(guildMember, "credits.self")}catch(e) {return msg.channel.send(e.message)}
+            try{await perms.check(guildMember, msg.channel.id, "credits.self")}catch(e) {return msg.channel.send(e.message)}
             let moneyName = await money.getName(msg.guild.id);
             let _money = await money.get(msg.author.id, msg.guild.id);
             let embed = new Discord.RichEmbed()
@@ -25,7 +25,7 @@ module.exports = {
                 .setDescription(`<@${msg.author.id}>,You have ${_money.amount} ${moneyName}`);
             msg.channel.send({embed});
         }else if (msg.mentions.users.first() !== msg.author && args[1] === "-see"){
-            try{await perms.check(guildMember, "credits.other")}catch(e) {return msg.channel.send(e.message)}
+            try{await perms.check(guildMember, msg.channel.id, "credits.other")}catch(e) {return msg.channel.send(e.message)}
             let moneyName = await money.getName(msg.guild.id);
             let _money = await money.get(msg.mentions.users.first().id, msg.guild.id);
             let embed = new Discord.RichEmbed()
@@ -36,7 +36,7 @@ module.exports = {
             msg.channel.send({embed});
         } else if(msg.mentions.users.first() !== msg.author){
             if(parseInt(args[args.length-1]) < 0) return msg.channel.send("You can't send negative amounts");
-            try{await perms.check(guildMember, "credits.other")}catch(e) {return msg.channel.send(e.message)}
+            try{await perms.check(guildMember, msg.channel.id, "credits.other")}catch(e) {return msg.channel.send(e.message)}
             let moneyName = await money.getName(msg.guild.id);
             let _money = await money.get(msg.author.id, msg.guild.id);
             let embed = new Discord.RichEmbed()

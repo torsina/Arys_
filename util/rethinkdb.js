@@ -17,7 +17,7 @@ db.init = async (Client) => {
 
     let tableList = await r.tableList().run(), tableWait = [];
     let tablesExpected = [
-        "setting", "post", "user", "event", "analytic", "guildMember", "shopItem", "shopCategory", "roles"
+        "setting", "post", "user", "event", "analytic", "guildMember", "guildChannel", "shopItem", "shopCategory", "guildRole"
     ];
     let indexExpected = [
         {table: "analytic", index: "analytic_guild", rows: ["guild"]},
@@ -32,8 +32,10 @@ db.init = async (Client) => {
         {table: "shopItem", index: "shopItem_guild_category_id", rows: ["guild", "category", "id"]},
         {table: "shopCategory", index: "shopCategory_guild", rows: ["guild"]},
         {table: "shopCategory", index: "shopCategory_guild_category", rows: ["guild", "category"]},
-        {table: "roles", index: "roles_guild", rows: ["guild"]},
-        {table: "roles", index: "roles_guild_role", rows: ["guild", "role"]}
+        {table: "guildRole", index: "guildRole_guild", rows: ["guild"]},
+        {table: "guildRole", index: "guildRole_guild_role", rows: ["guild", "role"]},
+        {table: "guildChannel", index: "guildChannel_guild", rows: ["guild"]},
+        {table: "guildChannel", index: "guildChannel_guild_channel", rows: ["guild", "channel"]},
     ];
     let indexes = [];
     for(let table of tablesExpected) {
@@ -352,24 +354,24 @@ db.setRolePerm = async (_guild, _role, _bitField, _message) => {
             position: _message.guild.roles.get(_role).position
         };
         doc.perm = _bitField;
-        return await r.table('roles').insert(doc).run();
+        return await r.table('guildRole').insert(doc).run();
     } else {
         doc.perm = assign(doc.perm, _bitField);
         if(doc.position !== _message.guild.roles.get(_role).position) doc.position = _message.guild.roles.get(_role).position;
-        return await r.table('roles').get(doc.id).replace(doc).run();
+        return await r.table('guildRole').get(doc.id).replace(doc).run();
     }
 };
 
 db.getRolePerm = async (_guild, _role, _message) => {
     if(!_guild) throw new Error('No guild scope provided');
     if(_role) {
-        let doc = await r.table('roles').getAll([_guild, _role], {index: "roles_guild_role"}).run();
+        let doc = await r.table('guildRole').getAll([_guild, _role], {index: "guildRole_guild_role"}).run();
         if(!doc) {
             return db.setRolePerm(_guild, _role, {}, _message).catch(console.error);
         }
         return doc[0];
     } else {
-        return await r.table('roles').getAll([_guild], {index: "roles_guild"}).orderBy('position').run();
+        return await r.table('guildRole').getAll([_guild], {index: "guildRole_guild"}).orderBy('position').run();
     }
 };
 
@@ -386,7 +388,37 @@ db.setGuildMemberPerm = async (_guild, _member, _bitFields) => {
         guildMember.perm = _bitFields;
         return await r.table('guildMember').get(guildMember.id).update(guildMember);
     }
+};
 
+db.setChannelPerm = async (_guild, _channel, _bitField) => {
+    if(_guild && _channel && _bitField) {
+        let doc = await db.getChannel(_guild, _channel).catch(console.error);
+        console.log(doc);
+        if(!doc) {
+            doc = {};
+            doc.guild = _guild;
+            doc.channel = _channel;
+            doc.own = _bitField;
+            return await r.table('guildChannel').insert(doc).run();
+        }
+        doc.own = _bitField;
+        return await r.table('guildChannel').replace(doc).run();
+    }
+};
+
+db.getChannel = async (_guild, _channel) => {
+    if(typeof _guild) {
+        if(_channel) {
+            let doc = await r.table('guildChannel').getAll([_guild, _channel], {index: "guildChannel_guild_channel"}).run();
+            if(doc.length > 1) throw new Error("Multiple channels were found, report this to my creator");
+            if(!doc) throw new Error("No channel was found with that id");
+            return doc[0];
+        }
+        let doc = await r.table('guildChannel').getAll([_guild], {index: "guildChannel_guild"}).run();
+        if(!doc) throw new Error("No channel was found in that guild");
+        return doc;
+    }
+    throw new Error("No guild scope was used")
 };
 
 db.createPost = async (image, message, file, channel, guild) => {
