@@ -17,9 +17,9 @@ module.exports = {
         if(parseInt(args[1]) < 200) return msg.channel.send("Your bid is too low!");
         let random = Math.random();
         let chance;
-        if(parseInt(args[1]) >= 5000) chance = 0.30;
-        else if(parseInt(args[1]) >=3000) chance = 0.35;
-        else chance = 0.43;
+        if(parseInt(args[1]) >= 5000) chance = 0.425;
+        else if(parseInt(args[1]) >=3000) chance = 0.475;
+        else chance = 0.5;
         let choice = args[0];
         let setting = await db.getSetting(msg.guild.id);
         let multiplier;
