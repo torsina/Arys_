@@ -65,8 +65,8 @@ perm.check = async (_guildMember, _channel, _perm) => {
     let userBitFields = {};
     for(let i=0;i<commands.length;i++) {
         channelBitField[commands[i]] = {};
-        if(channel[commands[i]] && channel[commands[i]].allow) channelBitField[commands[i]].allow = channelBitField[commands[i]].allow | channel[commands[i]].allow;
-        if(channel[commands[i]] && channel[commands[i]].deny) channelBitField[commands[i]].deny = channelBitField[commands[i]].deny | channel[commands[i]].deny;
+        if(channel && channel[commands[i]] && channel[commands[i]].allow) channelBitField[commands[i]].allow = channelBitField[commands[i]].allow | channel[commands[i]].allow;
+        if(channel && channel[commands[i]] && channel[commands[i]].deny) channelBitField[commands[i]].deny = channelBitField[commands[i]].deny | channel[commands[i]].deny;
 
         if(!channelBitField[commands[i]].allow) channelBitField[commands[i]].allow = 0;
         if(!channelBitField[commands[i]].deny) channelBitField[commands[i]].deny = 0;
