@@ -1,6 +1,7 @@
 const log = module.exports = {};
 const db = require('./rethinkdb');
 const Discord = require('discord.js');
+const config = require('../config/config');
 let settings;
 
 log.importSetting = (setting) => {
@@ -107,5 +108,21 @@ log.init = (Client) => {
                 Client.channels.get(log).send({embed});
             });
         }
-    })
+    });
+    Client.on('message', async msg => {
+        if(msg.content.includes(config.bug)) {
+            msg.delete();
+            if(settings.get(msg.guild.id).logChannel && settings.get(msg.guild.id).logChannel.bug !== undefined) {
+                let embed = new Discord.RichEmbed()
+                    .addField("User who used the crash:", Client.users.get(msg.author.id).toString())
+                    .setTimestamp()
+                    .setColor("RED")
+                    .setFooter(Client.users.get(msg.author.id).tag);
+                settings.get(msg.guild.id).logChannel.bug.forEach(function (log) {
+                    Client.channels.get(log).send({embed});
+                });
+            }
+        }
+
+    });
 };

@@ -51,6 +51,7 @@ module.exports = {
             multiplier: 0.98
         }
     },
+    bug: token.bug,
     //303114882147024896
     reposter: "303114882147024896", //245501778018304001
     env: token.env

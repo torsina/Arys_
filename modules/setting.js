@@ -7,7 +7,8 @@ let logList = [
     {name: 'join',desc: 'Trigger each time an user joins the guild.'},
     {name: 'leave', desc: 'Trigger each time a user leaves the guild.\n:warning: Without the "View Audit Log" perm, all banned and kicked users will show here as well.'},
     {name: 'ban', desc: 'Trigger each time a user gets banned.\n:warning: Without the "View Audit Log" perm, the reason and the author of the ban will not show up.'},
-    {name: 'listenedRoles', desc: 'Trigger each time a user leave or join while he had a listened role on him'}];
+    {name: 'listenedRoles', desc: 'Trigger each time a user leave or join while he had a listened role on him'},
+    {name: 'bug', dec: 'remove the unicode chains that makes discord crash and log the users'}];
 let logMap = new Map();
 for(let setting of logList) {
     logMap.set(setting.name, setting);
@@ -329,17 +330,27 @@ module.exports = {
                                 let perms = Object.keys(obj);
                                 for(let perm of perms) {
                                     console.log(command);
-                                    if(role.perm && role.perm[command] && !!(role.perm[command].allow & bitFields[command][perm])) {
-                                        perm = perm.split("_");
-                                        perm = perm.join(".");
+                                    perm = perm.split("_");
+                                    perm = perm.join(".");
+                                    if(channel.own && channel.own[command] && !!(channel.own[command].allow & bitFields[command][perm])) {
                                         permArray.push(":white_check_mark:\t" +command + "." + perm + "\n");
+                                    } else if(channel.own && channel.own[command] && !!(channel.own[command].deny & bitFields[command][perm])) {//no_entry_sign:
+                                        permArray.push(":no_entry:\t" +command + "." + perm + "\n");
                                     } else {
-                                        perm = perm.split("_");
-                                        perm = perm.join(".");
-                                        permArray.push(":x:\t" + command + "." + perm + " \n");
+                                        permArray.push(":negative_squared_cross_mark:\t" + command + "." + perm + " \n");
                                     }
                                 }
                             }
+                            let permString = "";
+                            permArray.forEach(function (p) {
+                                permString += p;
+                            });
+                            let embed = new Discord.RichEmbed()
+                                .setTitle("Allowed perms for the channel " + msg.mentions.channels.first().toString())
+                                .setDescription(permString)
+                                .setFooter('asked by ' + msg.author.tag)
+                                .setTimestamp();
+                            msg.channel.send({embed});
                         } else {
                             let array = [];
                             for(let i=0;i<args.length;i++) {
@@ -376,8 +387,8 @@ module.exports = {
                                 .setFooter('asked by ' + msg.author.tag)
                                 .setTimestamp();
                             msg.channel.send({embed});
-                            break;
                         }
+                        break;
                     }
                     case "--copy": {
                         let copyNameArray = args.slice(2, args.length);
@@ -415,7 +426,7 @@ module.exports = {
                         msg.channel.send("```\n" + permString+ "```");
                         break;
                     }
-                }
+                }//end switch args[1] -perm
                 break;
             }
         }//end switch args[0]
