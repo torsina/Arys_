@@ -403,7 +403,9 @@ db.setChannelPerm = async (_guild, _channel, _bitField) => {
         }
         doc.own = _bitField;
         return await r.table('guildChannel').replace(doc).run();
-    }
+    } else if(!_guild) throw new Error('No guild scope used');
+    else if(!_channel) throw new Error('No channel used');
+    else if(!_bitField) throw new Error('No bitField used');
 };
 
 db.getChannel = async (_guild, _channel) => {
