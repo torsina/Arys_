@@ -14,7 +14,7 @@ module.exports = {
     func: async(client, msg, args,  guildMember) => {
         //if(config.env === "dev") return;
         try{await perms.check(guildMember, msg.channel.id, "bet.base")}catch(e) {return msg.channel.send(e.message)}
-        if(parseInt(args[1]) < 200) return msg.channel.send("Your bid is too low!");
+        if(parseInt(args[1]) < 50) return msg.channel.send("Your bid is too low!");
         let random = Math.random();
         let chance = 0.5;
         let choice = args[0];
