@@ -2,6 +2,7 @@ const perms = require('../util/perm');
 const config = require('../config/config');
 const db = require('../util/rethinkdb');
 const money = require('../util/money');
+const Discord = require('discord.js');
 
 const bitField = {
     help: 1 << 0,
@@ -9,7 +10,7 @@ const bitField = {
 };
 
 module.exports = {
-    help: 'Ping, Pong',
+    help: 'Feel the commies inside you',
     func: async (client, msg, args, guildMember) => {
         try{await perms.check(guildMember, msg.channel.id, "buy.base")}catch(e) {return msg.channel.send(e.message)}
         if(!args[0]) {
@@ -47,6 +48,12 @@ module.exports = {
                             if(msg.guild.members.get(client.user.id).hasPermission('MANAGE_ROLES')) {
                                 await db.changeMoney(msg.guild.id, msg.author.id, -item.price).catch(e => {msg.channel.send(e.message)});
                                 msg.guild.members.get(msg.author.id).addRole(msg.guild.roles.find("name", item.item)).catch(console.error);
+                                let embed = new Discord.RichEmbed()
+                                    .setDescription(msg.author.toString() + " ,you bought the color " + item.item + " for " + item.price)
+                                    .setColor("GOLD")
+                                    .setFooter('asked by ' + msg.author.tag)
+                                    .setTimestamp();
+                                msg.channel.send({embed});
                             } else {
                                 return msg.channel.send("I don't have the permission to do that D:")
                             }
