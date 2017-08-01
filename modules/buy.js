@@ -49,7 +49,7 @@ module.exports = {
                                 await db.changeMoney(msg.guild.id, msg.author.id, -item.price).catch(e => {msg.channel.send(e.message)});
                                 msg.guild.members.get(msg.author.id).addRole(msg.guild.roles.find("name", item.item)).catch(console.error);
                                 let embed = new Discord.RichEmbed()
-                                    .setDescription(msg.author.toString() + " ,you bought the color " + item.item + " for " + item.price)
+                                    .setDescription(msg.author.toString() + " ,you bought the color " + item.item + " for " + item.price + " " + await money.getName(msg.guild.id))
                                     .setColor("GOLD")
                                     .setFooter('asked by ' + msg.author.tag)
                                     .setTimestamp();
