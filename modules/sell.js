@@ -46,7 +46,7 @@ module.exports = {
                                 msg.guild.members.get(msg.author.id).removeRole(msg.guild.roles.find("name", item.item)).catch(console.error);
                                 await db.changeMoney(msg.guild.id, msg.author.id, item.price/2).catch(e => {msg.channel.send(e.message)});
                                 let embed = new Discord.RichEmbed()
-                                    .setDescription(msg.author.toString() + " ,you sold the color " + item.item + " for " + item.price + " " + await money.getName(msg.guild.id))
+                                    .setDescription(msg.author.toString() + " ,you sold the color " + item.item + " for " + parseInt(item.price)/2 + " " + await money.getName(msg.guild.id))
                                     .setColor("GOLD")
                                     .setFooter('asked by ' + msg.author.tag)
                                     .setTimestamp();
