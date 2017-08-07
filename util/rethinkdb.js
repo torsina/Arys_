@@ -17,7 +17,7 @@ db.init = async (Client) => {
 
     let tableList = await r.tableList().run(), tableWait = [];
     let tablesExpected = [
-        "setting", "post", "user", "event", "analytic", "guildMember", "guildChannel", "shopItem", "shopCategory", "guildRole"
+        "setting", "post", "user", "event", "analytic", "guildMember", "guildChannel", "shopItem", "shopCategory", "guildRole", "autoRole"
     ];
     let indexExpected = [
         {table: "analytic", index: "analytic_guild", rows: ["guild"]},
@@ -36,6 +36,8 @@ db.init = async (Client) => {
         {table: "guildRole", index: "guildRole_guild_role", rows: ["guild", "role"]},
         {table: "guildChannel", index: "guildChannel_guild", rows: ["guild"]},
         {table: "guildChannel", index: "guildChannel_guild_channel", rows: ["guild", "channel"]},
+        {table: "autoRole", index: "autoRole_guild", rows: ["guild"]},
+        {table: "autoRole", index: "autoRole_guild_role", rows: ["guild", "role"]}
     ];
     let indexes = [];
     for(let table of tablesExpected) {
@@ -83,7 +85,6 @@ db.createSetting = async (guild) => {
         guild: guild,
         enter: Date.now(),
         lastSave: Date.now(),
-
     };
     return await r.table('setting').insert(query).run();
 };
@@ -92,7 +93,7 @@ db.getSettings = async () => {
     let doc =  await r.table('setting').run();
     let map = new Map();
     for(let subDoc of doc) {
-        map.set(subDoc.guild, subDoc)
+        map.set(subDoc.guild, subDoc);
     }
     return map;
 };
@@ -320,8 +321,8 @@ db.getShops = async (_guild, _category, _id) => {
     }
 };
 
-db.addLogChannel = async (guild, _channel, _type) => {
-    let doc = await db.getSetting(guild);
+db.addLogChannel = async (_guild, _channel, _type) => {
+    let doc = await db.getSetting(_guild);
     doc.lastSave = Date.now();
     if(!doc.logChannel) doc.logChannel = {};
     if(!doc.logChannel[_type]) doc.logChannel[_type] = [];
@@ -557,4 +558,30 @@ db.countAnalyticByDate = async (guild, min, max) => {
         stack[i].end = end;
     }
     return stack;
+};
+
+db.createAutoRole = async (_guild, _role) => {
+    let check = await db.getAutoRole(_guild, _role);
+    if(check) throw new Error('Role is already in the list.');
+    let query = {
+        guild: _guild,
+        role: _role
+    };
+    return await r.table('autoRole').insert(query).run().catch(console.error);
+};
+
+db.getAutoRole = async (_guild, _role) => {
+    let doc = await r.table('autoRole').getAll([_guild, _role], {index: "autoRole_guild_role"}).run();
+    if(doc.length > 1) throw new Error('Found more than 1 result, contact dev for more info');
+    return doc[0];
+};
+
+db.getAutoRoles = async (_guild) => {
+    return await r.table('autoRole').getAll([_guild], {index: "autoRole_guild"}).run();
+};
+
+db.deleteAutoRole = async (_guild, _role) => {
+    let check = await db.getAutoRole(_guild, _role);
+    if(!check) throw new Error('Role is not in the list');
+    return await r.table('autoRole').getAll([_guild, _role], {index: "autoRole_guild_role"}).delete().run();
 };
