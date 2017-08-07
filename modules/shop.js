@@ -36,8 +36,7 @@ module.exports = {
                                 }
                             }
                         }
-                        console.log(roleInput);
-                        let  roleName;
+                        let roleName;
                         for(let item of msg.guild.roles.values()) {
                             if(item.name.match(roleInput)) {
                                 roleName = item.name;
