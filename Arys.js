@@ -147,7 +147,12 @@ function isEmoji(str) {
 }
 
 process.on("unhandledRejection", err => {
-    console.error("Uncaught Promise Error: \n" + err.stack);
+    let timestamp = new Date();
+    console.error('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + ']' + "Uncaught Promise Error: \n" + err.stack);
+});
+process.on("uncaughtException", err => {
+    let timestamp = new Date();
+    console.error('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + ']' + "Uncaught Exception Error: \n" + err.stack);
 });
 
 exports.Client = Client;
