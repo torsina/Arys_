@@ -35,29 +35,39 @@ module.exports = {
                 break;
             }
             case "-set": {
-                if (msg.mentions.roles.first()) {
+                let nameArray = args.slice();
+                delete nameArray[0];
+                let name = nameArray.join(" ");
+                name = name.substr(1);
+                let role = msg.guild.roles.find("name", name);
+                if (role) {
                     try {
-                        await db.createListenedRole(msg.guild.id, msg.mentions.roles.first().id);
+                        await db.createListenedRole(msg.guild.id, role.id);
                     } catch (e) {
                         embed.setDescription(e.message);
                         return msg.channel.send({embed})
                     }
-                    embed.setDescription("the role " + msg.mentions.roles.first().name + " was added to the watch list");
+                    embed.setDescription("the role " + role.name + " was added to the watch list");
                     msg.channel.send({embed});
-                } else return msg.channel.send("Please tag the role you want to add to the watch list.");
+                } else return msg.channel.send("Please input the name of the role you want to add to the watch list.");
                 break;
             }
             case "-remove": {
-                if (msg.mentions.roles.first()) {
+                let nameArray = args.slice();
+                delete nameArray[0];
+                let name = nameArray.join(" ");
+                name = name.substr(1);
+                let role = msg.guild.roles.find("name", name);
+                if (role) {
                     try {
-                        await db.deleteListenedRole(msg.guild.id, msg.mentions.roles.first().id);
+                        await db.deleteListenedRole(msg.guild.id, role.id);
                     } catch (e) {
                         embed.setDescription(e.message);
                         return msg.channel.send({embed})
                     }
-                    embed.setDescription("the role " + msg.mentions.roles.first().name + " was removed from the watch list");
+                    embed.setDescription("the role " + role.name + " was removed from the watch list");
                     msg.channel.send({embed});
-                } else return msg.channel.send("Please tag the role you want to add to the watch list.");
+                } else return msg.channel.send("Please input the name of the role you want to add to the watch list.");
                 break;
             }
             case "-list": {
