@@ -39,7 +39,7 @@ module.exports = {
                 });
                 return;
             }
-            if (args[0] > config.post.safe && await perms.check(guildMember, msg.channel.id, "post.bypass.number") !== true){ //
+            if (!isNaN(parseInt(args[0])) && parseInt(args[0]) > config.post.safe && await perms.check(guildMember, msg.channel.id, "post.bypass.number") !== true){ //
                 msg.reply("don't make me use all of my material you horny fuck !"+"\n" + "Go fap to your girlfriend, Oh wait..").then(m => {
                     setTimeout(function() {
                         m.delete();
@@ -52,7 +52,7 @@ module.exports = {
 
             for (let i = start; i < end; i++) {
                 msg.channel.send('id : ' + i + "\n" + line[i]).then(m => {
-                    db.createPost(start, m.id, config.post.file, m.channel.id, m.guild.id);
+                    db.createPost(start, m.id, config.post.file, m.channel.id, m.guild.id).catch(console.error);
                 });
 
                 console.log(start + " " + end + " " + i);
