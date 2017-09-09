@@ -84,7 +84,7 @@ module.exports = {
                                     }
                                 }
                                 try{
-                                    await db.addShopItem(msg.guild.id, args[2], roleName, msg.guild.roles.find("name", roleName).id, parseInt(args[args.indexOf("--price") + 1]), "role");
+                                    await db.addShopItem(msg.guild.id, args[2], msg.guild.roles.find("name", roleName).id, parseInt(args[args.indexOf("--price") + 1]));
                                 }
                                 catch(e) {
                                     return msg.channel.send(e.message);
@@ -145,8 +145,6 @@ module.exports = {
                 obj[i] = {};
                 console.log(i);
                 obj[i].buffer = await money.shop(msg.guild.id, args[0], msg, i);
-                //console.log(typeof obj[i].buffer);
-                //console.log(obj[i].buffer);
                 msg.channel.send({ files: [ { attachment: obj[i].buffer, name: "name.png" } ] });
             }
 

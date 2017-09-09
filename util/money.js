@@ -97,15 +97,13 @@ money.shop = async (guild, category, msg, int) => {
     ctx.shadowBlur = 0;
 
     for (let i = 0; i < max; i++) {
-        //let length = Math.log(parseInt(list[i].price)) * Math.LOG10E + 1 | 0;
-        //if(length > 9) return console.error("element price was too big");
         if(parseInt(i+int) >= list.length) break;
         if(config.env === "dev") {
             console.log("TRIGGER " + parseInt(i+int));
             console.log(list[i+int]);
         }
         ctx.fillStyle = msg.guild.roles.get(list[i+int].id).hexColor;
-        ctx.fillText(list[i+int].item, 28, (i + 1) * 24 + i * 8);
+        ctx.fillText(msg.guild.roles.get(list[i+int].id).name, 28, (i + 1) * 24 + i * 8);
         ctx.fillStyle = "white";
         ctx.fillText(list[i+int].price, 402 * 2 - 65 * 2, (i + 1) * 24 + i * 8);
     }

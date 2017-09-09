@@ -42,14 +42,14 @@ module.exports = {
                     let category = await db.getShopsCategory(msg.guild.id, args[0]).catch(console.error);
                     switch(category.type) {
                         case "role":
-                            if(msg.guild.members.get(msg.author.id).roles.find("name", item.item)) {
-                                return msg.channel.send("You already have that role.")
+                            if(msg.guild.members.get(msg.author.id).roles.get(item.id)) {
+                                return msg.channel.send("You already have that role.");
                             }
                             if(msg.guild.members.get(client.user.id).hasPermission('MANAGE_ROLES')) {
                                 await db.changeMoney(msg.guild.id, msg.author.id, -item.price).catch(e => {msg.channel.send(e.message)});
-                                msg.guild.members.get(msg.author.id).addRole(msg.guild.roles.find("name", item.item)).catch(console.error);
+                                msg.guild.members.get(msg.author.id).addRole(item.id).catch(console.error);
                                 let embed = new Discord.RichEmbed()
-                                    .setDescription(msg.author.toString() + " ,you bought the color " + item.item + " for " + item.price + " " + await money.getName(msg.guild.id))
+                                    .setDescription(msg.author.toString() + " ,you bought the color " + msg.guild.roles.get(item.id).name + " for " + item.price + " " + await money.getName(msg.guild.id))
                                     .setColor("GOLD")
                                     .setFooter('asked by ' + msg.author.tag)
                                     .setTimestamp();

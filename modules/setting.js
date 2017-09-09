@@ -395,7 +395,6 @@ module.exports = {
                         let copyName = copyNameArray.join(" ");
                         let copyId = msg.guild.roles.find("name", copyName);
                         let copyRole = await db.getRolePerm(msg.guild.id, copyId.id);
-                        console.log(copyRole + " jjjj");
                         let filter = m => m.author.id === msg.author.id;
                         let copiedName = await msg.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] })
                             .catch(collected => msg.channel.send(`Sorry, you took too much time to select a role`));

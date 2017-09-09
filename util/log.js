@@ -95,7 +95,7 @@ log.init = (Client) => {
             let auditLog = await guild.fetchAuditLogs({type: 22, limit: 1}); //banned
             auditLog = auditLog.entries.first();
             let embed = new Discord.RichEmbed()
-                .addField("User banned:", user.toString() + " was banned")
+                .addField("User banned:", user.toString())
                 .setTimestamp()
                 .setColor("RED");
             if(guild.members.get(Client.user.id).permissions.has("VIEW_AUDIT_LOG")) {

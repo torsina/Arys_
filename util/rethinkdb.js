@@ -286,13 +286,12 @@ db.getShopsCategory = async (_guild, _category) => {
     }
 };
 
-db.addShopItem = async (_guild, _category, _item, _id, _price) => {
+db.addShopItem = async (_guild, _category, _id, _price) => {
     let doc = await db.getShops(_guild, _category, _id);
     if(!doc) {
         doc = {
             guild: _guild,
             category: _category,
-            item: _item,
             id: _id,
             price: _price
         };
