@@ -9,14 +9,14 @@ const bitField = {
 module.exports = {
     help: 'get dem data',
     func: async (client, msg, args, guildMember) => {
-        if(args[0] === "get") {// 0 = get ; 1 = <orderby(least used; highest used; user> ; 2 = <emoji>  ;
+        if(args[0] === "-get") {// 0 = get ; 1 = <orderby(least used; highest used; user> ; 2 = <emoji>  ;
             try{await perms.check(guildMember, msg.channel.id, "analytic.get")}catch(e) {return msg.channel.send(e.message)}
-            if (args[1] === "inc") {
+            if (args[1] === undefined) {
                 db.countAnalytic(msg.guild.id).then(doc => {
-                    msg.channel.send(compare(doc)).catch(console.error);
+                    msg.channel.send(compare(doc, msg)).catch(console.error);
                 });
             }
-            if(args[1] === "date") {
+            else if(args[1] === "date") {
                 let a, b, from, to;
                 if(args.includes("-from")) {
                     a = args.indexOf("-from");
@@ -50,18 +50,40 @@ module.exports = {
     }
 };
 
-function compare(doc) {
+function compare(doc, msg) {
     let array = doc.map(str => {
-        let [item, count] = str.split(" "); return { item, count }
+        let [item, count] = str.split(" ");
+        let id = item.match(/\d+/g);
+        id = id[id.length-1];
+        console.log(id);
+        if(msg.guild.emojis.get(id)) {
+            return { item, count }
+        }
     });
     array.sort(function(a, b){
         return a.count-b.count;
     });
     let str = "";
+    for (let i = 0; i < array.length; i++) { //clean the undefined array slots
+        if (array[i] === undefined) {
+            array.splice(i, 1);
+            i--;
+        }
+    }
+    console.log(array);
     for(let i=0;i<array.length; i++) {
         console.log(array[i].item);
         str += array[i].item + " " + array[i].count  + "\n";
     }
     return str;
 }
+clean = function(deleteValue) {
+    for (var i = 0; i < this.length; i++) {
+        if (this[i] == deleteValue) {
+            this.splice(i, 1);
+            i--;
+        }
+    }
+    return this;
+};
 module.exports.bitField = bitField;

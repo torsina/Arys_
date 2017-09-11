@@ -507,9 +507,9 @@ db.createAnalytic = async (guild, channel, item, member, date) => {
 
 db.countAnalytic = async (guild) => {
     let doc = await r.table('analytic').getAll([guild], {index: "analytic_guild"}).run();
-    console.log(doc);
     let nameStack = [...new Set(doc.map(analytic => analytic.item))];
     if(nameStack.length !== 0) {
+        let stack = [];
         for(let i=0;i<nameStack.length;i++) {
             let name = nameStack[i];
             let count = doc.filter(function (o) {
