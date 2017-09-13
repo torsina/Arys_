@@ -30,7 +30,7 @@ module.exports = {
     func: async(client, msg, args, guildMember) => {
     if(config.env === "dev") return;
         try{await perms.check(guildMember, msg.channel.id, "post.base")}catch(e) {return msg.channel.send(e.message)}
-        if(msg.channel.id==='275280722531581952' || role === "bot_owner"){
+        if(msg.channel.id==='275280722531581952' && !isNaN(parseInt(args[0])) && parseInt(args[0]) > 0){
             if (args.length < 1){
                 msg.reply("please add the number of image you want (._. )").then(m => {
                     setTimeout(function() {
