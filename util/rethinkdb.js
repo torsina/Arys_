@@ -66,6 +66,12 @@ db.init = async (Client) => {
             console.info(`Guild "${Client.guilds.get(guild).name}" was added in "setting" table`);
         }
     }
+    Client.guilds.forEach(async function(guild) {
+        let setting = await db.getSetting(guild.id).catch(console.error);
+        if(setting === undefined) {
+            await db.createSetting(guild.id).catch(console.error);
+        }
+    });
     await Promise.all(tableWait);
     console.log(`rethinkdb initialized`);
     return true;

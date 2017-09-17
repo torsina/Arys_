@@ -14,7 +14,7 @@ money.perMessage = async (guild, member) => {
     let setting = await db.getSetting(guild).catch(console.error);
     let doc = await db.getGuildMember(guild, member);
     if(doc) {
-        if(!setting.money && doc.money || !setting.money.wait && doc.money) {
+        if(!setting.money && doc.money) {
             if(doc.money && doc.money.lastGet + config.money.wait > Date.now()) return;
         } else {
             if(doc.money && doc.money.lastGet + setting.money.wait > Date.now()) return;
