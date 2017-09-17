@@ -128,7 +128,9 @@ Client.on('message', async message => {
         args.splice(0, 1);
 
         if (command in Client.commands) {
-            console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] [' + message.author.username + '#' + message.author.discriminator + '] [' + message.author.id + '] ['+ message.channel.name + "] " + command);
+            console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] ['
+                + message.guild.name + "@" + message.guild.id + '] ['
+                + message.author.tag + '] [' + message.author.id + '] ['+ message.channel.name + "] " + command);
             Client.commands[command].func(Client, message, args, guildMember);
             console.log(args);
         }
