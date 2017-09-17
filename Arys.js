@@ -10,6 +10,7 @@ const web = require('./web/server');
 let trigger = false;
 let settings;
 Client.login(config.discord.token.bot).catch(console.error);
+exports.Client = Client;
 Client.once('ready', async () => {
     console.time('loading');
     Client.load();
@@ -94,7 +95,7 @@ Client.on('message', async message => {
         return message.channel.send("throw him in a pit and let me do the rest")
     }
     //emoji delete system
-    if (isEmoji(message.content) === true && message.channel.id !== "249626680434491392" && config.env !== "dev") {
+    if (isEmoji(message.content) === true && message.channel.id !== "249626680434491392" && config.env !== "dev" && message.guild.id !== "242655328410402816") {
         if (message.author.bot) return;
         console.log(timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + "there is an emoji here : " + message.channel.name + " ,by : " + message.author.username + '#' + message.author.discriminator);
         message.delete();
@@ -155,4 +156,3 @@ process.on("uncaughtException", err => {
     console.error('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + ']' + "Uncaught Exception Error: \n" + err.stack);
 });
 
-exports.Client = Client;
