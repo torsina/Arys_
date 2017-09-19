@@ -1,46 +1,44 @@
 const http = require("http"),
     url = require("url"),
     path = require("path"),
-    fs = require("fs")
+    fs = require("fs");
 port = process.argv[2] || 8888;
 
 
-    http.createServer(function(request, response) {
+    http.createServer(function(req, res) {
 
-        let uri = url.parse(request.url).pathname
-            , filename = path.join(process.cwd(), uri);
+        var filePath = req.url;
+        if (filePath == '/')
+            filePath = '/index.html';
 
-        let contentTypesByExtension = {
-            '.html': "text/html",
-            '.css':  "text/css",
-            '.js':   "text/javascript"
-        };
+        filePath = __dirname+filePath;
+        var extname = path.extname(filePath);
+        var contentType = 'text/html';
 
-        fs.exists(filename, function(exists) {
-            if(!exists) {
-                response.writeHead(404, {"Content-Type": "text/plain"});
-                response.write("404 Not Found\n");
-                response.end();
-                return;
+        switch (extname) {
+            case '.js':
+                contentType = 'text/javascript';
+                break;
+            case '.css':
+                contentType = 'text/css';
+                break;
+        }
+
+
+        fs.exists(filePath, function(exists) {
+
+            if (exists) {
+                fs.readFile(filePath, function (error, content) {
+                    if (error) {
+                        res.writeHead(500);
+                        res.end();
+                    }
+                    else {
+                        res.writeHead(200, {'Content-Type': contentType});
+                        res.end(content, 'utf-8');
+                    }
+                });
             }
-
-            if (fs.statSync(filename).isDirectory()) filename += '/index.html';
-
-            fs.readFile(filename, "binary", function(err, file) {
-                if(err) {
-                    response.writeHead(500, {"Content-Type": "text/plain"});
-                    response.write(err + "\n");
-                    response.end();
-                    return;
-                }
-
-                let headers = {};
-                let contentType = contentTypesByExtension[path.extname(filename)];
-                if (contentType) headers["Content-Type"] = contentType;
-                response.writeHead(200, headers);
-                response.write(file, "binary");
-                response.end();
-            });
         });
     }).listen(parseInt(port, 10));
 

@@ -7,6 +7,7 @@ const money = require('./util/money');
 const log = require('./util/log');
 const perm = require('./util/perm');
 const web = require('./web/server');
+const rest = require('./rest/routes');
 let trigger = false;
 let settings;
 Client.login(config.discord.token.bot).catch(console.error);
