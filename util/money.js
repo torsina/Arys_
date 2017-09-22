@@ -6,6 +6,13 @@ const path = require('path');
 const Canvas = require('canvas');
 Canvas.registerFont(fontFile('../Whitney_Book.ttf'), {family: 'Whitney'});
 
+money.amount = (_array) => {
+    if(!(_array instanceof Array)) throw new Error("Value is not an array");
+    let amount = parseInt(_array.join(""));
+    if(isNaN(amount) || amount < 0) throw new Error("Value must be a number");
+    return amount;
+};
+
 money.add = async (guild, member, amount) => {
     await db.changeMoney(guild, member, amount).catch(e => {return e.message})
 };

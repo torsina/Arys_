@@ -1,4 +1,5 @@
 const token = require('../token');
+if(token.env === "dev") token.bot = token.dev;
 module.exports = {
     discord: {
         token: {

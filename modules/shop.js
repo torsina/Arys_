@@ -24,19 +24,12 @@ module.exports = {
                 try{await perms.check(guildMember, msg.channel.id, "shop.add")}catch(e) {return msg.channel.send(e.message)}
                 switch(args[1]) {
                     case "--role": //0 = -add ; 1 = --role; 2 = category; 3 = role; 4 = --price; 5 = price
-                        let roleInput = "";
+                        let roleInput, roleName;
                         if(args.indexOf("--price") !== -1) {
                             let max = args.indexOf("--price");
                             let min = args.indexOf("--role") + 2;
-                            for(let i = min;i<max;i++) {
-                                if(i === max-1) {
-                                    roleInput += args[i]
-                                } else {
-                                    roleInput += args[i] + " "
-                                }
-                            }
+                            roleInput = args.slice(min, max).join(" ");
                         }
-                        let roleName;
                         for(let item of msg.guild.roles.values()) {
                             if(item.name.match(roleInput)) {
                                 roleName = item.name;
@@ -47,44 +40,32 @@ module.exports = {
                             if(!isNaN(parseInt(args[args.indexOf("--price") + 1]))) {
                                 let _category = await db.getShopsCategory(msg.guild.id, args[2]);
                                 if(!_category) {
-                                    let str = "";
+                                    let availableTypes = "";
                                     config.money.shop.type.forEach(function (doc) {
-                                        str += "`" + doc + "`\n";
+                                        availableTypes += "`" + doc + "`\n";
                                     });
                                     msg.channel.send("Please enter the display name of the category and the type of the category\n" +
                                         "To do that, please use:\n" +
                                         "`--header <header> --type <type>`\n" +
-                                        "avalaible types: " + str);
+                                        "available types: " + availableTypes);
                                     let filter = m => m.author.id === msg.author.id;
-                                    let doc = await msg.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] })
+                                    let msgResponse = await msg.channel.awaitMessages(filter, { max: 1, time: 30000, errors: ['time'] })
                                         .catch(collected => msg.channel.send(`Sorry, you took too much time to create the new category`));
-                                    doc = doc.first().content.split(' ');
-                                    if(doc.indexOf("--header") === -1 && doc.indexOf("--type") === -1) {
+                                    msgResponse = msgResponse.first().content.split(' ');
+                                    let headerInput, typeInput;
+                                    let headerIndex = msgResponse.indexOf("--header");
+                                    let typeIndex = msgResponse.indexOf("--type");
+                                    if(headerIndex === -1 || typeIndex === -1) {
                                         return msg.channel.send("Please use both `--header` and `--type` in your answer.\nCommand canceled.")
                                     } else {
-                                        let headerInput = "";
-                                        let typeInput = "";
-                                        let min = doc.indexOf("--header");
-                                        let max = doc.indexOf("--type");
-                                        for(let i = min+1;i<max;i++) {
-                                            if(i === max-1) {
-                                                headerInput += doc[i]
-                                            } else {
-                                                headerInput += doc[i] + " "
-                                            }
-                                        }
-                                        for(let i = max+1;i<doc.length;i++) {
-                                            if(i === doc.length-1) {
-                                                typeInput += doc[i]
-                                            } else {
-                                                typeInput += doc[i] + " "
-                                            }
-                                        }
+                                        headerInput = msgResponse.slice(headerIndex+1, typeIndex-1).join(" ");
+                                        typeInput = msgResponse.slice(typeIndex+1, msgResponse.length).join(" ");
                                         await db.addShopCategory(msg.guild.id, args[2], headerInput, typeInput).catch(console.error);
                                     }
                                 }
                                 try{
-                                    await db.addShopItem(msg.guild.id, args[2], msg.guild.roles.find("name", roleName).id, parseInt(args[args.indexOf("--price") + 1]));
+                                    let priceIndex = args.indexOf("--price");
+                                    await db.addShopItem(msg.guild.id, args[2], msg.guild.roles.find("name", roleName).id, money.amount(args.slice(priceIndex, args.length)));
                                 }
                                 catch(e) {
                                     return msg.channel.send(e.message);
@@ -96,17 +77,15 @@ module.exports = {
                         return msg.channel.send("Please put a valid role name here.");
                         break;
                     default:
-                        return msg.channel.send("Synthax:\n" +
-                            "`-add [--role] <category> <role name> <price>`");
+                        return msg.channel.send("Syntax:\n" +
+                            "`$shop -add [--role] <category> <role name> --price <price>`");
                         break;
                 }
                 break;
             case "-remove": {
                 switch(args[1]) {
                     case "--role": {
-                        let name = args.slice();
-                        name.splice(0, 3);
-                        name = name.join(" ");
+                        let name = args.slice().splice(0, 3).join(" ");
                         console.log(name);
                         let role = msg.guild.roles.find("name", name);
                         if(!role) return msg.channel.send("No such role found\n:warning: case sensitive.");
@@ -147,9 +126,7 @@ module.exports = {
                 obj[i].buffer = await money.shop(msg.guild.id, args[0], msg, i);
                 msg.channel.send({ files: [ { attachment: obj[i].buffer, name: "name.png" } ] });
             }
-
         }
-
     }
 };
 module.exports.bitField = bitField;

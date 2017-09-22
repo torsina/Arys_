@@ -21,14 +21,7 @@ module.exports = {
             list.forEach(function(item) {
                 array.push(item);
             });
-            let name = "";
-            for(let i = 1;i<args.length;i++) {
-                if(i === args.length-1) {
-                    name += args[i]
-                } else {
-                    name += args[i] + " "
-                }
-            }
+            let name = args.slice(1, args.length).join(" ");
             if(includesObject(args[0], array)) {
                 if(!name) return msg.channel.send("Please enter a valid role name");
                 let role = msg.guild.roles.find("name", name);
@@ -44,15 +37,17 @@ module.exports = {
                             }
                             if(msg.guild.members.get(client.user.id).hasPermission('MANAGE_ROLES')) {
                                 msg.guild.members.get(msg.author.id).removeRole(item.id).catch(console.error);
-                                await db.changeMoney(msg.guild.id, msg.author.id, item.price/2).catch(e => {msg.channel.send(e.message)});
+                                await db.changeMoney(msg.guild.id, msg.author.id, item.price/2).catch(console.error);
+                                let moneyName = await money.getName(msg.guild.id);
+                                let roleName = msg.guild.roles.get(item.id).name;
                                 let embed = new Discord.RichEmbed()
-                                    .setDescription(msg.author.toString() + " ,you sold the color " + msg.guild.roles.get(item.id).name + " for " + parseInt(item.price)/2 + " " + await money.getName(msg.guild.id))
+                                    .setDescription(`${msg.author.toString()}, you sold the role ${roleName} for ${parseInt(item.price)/2} ${moneyName}`)
                                     .setColor("GOLD")
                                     .setFooter('asked by ' + msg.author.tag)
                                     .setTimestamp();
                                 msg.channel.send({embed});
                             } else {
-                                return msg.channel.send("I don't have the permission to do that D:")
+                                return msg.channel.send("I don't have the permission `MANAGE ROLE`")
                             }
                     }
                 }

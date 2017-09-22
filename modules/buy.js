@@ -21,21 +21,14 @@ module.exports = {
             list.forEach(function(item) {
                 array.push(item);
             });
-            let name = "";
-            for(let i = 1;i<args.length;i++) {
-                if(i === args.length-1) {
-                    name += args[i]
-                } else {
-                    name += args[i] + " "
-                }
-            }
+            let name = args.slice(1, args.length).join(" ");
             if(includesObject(args[0], array)) {
                 if(!name) return msg.channel.send("Please enter a valid role name");
                 let role = msg.guild.roles.find("name", name);
                 let item = await db.getShops(msg.guild.id, args[0], role.id);
                 let amount = await money.getAmount(msg.author.id, msg.guild.id);
                 let moneyName = await money.getName(msg.guild.id);
-                if(amount < item.price) return msg.channel.send("You don't have enough " + moneyName + " to do that. ");
+                if(amount < item.price) return msg.channel.send(`You don't have enough ${moneyName} to do that.`);
                 if(!item) {
                     return msg.channel.send("This item does not exist.");
                 } else {
@@ -46,7 +39,7 @@ module.exports = {
                                 return msg.channel.send("You already have that role.");
                             }
                             if(msg.guild.members.get(client.user.id).hasPermission('MANAGE_ROLES')) {
-                                await db.changeMoney(msg.guild.id, msg.author.id, -item.price).catch(e => {msg.channel.send(e.message)});
+                                await db.changeMoney(msg.guild.id, msg.author.id, -item.price);
                                 msg.guild.members.get(msg.author.id).addRole(item.id).catch(console.error);
                                 let embed = new Discord.RichEmbed()
                                     .setDescription(msg.author.toString() + " ,you bought the color " + msg.guild.roles.get(item.id).name + " for " + item.price + " " + await money.getName(msg.guild.id))

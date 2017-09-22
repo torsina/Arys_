@@ -202,13 +202,14 @@ db.changeMoney = async (guild, member, amount, isMessage, scope, force) => {
     let guildMember = await db.getGuildMember(guild, member);
     let user = await r.table('user').getAll(member, {index: "user_member"}).run();
     let setting = await db.getSetting(guild);
+    //guildMember object has a guild scope, user object does not
     if(!guildMember) {
         guildMember = {};
     }
     if(!user) {
         user = {};
     }
-    if(!guildMember.money) { //set
+    if(!guildMember.money) { //create bank account
         guildMember.money = {};
         if(setting.money && setting.money.amount) {
             guildMember.money.amount = setting.money.amount;
@@ -225,15 +226,15 @@ db.changeMoney = async (guild, member, amount, isMessage, scope, force) => {
         guildMember.money.lastGet = Date.now();
         user.money.amount += parseInt(amount);
     }
-    if((guildMember.money.amount + parseInt(amount)) < 0 && force === false || scope === "general" && (user.money.amount + parseInt(amount)) < 0 && force === false) {
-        throw new Error('Not enough credits for that.');
+    if((guildMember.money.amount + parseInt(amount)) < 0 && force === false || scope === "user" && user.money.amount + parseInt(amount) < 0 && force === false) {
+        throw new Error("You don't have enough money for that.");
     }
     if(!scope) { //guild is default scope
         guildMember.money.amount += parseInt(amount);
-    } else if(isMessage === false) {
+    } else {
         user.money.amount += parseInt(amount);
     }
-    if(!guildMember.member) {
+    if(!guildMember.member) {//finalizing object if new
         guildMember.member = member;
         guildMember.guild = guild;
         await r.table('guildMember').insert(guildMember).run();
