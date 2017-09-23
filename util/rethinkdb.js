@@ -197,7 +197,7 @@ db.deleteGuildMember = async (guild, member) => {
     return await r.table('guildMember').getAll([guild, member], {index: "guildMember_guild_member"}).delete().run();
 };
 
-db.changeMoney = async (guild, member, amount, isMessage, scope, force) => {
+db.changeMoney = async (guild, member, amount, options = {}) => {
     console.time('money');
     let guildMember = await db.getGuildMember(guild, member);
     let user = await r.table('user').getAll(member, {index: "user_member"}).run();
@@ -222,14 +222,14 @@ db.changeMoney = async (guild, member, amount, isMessage, scope, force) => {
         user.money.amount = config.money.amount;
     }
     if(isNaN(amount)) throw new Error('Amount is not a number.');
-    if(isMessage === true) {
+    if(options.isMessage === true) {
         guildMember.money.lastGet = Date.now();
         user.money.amount += parseInt(amount);
     }
-    if((guildMember.money.amount + parseInt(amount)) < 0 && force === false || scope === "user" && user.money.amount + parseInt(amount) < 0 && force === false) {
+    if((guildMember.money.amount + parseInt(amount)) < 0 && options.force === false || options.scope === "user" && user.money.amount + parseInt(amount) < 0 && options.force === false) {
         throw new Error("You don't have enough money for that.");
     }
-    if(!scope) { //guild is default scope
+    if(!options.scope) { //guild is default scope
         guildMember.money.amount += parseInt(amount);
     } else {
         user.money.amount += parseInt(amount);

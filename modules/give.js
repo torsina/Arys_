@@ -17,11 +17,46 @@ module.exports = {
         if(!msg.mentions.users.first()) {
             try{await perms.check(guildMember, msg.channel.id, "give.self")}catch(e) {return msg.channel.send(e.message)}
             msg.channel.send("You gave yourself " + args[0] + " " + name);
-            await db.changeMoney(msg.guild.id, msg.author.id, args[0], undefined, undefined, true).catch(console.error);
+            let moneyName = await money.getName(msg.guild.id);
+            let amount;
+            try{
+                amount = await money.amount(args.slice(0, args.length));
+            } catch(e) {
+                let embed = new Discord.RichEmbed()
+                    .setColor("RED")
+                    .setFooter('asked by ' + msg.author.tag)
+                    .setTimestamp()
+                    .addField("Error:", e.message);
+                return msg.channel.send({embed});
+            }
+            let embed = new Discord.RichEmbed()
+                .setColor("GREEN")
+                .setFooter('asked by ' + msg.author.tag)
+                .setTimestamp()
+                .setDescription(`${msg.author.toString()},You gave yourself ${amount} ${moneyName}.`);
+            msg.channel.send({embed});
+            await db.changeMoney(msg.guild.id, msg.author.id, amount, {force: true}).catch(console.error);
         } else {
             try{await perms.check(guildMember, msg.channel.id, "give.other")}catch(e) {return msg.channel.send(e.message)}
-            msg.channel.send("You gave " + args[args.length-1] + " " + name + " to " + msg.mentions.users.first().toString());
-            await db.changeMoney(msg.guild.id, msg.mentions.users.first().id, args[args.length-1], undefined, undefined, true).catch(console.error);
+            let moneyName = await money.getName(msg.guild.id);
+            let amount;
+            try{
+                amount = await money.amount(args.slice(0, args.length));
+            } catch(e) {
+                let embed = new Discord.RichEmbed()
+                    .setColor("RED")
+                    .setFooter('asked by ' + msg.author.tag)
+                    .setTimestamp()
+                    .addField("Error:", e.message);
+                return msg.channel.send({embed});
+            }
+            let embed = new Discord.RichEmbed()
+                .setColor("GREEN")
+                .setFooter('asked by ' + msg.author.tag)
+                .setTimestamp()
+                .setDescription(`${msg.author.toString()},You gave ${amount} ${moneyName} to ${msg.mentions.users.first().toString()}.`);
+            msg.channel.send({embed});
+            await db.changeMoney(msg.guild.id, msg.mentions.users.first().id, amount, {force: true}).catch(console.error);
         }
     }
 };

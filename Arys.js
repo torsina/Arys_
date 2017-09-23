@@ -58,14 +58,6 @@ Client.on('guildCreate', async (guild) => {
     await db.createSetting(guild.id).catch(console.error);
 });
 
-Client.on('typingStart', (channel, user) => {
-    if(user.id === '211208289206272001' && trigger === false) { //211208289206272001
-        channel.send("barry is writing");
-        console.log(channel.name + new Date);
-        trigger = true;
-    }
-});
-
 Client.on('message', async message => {
     if (config.env === "dev" && message.author.id !== config.discord.owner) return;
     if (message.author.bot) return;
@@ -137,6 +129,7 @@ Client.on('message', async message => {
         }
     }
 });
+
 function isEmoji(str) {
     //'\ud83c[\udf00-\udfff]', // U+1F300 to U+1F3FF
     //'\ud83d[\udc00-\ude4f]', // U+1F400 to U+1F64F // U+1F680 to U+1F6FF // U+263A // 1F600 - 1F636 // U+1F621
