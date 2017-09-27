@@ -8,7 +8,7 @@ const log = require('./util/log');
 const perm = require('./util/perm');
 const web = require('./web/server');
 const rest = require('./rest/routes');
-let trigger = false;
+const moment = require('moment');
 let settings;
 Client.login(config.discord.token.bot).catch(console.error);
 exports.Client = Client;
@@ -27,14 +27,20 @@ Client.once('ready', async () => {
     log.init(Client);
     perm.load();
     Client.user.setGame('type $help').catch(console.error);
+    Client.guilds.forEach((guild) => {
+        guild.channels.forEach(async (channel) => {
+            if (channel.type === "text" && channel.permissionsFor(guild.members.get(Client.user.id)).has(["READ_MESSAGE_HISTORY", "VIEW_CHANNEL"])) {
+                console.log(`asking for messages for ${guild.name}#${channel.name}`);
+                await channel.fetchMessages({limit: 100});
+            }
+        })
+    });
     console.timeEnd('loading');
     console.log('I am ready!');
 });
 
-
-
 Client.load = (command) => {
-    let commandsList = fs.readdirSync('./modules/');
+    const commandsList = fs.readdirSync('./modules/');
     if (command) {
         if (commandsList.indexOf(`${command}.js`) >= 0) {
             delete require.cache[require.resolve(`./modules/${command}`)];
@@ -42,12 +48,12 @@ Client.load = (command) => {
         }
     } else {
         Client.commands = {};
-        for (i = 0; i < commandsList.length; i++) {
-            let item = commandsList[i];
+        for (let i = 0; i < commandsList.length; i++) {
+            const item = commandsList[i];
             if (item.match(/\.js$/)) {
                 delete require.cache[require.resolve(`./modules/${item}`)];
                 Client.commands[item.slice(0, -3)] = require(`./modules/${item}`);
-                console.log('loaded :' +item);
+                console.log(`loaded : ${item}`);
             }
         }
     }
@@ -61,19 +67,18 @@ Client.on('guildCreate', async (guild) => {
 Client.on('message', async message => {
     if (config.env === "dev" && message.author.id !== config.discord.owner) return;
     if (message.author.bot) return;
-    let timestamp = new Date();
-    let roles = message.guild.member(Client.users.get(message.author.id)).roles;
-    let roleArray = [];
-    roles.forEach(function (item) {
+    const roles = message.guild.member(Client.users.get(message.author.id)).roles;
+    const roleArray = [];
+    roles.forEach((item) => {
         roleArray.push(item.id);
     });
     await perm.processUser(message.guild.id, roleArray, message.author.id).catch(console.error);
     //money add with message
     await money.perMessage(message.guild.id, message.author.id).catch(console.error);
     //invite delete system
-    if(message.content.includes("discord.gg" || "https://discord.gg/" || "www.discord.gg/" || "https://discord.gg" || "https:/ /discord.gg" || "www" && "discord" && "gg" || "https" && "discord" && "gg")) {
+    if (message.content.includes("discord.gg")) {
         Client.fetchInvite(message.content.split("gg/")[1].split(" ")[0]).then(m => {
-            if(m.guild.id === "242655328410402816") {
+            if (m.guild.id === "242655328410402816") {
                 return message.channel.send("from 9i");
             } else {
                 return message.channel.send("from other");
@@ -81,30 +86,30 @@ Client.on('message', async message => {
         });
     }
     //interaction
-    if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of her ?")) {
-        return message.channel.send("throw her in a pit and let me do the rest")
+    if (message.content.startsWith(`${Client.user.toString()}, what should we do of her ?`)) {
+        return message.channel.send("throw her in a pit and let me do the rest");
     }
-    if(message.content.startsWith("<@" + Client.user.id + ">, what should we do of him ?")) {
-        return message.channel.send("throw him in a pit and let me do the rest")
+    if (message.content.startsWith(`${Client.user.toString()}, what should we do of him ?`)) {
+        return message.channel.send("throw him in a pit and let me do the rest");
     }
     //emoji delete system
-    if (isEmoji(message.content) === true && message.channel.id !== "249626680434491392" && config.env !== "dev" && message.guild.id === "242655328410402816") {
+    if (isEmoji(message.content) === true && message.channel.id !== "249626680434491392" && config.env === "dev" && message.guild.id === "242655328410402816") {
         if (message.author.bot) return;
-        console.log(timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + "there is an emoji here : " + message.channel.name + " ,by : " + message.author.username + '#' + message.author.discriminator);
+        console.log(`[${moment().format("Y-M-D H:m:s Z")}] there is an emoji here ${message.channel.name}, by ${message.author.tag}`);
         message.delete();
         return message.reply("***GTFO RETARD AND READ THE RULES IN *** <#242655328410402816> <:feelsrageman:246603943768096769>").then(m => {
-            setTimeout(function() {
+            setTimeout(() => {
                 m.delete();
             }, 7000);
         });
     }
     //server emote analytics
-    if(!message.author.bot && config.env !== "dev") {
-        let serverEmotes = message.guild.emojis.array();
-        let emoteStack = message.content.match(/<:(\w+):(\d+)>/g);
+    if (!message.author.bot && config.env !== "dev") {
+        const serverEmotes = message.guild.emojis.array();
+        const emoteStack = message.content.match(/<:(\w+):(\d+)>/g);
         if (emoteStack !== null) {
-            for (let i = 0; i<serverEmotes.length; i++) {
-                let emote = "<:" + serverEmotes[i].name + ":" + serverEmotes[i].id + ">";
+            for (let i = 0; i < serverEmotes.length; i++) {
+                const emote = `<:${serverEmotes[i].name}:${serverEmotes[i].id}>`;
                 if (emoteStack.includes(emote)) {
                     db.createAnalytic(message.guild.id, message.channel.id, emote, message.author.id).catch(console.error);
                     return console.log(emote);
@@ -113,17 +118,15 @@ Client.on('message', async message => {
         }
     }
     //command handler
-    if (message.content.startsWith(config.discord.prefix) && settings !== undefined || settings !== undefined && message.content.startsWith(settings.get(message.guild.id).prefix)) {
+    if ((message.content.startsWith(config.discord.prefix) && settings !== undefined) || (settings !== undefined && message.content.startsWith(settings.get(message.guild.id).prefix))) {
         const prefix = (message.content.startsWith(settings.get(message.guild.id).prefix) ? settings.get(message.guild.id).prefix : config.discord.prefix);
         let args = message.content.split(' ');
-        let command = args[0].slice(prefix.length);
-        let guildMember = await db.getGuildMember(message.guild.id, message.author.id);
+        const command = args[0].slice(prefix.length);
+        const guildMember = await db.getGuildMember(message.guild.id, message.author.id);
         args.splice(0, 1);
 
         if (command in Client.commands) {
-            console.log('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + '] ['
-                + message.guild.name + "@" + message.guild.id + '] ['
-                + message.author.tag + '] [' + message.author.id + '] ['+ message.channel.name + "] " + command);
+            console.log(`[${moment().format("Y-M-D H:m:s Z")}] [${message.guild.name}@${message.guild.id}] [${message.author.tag}] [${message.author.id}] [${message.channel.name}] ${command}`);
             Client.commands[command].func(Client, message, args, guildMember);
             console.log(args);
         }
@@ -133,7 +136,7 @@ Client.on('message', async message => {
 function isEmoji(str) {
     //'\ud83c[\udf00-\udfff]', // U+1F300 to U+1F3FF
     //'\ud83d[\udc00-\ude4f]', // U+1F400 to U+1F64F // U+1F680 to U+1F6FF // U+263A // 1F600 - 1F636 // U+1F621
-    let ranges = [
+    const ranges = [
         '\ud83d[\ude00-\udeff]'
     ];
     if (str.match(ranges.join('|')) && !str.match('\u{1F621}')) {
@@ -144,11 +147,9 @@ function isEmoji(str) {
 }
 
 process.on("unhandledRejection", err => {
-    let timestamp = new Date();
-    console.error('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + ']' + "Uncaught Promise Error: \n" + err.stack);
+    console.error(`${moment().format("Y-M-D H:m:s Z")} Uncaught Promise Error: \n ${err.stack}`);
 });
 process.on("uncaughtException", err => {
-    let timestamp = new Date();
-    console.error('[' + timestamp.getFullYear() + '-' + (timestamp.getMonth() + 1) + '-' + timestamp.getDate() + ' ' + timestamp.getHours() + ':' + timestamp.getMinutes() + ']' + "Uncaught Exception Error: \n" + err.stack);
+    console.error(`${moment().format("Y-M-D H:m:s Z")} Uncaught Exception Error: \n ${err.stack}`);
 });
 

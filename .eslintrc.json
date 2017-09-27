@@ -199,7 +199,7 @@
     "space-in-parens": "error",
     "space-infix-ops": "error",
     "space-unary-ops": "error",
-    "spaced-comment": "error",
+    "spaced-comment": ["error", "never"],
     "unicode-bom": "error",
     "arrow-body-style": 0,
     "arrow-spacing": "error",
