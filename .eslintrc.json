@@ -15,8 +15,7 @@
     "consistent-return": "off",
     "curly": [
       "error",
-      "multi-line",
-      "consistent"
+      "multi-line"
     ],
     "dot-location": [
       "error",
@@ -90,7 +89,8 @@
     ],
     "indent": [
       "error",
-      4
+      4,
+      { "SwitchCase": 1 }
     ],
     "key-spacing": "error",
     "keyword-spacing": [
@@ -130,7 +130,7 @@
     "max-statements-per-line": [
       "error",
       {
-        "max": 2
+        "max": 3
       }
     ],
     "new-cap": "error",
