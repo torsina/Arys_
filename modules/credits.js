@@ -27,7 +27,7 @@ module.exports = {
             if(args.length > 1) {
                 let amount;
                 try{
-                    amount = money.amount(args.slice(2, args.length-1));
+                    amount = money.amount(args.slice(1, args.length));
                 }
                 catch(e){
                     let embed = new Discord.RichEmbed()
