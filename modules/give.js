@@ -41,7 +41,7 @@ module.exports = {
             let moneyName = await money.getName(msg.guild.id);
             let amount;
             try{
-                amount = await money.amount(args.slice(0, args.length));
+                amount = await money.amount(args.slice(1, args.length));
             } catch(e) {
                 let embed = new Discord.RichEmbed()
                     .setColor("RED")
