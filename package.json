@@ -6,7 +6,6 @@
   "dependencies": {
     "bufferutil": "^3.0.2",
     "canvas": "2.0.0-alpha.2",
-    "discord.js": "^11.2.1",
     "eris": "^0.7.2",
     "eris-additions": "^1.2.5",
     "eris-wiggle": "git+https://git@github.com/minemidnight/eris-wiggle.git",
