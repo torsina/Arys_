@@ -8,7 +8,7 @@ const r = require('rethinkdbdash')({
     db: dbName
 });
 
-db.init = async (client) => {
+db.init = async () => {
     const expected = constants.DB_MODEL;
     const dbs = await r.dbList().run();
     // creating database if not already created
@@ -46,9 +46,21 @@ db.setGuildSetting = async (_data) => {
     return await r.table('guild').insert(query).run();
 };
 
+db.initGuildSetting = async (client, storedGuildArray) => {
+    const guildArray = Array.from(client.erisClient.guilds.keys());
+    guildArray.forEach(async (guildID) => {
+        // loop through the guilds to check that no one is missing from the database
+        if (!storedGuildArray.get(guildID)) {
+            const { timestamp, name } = client.erisClient.guilds.get(guildID);
+            await db.setGuildSetting({guildID: guildID, joinedTimestamp: timestamp});
+            console.log(`added the guild "${name}" to the database`);
+        }
+    });
+};
+
 db.getGuildSetting = async (_guildID) => {
     if (_guildID) return await r.table('guild').get(_guildID).run();
-    const doc = await r.table('setting').run();
+    const doc = await r.table('guild').run();
     return new Map(doc.map((item) => [item.guildID, item]));
 };
 

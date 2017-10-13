@@ -5,7 +5,7 @@ const client = wiggle();
 const config = require('../../config');
 const db = require('./util/rethink');
 const middlewares = require('./middleware/main');
-let Raven, settings;
+let Raven, settings = new Map;
 client.init = async () => {
     // starting sentry before everything else to log every error
     if (config.sentry) {
@@ -18,19 +18,27 @@ client.init = async () => {
     settingStream.on('data', update => {
         settings.set(update.new_val.guild, update.new_val);
     });
+    await db.initGuildSetting(client, settings);
+    console.log(settings);
 };
 
 client.set("owner", "306418399242747906")
-    .set("prefixes", ["mention", "$"])
+    .set("prefixes", ["mention", "%"])
     .set("token", config.token)
     .set("commandOptions", { sendTyping: true, replyResult: true })
-    .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler())
-    .use('message', (message, next) => {
-        middlewares.permission.run(message, next, client);
+    .use("ready", async (next) => {
+        await client.init();
+        next();
     })
-    .set("commands", "./bot/commands")
-    .set("locales", "./bot/locales")
-    .set("listeners", "./bot/events");
+    .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler())
+    .use("message", (message, next) => {
+        message.guild.setting = settings.get(message.guild.id);
+        next();
+    })
+    .use("message", middlewares.permission)
+    .set("commands", "commands")
+    .set("locales", "locales")
+    .set("listeners", "events");
 client.connect();
 
 process.on("unhandledRejection", err => {

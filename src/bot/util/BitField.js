@@ -1,7 +1,6 @@
 const constants = require('./constants');
 const db = require('./rethink');
-const PermissionResolvable = require('./PermissionResolvable');
-class Permission {
+class BitField {
     constructor(bitField) {
         /**
          * An object containing the permission numbers of the bot
@@ -160,7 +159,16 @@ class Permission {
         }
         return object;
     }
-
+    static check(permissionString, message, guildSetting) {
+        const permissionNode = this.resolveNode(permissionString);
+        if (!permissionNode) throw new Error(`The permission \`${permissionString}\` doesn't exist.`);
+        // we get all of the needed bitFields and build the total of them
+        const bitField = this.build(message, guildSetting);
+        if (typeof permissionNode === "number") {
+            const bitFieldNode = this.resolveNode(permissionString, bitField);
+            return !!(bitFieldNode & permissionNode);
+        }
+    }
     /**
      * * check if a user in the context of the message can use a permission node
      * @everyone + packed roles -> member -> channel -> channel override (packed roles) -> channel override (member)
@@ -175,14 +183,5 @@ class Permission {
      * (ex: util.ping.visible)
      * @typedef {string} permissionString
      */
-    async check(permissionString, message, guildSetting) {
-        const permissionNode = this.resolveNode(permissionString);
-        if (!permissionNode) throw new Error(`The permission \`${permissionString}\` doesn't exist.`);
-        // we get all of the needed bitFields and build the total of them
-        const bitField = this.build(message, guildSetting);
-        if (typeof permissionNode === "number") {
-            const bitFieldNode = this.resolveNode(permissionString, bitField);
-            return !!(bitFieldNode & permissionNode);
-        }
-    }
 }
+module.exports = BitField;
