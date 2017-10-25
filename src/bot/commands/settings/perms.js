@@ -1,7 +1,7 @@
 const db = require("../../util/rethink");
 const BitField = require("../../util/BitField");
 const constants = require("../../util/constants");
-
+const util = require('util');
 module.exports = {
     run: async (context) => {
         let role, channel, user, guild;
@@ -9,6 +9,7 @@ module.exports = {
         if (context.flags.channel) channel = context.flags.channel.id;
         if (context.flags.user) user = context.flags.user.id;
         if (context.flags.guild) guild = context.guild.id;
+        console.log(context.args);
         const IDs = { role, channel, user, guild };
         const scope = scopeChoice(channel, role, user, guild);
         switch (context.args[0]) {
@@ -150,7 +151,7 @@ async function editNumber(mode, option, scope, permissionNode, IDs) {
                     else {
                         channel.overrides.members[index] = input;
                     }
-                    await db.editGuildChannel(IDs.channel, channel);
+                    await db.editGuildChannel(IDs.channel, channel, true);
                 } catch (err) {
                     return console.error(err);
                 }
@@ -164,7 +165,7 @@ async function editNumber(mode, option, scope, permissionNode, IDs) {
                     else {
                         channel.overrides.roles[index] = input;
                     }
-                    await db.editGuildChannel(IDs.channel, channel);
+                    await db.editGuildChannel(IDs.channel, channel, true);
                 } catch (err) {
                     return console.error(err);
                 }
@@ -175,8 +176,8 @@ async function editNumber(mode, option, scope, permissionNode, IDs) {
             const member = await db.getGuildMember(IDs.user, IDs.guild);
             const bitField = member.bitField || {};
             try {
-                const output = buildObject(bitField, permissionNode, mode, option);
-                await db.editGuildMember(IDs.user, IDs.guild, { bitField: output });
+                member.bitField = buildObject(bitField, permissionNode, mode, option);
+                await db.editGuildMember(IDs.user, IDs.guild, member, true);
             } catch (err) {
                 return console.error(err);
             }
@@ -186,8 +187,8 @@ async function editNumber(mode, option, scope, permissionNode, IDs) {
             const role = await db.getGuildRole(IDs.role);
             const bitField = role.bitField || {};
             try {
-                const output = buildObject(bitField, permissionNode, mode, option);
-                await db.editGuildRole(IDs.role, { bitField: output });
+                role.bitField = buildObject(bitField, permissionNode, mode, option);
+                await db.editGuildRole(IDs.role, role, true);
             } catch (err) {
                 return console.error(err);
             }
@@ -197,8 +198,8 @@ async function editNumber(mode, option, scope, permissionNode, IDs) {
             const channel = await db.getGuildChannel(IDs.channel);
             const bitField = channel.bitField || {};
             try {
-                const output = buildObject(bitField, permissionNode, mode, option);
-                await db.editGuildChannel(IDs.channel, { bitField: output });
+                channel.bitField = buildObject(bitField, permissionNode, mode, option);
+                await db.editGuildChannel(IDs.channel, channel, true);
             } catch (err) {
                 return console.error(err);
             }
@@ -209,8 +210,8 @@ async function editNumber(mode, option, scope, permissionNode, IDs) {
             const role = await db.getGuildRole(IDs.guild);
             const bitField = role.bitField || {};
             try {
-                const output = buildObject(bitField, permissionNode, mode, option);
-                await db.editGuildRole(IDs.role, { bitField: output });
+                role.bitField = buildObject(bitField, permissionNode, mode, option);
+                await db.editGuildRole(IDs.role, role, true);
             } catch (err) {
                 return console.error(err);
             }
@@ -253,20 +254,26 @@ function buildObject(input, permissionNode, mode, option) {
     if (!number) cmd[mode] = 0;
     if ((number & permissionBit) === permissionBit) {
         // number does have permissionBit
-        if (option) {
-            if (number === 0) delete cmd[mode];
-            return input;
-        } else {
+        if (!option) {
             cmd[mode] ^= permissionBit;
         }
     } else {
         // number does not have permissionBit
         if (option) { // eslint-disable-line no-lonely-if
             cmd[mode] ^= permissionBit;
-        } else {
-            if (number === 0) delete cmd[mode];
-            return input;
         }
     }
+    if (cmd[mode] === 0) {
+        delete cmd[mode];
+        const commandKeys = Object.keys(cmdCategory[pathCommand]);
+        if (commandKeys.length === 0) {
+            delete cmdCategory[pathCommand];
+            const categoryKeys = Object.keys(cmdCategories[pathCategory]);
+            if (categoryKeys.length === 0) {
+                delete cmdCategories[pathCategory];
+            }
+        }
+    }
+    console.log(util.inspect(input, false, null));
     return input;
 }

@@ -120,9 +120,9 @@ class BitField {
             const bitField = arrayBitField[i];
             // loop over the command categories
             for (let j = 0, m = cmdCategories.length; j < m; j++) {
-                const cmdCategory = endBitField.commands[cmdCategories[j]];
+                let cmdCategory = endBitField.commands[cmdCategories[j]];
                 // assign this category in the end bitField to an object if not already assigned
-                if (!cmdCategory) endBitField.commands[cmdCategories[j]] = {};
+                if (!cmdCategory) cmdCategory = endBitField.commands[cmdCategories[j]] = {};
                 const bitFieldCategory = bitField.commands[cmdCategories[j]];
                 // if empty assign to default bitField and skip loop
                 if (!bitFieldCategory) {
@@ -132,9 +132,9 @@ class BitField {
                     const cmds = Object.keys(constants.PERMISSION_BITFIELD.commands[cmdCategories[j]]);
                     // loop over the commands in the category
                     for (let k = 0, o = cmds.length; k < o; k++) {
-                        const cmd = cmdCategory[cmds[k]];
+                        let cmd = cmdCategory[cmds[k]];
                         // set this command perm number to 0 if does not already initialized
-                        if (!cmd) cmdCategory[cmds[k]] = 0; // eslint-disable-line max-depth
+                        if (!cmd) cmd = cmdCategory[cmds[k]] = 0; // eslint-disable-line max-depth
                         // do this to prevent unnecessarily long lines
                         const bitFieldCmd = bitFieldCategory[cmds[k]];
                         const allow = bitFieldCmd.allow || 0;
@@ -149,12 +149,14 @@ class BitField {
         return endBitField;
     }
 
-    static resolveNode(_permissionString, object = constants.PERMISSION_BITFIELD.commands) {
-        // strip a leading dot
-        _permissionString = _permissionString.replace(/^\./, "");
-        const a = _permissionString.split(".");
-        for (let i = 0, n = a.length; i < n; ++i) {
-            const k = a[i];
+    static resolveNode(_permissionString, object = constants.PERMISSION_BITFIELD, build = false) {
+        let a = _permissionString.split(".");
+        if (build) a = a.slice(0, 2);
+        const b = ["commands", ...a];
+        console.log(object);
+        for (let i = 0, n = b.length; i < n; ++i) {
+            const k = b[i];
+            console.log(k);
             if (k in object) {
                 object = object[k];
             } else {
@@ -164,13 +166,14 @@ class BitField {
         return object;
     }
 
-    static check(permissionString, message, guildSetting) {
+    static async check(permissionString, message, guildSetting) {
         const permissionNode = this.resolveNode(permissionString);
         if (!permissionNode) throw new message.command.EmbedError(message, { error: "permission.undefined", data: { node: permissionNode } });
         // we get all of the needed bitFields and build the total of them
-        const bitField = this.build(message, guildSetting);
+        const bitField = await this.build(message, guildSetting);
         if (typeof permissionNode === "number") {
-            const bitFieldNode = this.resolveNode(permissionString, bitField);
+            const bitFieldNode = this.resolveNode(permissionString, bitField, true);
+            console.log(bitFieldNode, permissionNode);
             return !!(bitFieldNode & permissionNode);
         } else throw new message.command.EmbedError(message, { error: "permission.notNumber", data: { node: permissionNode } });
     }

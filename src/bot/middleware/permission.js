@@ -6,18 +6,18 @@ module.exports = async (message, next, wiggle) => {
     const { owner } = wiggle.locals.options;
     // bypass for bot owner
     if (message.author.id === owner) return next();
-    const categoryName = message.category;
+    const categoryName = message.command.category;
     const commandName = message.command.name;
-    const argName = (message.command.args && message.command.args[0] && !message.command.args[0].optional) ? message.command.args[0].name : "base";
+    const argName = (message.command.args && message.command.args[0] && !message.command.args[0].optional) ? message.args[0] : "base";
     const permissionNodeString = [categoryName, commandName, argName].join(".");
     try {
-        const result = BitField.check(permissionNodeString, message, message.guildSetting);
+        const result = await BitField.check(permissionNodeString, message, message.guildSetting);
         if (!result) {
             const { embed } = new EmbedError(message, { error: "permission.denied", data: { node: permissionNodeString } });
             return message.channel.send(embed);
         }
-    } catch ({ embed }) {
-        return message.channel.send(embed);
+    } catch (err) {
+        return console.error(err);
     }
     message.permission = permissionNodeString;
     return next();

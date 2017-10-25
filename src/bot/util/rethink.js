@@ -59,18 +59,18 @@ db.initGuildSetting = async (client, storedGuildArray) => {
     });
 };
 
-db.getGuildSetting = async (_guildID) => {
-    if (_guildID) return await r.table("guild").get(_guildID).run();
+db.getGuildSetting = async (guildID) => {
+    if (guildID) return await r.table("guild").get(guildID).run();
     const doc = await r.table("guild").run();
     return new Map(doc.map((item) => [item.guildID, new GuildSetting(item)]));
 };
 
-db.editGuildSetting = async (_guildID, data) => {
-    return await r.table("guild").get(_guildID).update(data).run();
+db.editGuildSetting = async (guildID, data) => {
+    return await r.table("guild").get(guildID).update(data).run();
 };
 
-db.deleteGuildSetting = async (_guildID) => {
-    return await r.table("guild").get(_guildID).delete().run();
+db.deleteGuildSetting = async (guildID) => {
+    return await r.table("guild").get(guildID).delete().run();
 };
 
 db.streamGuildSetting = async () => {
@@ -79,21 +79,33 @@ db.streamGuildSetting = async () => {
 
 // guildRole getter/setter
 db.setGuildRole = async (data) => {
-    const query = new GuildRole(data);
-    return await r.table("guildRole").insert(query).run();
+    if (!(data instanceof GuildRole)) {
+        const query = new GuildRole(data);
+        return await r.table("guildRole").insert(query).run();
+    } else return await r.table("guildRole").insert(data).run();
 };
 
-db.getGuildRole = async (_roleID) => {
-    const doc = await r.table("guildRole").get(_roleID).run();
-    return new GuildRole(doc);
+db.getGuildRole = async (roleID) => {
+    const doc = await r.table("guildRole").get(roleID).run();
+    if (doc === null) {
+        const Role = new GuildRole({ roleID });
+        await db.setGuildRole(Role);
+        return Role;
+    } else {
+        return new GuildRole(doc);
+    }
 };
 
-db.editGuildRole = async (_roleID, data) => {
-    return await r.table("guildRole").get(_roleID).update(data).run();
+db.editGuildRole = async (roleID, data, force = false) => {
+    if (force) {
+        data = new GuildMember(data);
+        return await r.table("guildRole").get(roleID).replace(data).run();
+    }
+    return await r.table("guildRole").get(roleID).update(data).run();
 };
 
-db.deleteGuildRole = async (_roleID) => {
-    return await r.table("guildRole").get(_roleID).delete().run();
+db.deleteGuildRole = async (roleID) => {
+    return await r.table("guildRole").get(roleID).delete().run();
 };
 
 // guildChannel getter/setter
@@ -107,7 +119,7 @@ db.setGuildChannel = async (data) => {
 db.getGuildChannel = async (channelID) => {
     const doc = await r.table("guildChannel").get(channelID).run();
     if (doc === null) {
-        const channel = new GuildChannel({ channelID: channelID });
+        const channel = new GuildChannel({ channelID });
         await db.setGuildChannel(channel);
         return channel;
     } else {
@@ -115,8 +127,12 @@ db.getGuildChannel = async (channelID) => {
     }
 };
 
-db.editGuildChannel = async (_channelID, data) => {
-    return await r.table("guildChannel").get(_channelID).update(data).run();
+db.editGuildChannel = async (channelID, data, force = false) => {
+    if (force) {
+        data = new GuildChannel(data);
+        return await r.table("guildChannel").get(channelID).replace(data).run();
+    }
+    return await r.table("guildChannel").get(channelID).update(data).run();
 };
 
 db.deleteGuildChannel = async (_channelID) => {
@@ -124,22 +140,35 @@ db.deleteGuildChannel = async (_channelID) => {
 };
 
 // guildMember getter/setter
+
 db.setGuildMember = async (data) => {
-    const query = new GuildMember(data);
-    return await r.table("guildMember").insert(query).run();
+    if (!(data instanceof GuildMember)) {
+        const query = new GuildMember(data);
+        return await r.table("guildMember").insert(query).run();
+    } else return await r.table("guildMember").insert(data).run();
 };
 
 db.getGuildMember = async (memberID, guildID) => {
     const doc = await r.table("guildMember").getAll([guildID, memberID], { index: "guildMember_guildID_memberID" }).run();
-    return new GuildMember(doc[0]);
+    if (doc[0] === null) {
+        const Member = new GuildMember({ memberID, guildID });
+        await db.setGuildMember(Member);
+        return Member;
+    } else {
+        return new GuildMember(doc[0]);
+    }
 };
 
-db.editGuildMember = async (memberID, guildID, data) => {
+db.editGuildMember = async (memberID, guildID, data, force = false) => {
+    if (force) {
+        data = new GuildMember(data);
+        return await r.table("guildMember").getAll([guildID, memberID], { index: "guildMember_guildID_memberID" }).update(data).run();
+    }
     return await r.table("guildMember").getAll([guildID, memberID], { index: "guildMember_guildID_memberID" }).update(data).run();
 };
 
-db.deleteMember = async (_memberID) => {
-    return await r.table("guildMember").get(_memberID).delete().run();
+db.deleteMember = async (memberID, guildID) => {
+    return await r.table("guildMember").getAll([guildID, memberID], { index: "guildMember_guildID_memberID" }).delete().run();
 };
 
 /**
@@ -155,12 +184,15 @@ db.deleteMember = async (_memberID) => {
  * @returns {Promise.<*>}
  */
 db.getBitFields = async (_rolesID, _channelID, _memberID, _guildID) => {
-    return await r.table("guildMember").getAll([_guildID, _memberID], { index: "guildMember_guildID_memberID" }).merge((member) => ({
-        member: member.pluck("bitField"),
-        roles: r.table("role").getAll(..._rolesID).pluck("bitField"),
+    const member = await r.table("guildMember").getAll([_guildID, _memberID], { index: "guildMember_guildID_memberID" }).pluck("bitField").run();
+    const roles = await r.table("guildRole").getAll(..._rolesID).pluck("bitField").run();
+    const channel = await r.table("guildChannel").get(_channelID).run();
+    return {
+        member: member[0],
+        roles: roles,
         channel: {
-            own: r.table("channel").get(_channelID).pluck("bitField"),
-            overrides: r.table("channel").get(_channelID).pluck("overrides")
+            own: channel.bitField,
+            overrides: channel.overrides
         }
-    })).run();
+    };
 };

@@ -1,7 +1,13 @@
 module.exports = {
-    run: ({ message }) => message.t("ping.success", {
-        ms: message.channel.guild ?
-            message.channel.guild.shard.latency :
-            message.channel._client.shards.get(0).latency
-    })
+    run: async ({ message, reply, t }) => {
+        return t("ping.success", {
+            ms: Math.floor(message.client.ping)
+        });
+    },
+    args: [
+        {
+            type: "text",
+            label: "word",
+            optional: true
+        }]
 };
