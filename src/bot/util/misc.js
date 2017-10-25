@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 const misc = {};
 module.exports = misc;
 misc.readFile = (dir, filelist = []) => {
@@ -15,14 +15,14 @@ misc.readFile = (dir, filelist = []) => {
 };
 
 misc.searchObject = (obj, key) => {
-    if (typeof key === 'undefined') {
+    if (typeof key === "undefined") {
         key = [];
     }
     for (key in obj) {
         if (obj.hasOwnProperty(key)) {
-            if (typeof obj[key] === 'string' || obj[key] instanceof String) {
+            if (typeof obj[key] === "string" || obj[key] instanceof String) {
                 key.push(obj[key]);
-            } else if (obj[key] !== null && typeof obj[key] === 'object') {
+            } else if (obj[key] !== null && typeof obj[key] === "object") {
                 misc.searchObject(obj[key], key);
             }
         }

@@ -1,3 +1,6 @@
 {
-  "ping.success": "Pong! {{ms}}ms"
+  "ping.success": "Pong! {{ms}}ms",
+  "permission.undefined": "The permission `{{node}}` does not exists. Please report this to a developer.",
+  "permission.notNumber": "The permission `{{node}}` does not returns a number. Please report this to a developer.",
+  "permission.denied": "You don't have the permission `{{node}}`"
 }

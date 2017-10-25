@@ -1,4 +1,5 @@
 module.exports = (next, wiggle) => {
-    console.log(`Bot is launched on ${wiggle.erisClient.guilds.size} guilds with ${wiggle.erisClient.users.size} users`);
+    // console.log(wiggle);
+    console.log(`Bot is launched on ${wiggle.discordClient.guilds.size} guilds with ${wiggle.discordClient.users.size} users`);
     next();
 };

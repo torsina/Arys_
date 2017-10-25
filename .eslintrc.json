@@ -157,7 +157,7 @@
     "no-unneeded-ternary": "error",
     "no-whitespace-before-property": "error",
     "object-curly-newline": "off",
-    "object-curly-spacing": "off",
+    "object-curly-spacing": ["error", "always"],
     "operator-assignment": "error",
     "operator-linebreak": [
       "error",
@@ -176,8 +176,8 @@
       "as-needed"
     ],
     "quotes": [
-      "off",
-      "single",
+      "error",
+      "double",
       {
         "avoidEscape": true,
         "allowTemplateLiterals": true
