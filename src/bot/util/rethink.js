@@ -98,7 +98,7 @@ db.getGuildRole = async (roleID) => {
 
 db.editGuildRole = async (roleID, data, force = false) => {
     if (force) {
-        data = new GuildMember(data);
+        data = new GuildRole(data);
         return await r.table("guildRole").get(roleID).replace(data).run();
     }
     return await r.table("guildRole").get(roleID).update(data).run();

@@ -1,69 +1,6 @@
 const constants = require("./constants");
 const db = require("./rethink");
 class BitField {
-    constructor(bitField) {
-        /**
-         * An object containing the permission numbers of the bot
-         * Can come from a GuildRole, GuildRole, or GuildMember
-         * @typedef {Object} Permission
-         */
-        /**
-         * Converts a database bitField to a valid bitField
-         * @param {Permission}
-         */
-        this.bitField = this.fill(bitField);
-        this.type = bitField.type;
-    }
-
-    /**
-     * Creates a comparable bitField from a database entry
-     * @param {PermissionResolvable} _bitField
-     * @returns {Permission}
-     */
-    /** @constructs */
-    static fill(_bitField) {
-        // default full bitField
-        const baseBitField = constants.PERMISSION_BITFIELD_DEFAULT;
-        // command categories array
-        const cmdCategories = Object.keys(constants.PERMISSION_BITFIELD.commands);
-        const endBitField = {
-            commands: {}
-        };
-        // if empty assign to default non built bitField and skip whole loop
-        if (!_bitField.commands) endBitField.commands = baseBitField.commands;
-        else {
-            // loop over the command categories
-            for (let i = 0; i < cmdCategories.length; i++) {
-                // do this to prevent unnecessarily long lines
-                let cmdCategory = endBitField.commands[cmdCategories[i]] = {};
-                const baseCmdCategory = baseBitField.commands[cmdCategories[i]];
-                const _bitFieldCmdCategory = _bitField.commands[cmdCategories[i]];
-                // if empty assign to default non built bitField and skip iteration
-                if (!_bitFieldCmdCategory) {
-                    cmdCategory = baseCmdCategory;
-                    continue;
-                }
-                // commands from command category array
-                const cmds = Object.keys(constants.PERMISSION_BITFIELD.commands[cmdCategories[i]]);
-                // loop over the commands
-                for (let j = 0; j < cmds.length; j++) {
-                    // do this to prevent unnecessarily long lines
-                    const baseBitFieldCmd = baseBitField.commands[cmdCategories[i]][cmds[j]];
-                    const _bitFieldCmd = _bitField.commands[cmdCategories[i]][cmds[j]];
-                    // if empty assign to default non built bitField and skip iteration
-                    if (!_bitFieldCmd) {
-                        cmdCategory[cmds[j]] = baseBitFieldCmd;
-                        continue;
-                    }
-                    // compile the allow and deny permission number into one (deny overrides allow if true)
-                    const allow = _bitFieldCmd.allow || 0;
-                    const deny = _bitFieldCmd.deny || 0;
-                    cmdCategory[cmds[j]] = allow & ~deny;
-                }
-            }
-        }
-        return endBitField;
-    }
 
     /**
      *
@@ -146,6 +83,8 @@ class BitField {
                 }
             }
         }
+        console.log(endBitField);
+        console.log(endBitField);
         return endBitField;
     }
 
@@ -153,10 +92,8 @@ class BitField {
         let a = _permissionString.split(".");
         if (build) a = a.slice(0, 2);
         const b = ["commands", ...a];
-        console.log(object);
         for (let i = 0, n = b.length; i < n; ++i) {
             const k = b[i];
-            console.log(k);
             if (k in object) {
                 object = object[k];
             } else {
@@ -173,7 +110,6 @@ class BitField {
         const bitField = await this.build(message, guildSetting);
         if (typeof permissionNode === "number") {
             const bitFieldNode = this.resolveNode(permissionString, bitField, true);
-            console.log(bitFieldNode, permissionNode);
             return !!(bitFieldNode & permissionNode);
         } else throw new message.command.EmbedError(message, { error: "permission.notNumber", data: { node: permissionNode } });
     }

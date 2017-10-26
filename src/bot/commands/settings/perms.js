@@ -1,6 +1,7 @@
 const db = require("../../util/rethink");
 const BitField = require("../../util/BitField");
 const constants = require("../../util/constants");
+const { RichEmbed } = require("discord.js");
 const util = require('util');
 module.exports = {
     run: async (context) => {
@@ -9,11 +10,11 @@ module.exports = {
         if (context.flags.channel) channel = context.flags.channel.id;
         if (context.flags.user) user = context.flags.user.id;
         if (context.flags.guild) guild = context.guild.id;
-        console.log(context.args);
         const IDs = { role, channel, user, guild };
         const scope = scopeChoice(channel, role, user, guild);
         switch (context.args[0]) {
-            case ("allow" || "deny"): {
+            case "allow":
+            case "deny": {
                 // error handling
                 if (context.args.length < 3) {
                     const error = {
@@ -36,14 +37,56 @@ module.exports = {
                 }
                 // start of process
                 // mode = allow, option = true/false, scope, permissionNode, message, IDs
+                let output;
                 try {
-                    await editNumber(context.args[0], context.args[2], scope, context.args[1], IDs);
+                    output = await editNumber(context.args[0], context.args[2], scope, context.args[1], IDs);
+                    console.log(output);
                 } catch (err) {
                     return console.error(err);
                 }
+                const embed = new RichEmbed()
+                    .setTimestamp()
+                    .setFooter(context.t("wiggle.embed.footer", { tag: context.author.tag }))
+                    .setColor("GREEN");
+                const mode = context.args[0];
+                const node = context.args[1];
+                const set = context.args[2];
+                const member = context.flags.user ? context.flags.user.toString() : null;
+                const _role = context.flags.role ? context.flags.role.toString() : null;
+                const _channel = context.flags.channel ? context.flags.channel.toString() : null;
+                const isChanged = checkSame(output, node);
+                const old = (isChanged && set) ? ":x:" : ":white_check_mark:";
+                const now = set ? ":white_check_mark:" : ":x:";
+                switch (scope) {
+                    case "memberOverride": {
+                        embed.setDescription(context.t("perms.success.memberOverride", { mode, node, set, member, channel: _channel }));
+                        break;
+                    }
+                    case "roleOverride": {
+                        embed.setDescription(context.t("perms.success.roleOverride", { mode, node, set, member, role: _role }));
+                        break;
+                    }
+                    case "role": {
+                        embed.setDescription(context.t("perms.success.role", { mode, node, set, role: _role }));
+                        break;
+                    }
+                    case "channel": {
+                        embed.setDescription(context.t("perms.success.channel", { mode, node, set, channel: _channel }));
+                        break;
+                    }
+                    case "member": {
+                        embed.setDescription(context.t("perms.success.member", { mode, node, set, member }));
+                        break;
+                    }
+                }
+                embed.addField(context.t("words.value"), context.t("perms.values", { old, now }));
+                context.channel.send(embed);
                 break;
             }
             case "show": {
+                break;
+            } default: {
+                console.log("end");
                 break;
             }
         }
@@ -107,7 +150,7 @@ function scopeChoice(channel, role, user, guild) {
     } else if (guild) {
         return "guild";
     } else {
-        return "undefined";
+        return null;
     }
 }
 
@@ -139,19 +182,24 @@ function scopeChoice(channel, role, user, guild) {
 async function editNumber(mode, option, scope, permissionNode, IDs) {
     if (typeof option !== "boolean") throw new Error("Type error: option is not a Boolean");
     switch (scope) {
-        case ("memberOverride" || "roleOverride"): {
+        case "roleOverride":
+        case "memberOverride": {
+            console.log("trigger");
             const channel = await db.getGuildChannel(IDs.channel);
             if (scope === "memberOverride") {
                 const index = channel.overrides.members.findIndex(member => member.id === IDs.user);
                 const memberOverride = channel.overrides.members[index];
                 const input = memberOverride || {};
                 try {
-                    const output = buildObject(input, permissionNode, mode, option);
-                    if (!memberOverride) channel.overrides.members.push(output);
-                    else {
+                    let output;
+                    if (!memberOverride) {
+                        output = buildObject(input, permissionNode, mode, option);
+                        channel.overrides.members.push(output.bitField);
+                    } else {
                         channel.overrides.members[index] = input;
                     }
                     await db.editGuildChannel(IDs.channel, channel, true);
+                    return { old: output.old, now: output.now };
                 } catch (err) {
                     return console.error(err);
                 }
@@ -160,64 +208,67 @@ async function editNumber(mode, option, scope, permissionNode, IDs) {
                 const roleOverride = channel.overrides.roles[index];
                 const input = roleOverride || {};
                 try {
-                    const output = buildObject(input, permissionNode, mode, option);
-                    if (!roleOverride) channel.overrides.roles.push(output);
-                    else {
+                    let output;
+                    if (!roleOverride) {
+                        output = buildObject(input, permissionNode, mode, option);
+                        channel.overrides.roles.push(output);
+                    } else {
                         channel.overrides.roles[index] = input;
                     }
                     await db.editGuildChannel(IDs.channel, channel, true);
+                    return { old: output.old, now: output.now };
                 } catch (err) {
                     return console.error(err);
                 }
             }
-            break;
         }
         case "member": {
             const member = await db.getGuildMember(IDs.user, IDs.guild);
             const bitField = member.bitField || {};
             try {
-                member.bitField = buildObject(bitField, permissionNode, mode, option);
+                const output = member.bitField = buildObject(bitField, permissionNode, mode, option);
                 await db.editGuildMember(IDs.user, IDs.guild, member, true);
+                return { old: output.old, now: output.now };
             } catch (err) {
                 return console.error(err);
             }
-            break;
         }
         case "role": {
             const role = await db.getGuildRole(IDs.role);
             const bitField = role.bitField || {};
             try {
-                role.bitField = buildObject(bitField, permissionNode, mode, option);
+                const output = role.bitField = buildObject(bitField, permissionNode, mode, option);
                 await db.editGuildRole(IDs.role, role, true);
+                return { old: output.old, now: output.now };
             } catch (err) {
                 return console.error(err);
             }
-            break;
         }
         case "channel": {
             const channel = await db.getGuildChannel(IDs.channel);
             const bitField = channel.bitField || {};
             try {
-                channel.bitField = buildObject(bitField, permissionNode, mode, option);
+                const output = channel.bitField = buildObject(bitField, permissionNode, mode, option);
                 await db.editGuildChannel(IDs.channel, channel, true);
+                return { old: output.old, now: output.now };
             } catch (err) {
                 return console.error(err);
             }
-            break;
         }
         case "guild": {
             // this case is for the @everyone role, which have the same id as the guild id
             const role = await db.getGuildRole(IDs.guild);
             const bitField = role.bitField || {};
             try {
-                role.bitField = buildObject(bitField, permissionNode, mode, option);
+                const output = role.bitField = buildObject(bitField, permissionNode, mode, option);
                 await db.editGuildRole(IDs.role, role, true);
+                return { old: output.old, now: output.now };
             } catch (err) {
                 return console.error(err);
             }
-            break;
         }
-        case "undefined": {
+        case undefined:
+        case null: {
             throw new Error("Type error: wrong permission scope");
         }
     }
@@ -274,6 +325,11 @@ function buildObject(input, permissionNode, mode, option) {
             }
         }
     }
-    console.log(util.inspect(input, false, null));
-    return input;
+    //console.log(util.inspect(input, false, null));
+    return { bitField: input, old: number, now: cmd[mode] };
+}
+
+function checkSame({ old, now }, permissionString) {
+    const permissionNode = BitField.resolveNode(permissionString);
+    return !!(old & now & permissionNode);
 }

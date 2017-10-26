@@ -2,5 +2,12 @@
   "ping.success": "Pong! {{ms}}ms",
   "permission.undefined": "The permission `{{node}}` does not exists. Please report this to a developer.",
   "permission.notNumber": "The permission `{{node}}` does not returns a number. Please report this to a developer.",
-  "permission.denied": "You don't have the permission `{{node}}`"
+  "permission.denied": "You don't have the permission `{{node}}`",
+  "perms.values": "Previous:\t\t{{old}}\nCurrent:\t\t{{now}}",
+  "perms.success.member": "You successfully set the {{mode}}ed permission `{{node}}` to {{set}} for the member {{member}}",
+  "perms.success.role": "You successfully set the {{mode}}ed permission `{{node}}` to {{set}} for the role {{role}}",
+  "perms.success.channel": "You successfully set the {{mode}}ed permission `{{node}}` to {{set}} in the channel {{channel}}",
+  "perms.success.memberOverride": "You successfully set the {{mode}}ed permission `{{node}}` to {{set}} for the member {{member}} inside of the channel {{channel}}",
+  "perms.success.roleOverride": "You successfully set the {{mode}}ed permission `{{node}}` to {{set}} for the role {{role}} inside of the channel {{channel}}",
+  "words.value": "Value"
 }
