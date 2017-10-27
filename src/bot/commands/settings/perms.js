@@ -1,8 +1,7 @@
 const db = require("../../util/rethink");
 const BitField = require("../../util/BitField");
-const constants = require("../../util/constants");
+const constants = require("../../../util/constants");
 const { RichEmbed } = require("discord.js");
-const util = require('util');
 module.exports = {
     run: async (context) => {
         let role, channel, user, guild;
@@ -12,6 +11,7 @@ module.exports = {
         if (context.flags.guild) guild = context.guild.id;
         const IDs = { role, channel, user, guild };
         const scope = scopeChoice(channel, role, user, guild);
+        console.log(context.message.GuildSetting);
         switch (context.args[0]) {
             case "allow":
             case "deny": {
@@ -39,8 +39,7 @@ module.exports = {
                 // mode = allow, option = true/false, scope, permissionNode, message, IDs
                 let output;
                 try {
-                    output = await editNumber(context.args[0], context.args[2], scope, context.args[1], IDs);
-                    console.log(output);
+                    output = await editNumber(context.args[0], context.args[2], scope, context.args[1], IDs, context.message.GuildSetting);
                 } catch (err) {
                     return console.error(err);
                 }
@@ -179,12 +178,11 @@ function scopeChoice(channel, role, user, guild) {
  * @param IDs {Object<Snowflake>}
  * @returns {Promise.<*>}
  */
-async function editNumber(mode, option, scope, permissionNode, IDs) {
+async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting) {
     if (typeof option !== "boolean") throw new Error("Type error: option is not a Boolean");
     switch (scope) {
         case "roleOverride":
         case "memberOverride": {
-            console.log("trigger");
             const channel = await db.getGuildChannel(IDs.channel);
             if (scope === "memberOverride") {
                 const index = channel.overrides.members.findIndex(member => member.id === IDs.user);
@@ -239,6 +237,10 @@ async function editNumber(mode, option, scope, permissionNode, IDs) {
             try {
                 const output = role.bitField = buildObject(bitField, permissionNode, mode, option);
                 await db.editGuildRole(IDs.role, role, true);
+                const settingRoleIndex = GuildSetting.permission.roles.findIndex(settingRole => settingRole.roleID === IDs.role);
+                if (settingRoleIndex === -1 && Object.keys(output.commands).length) GuildSetting.permission.roles.push(role);
+                else if (settingRoleIndex !== -1 && !Object.keys(output.commands).length) GuildSetting.permission.roles[settingRoleIndex] = undefined;
+                await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
                 return { old: output.old, now: output.now };
             } catch (err) {
                 return console.error(err);
@@ -325,7 +327,6 @@ function buildObject(input, permissionNode, mode, option) {
             }
         }
     }
-    //console.log(util.inspect(input, false, null));
     return { bitField: input, old: number, now: cmd[mode] };
 }
 

@@ -8,7 +8,7 @@ module.exports = async (message, next, wiggle) => {
     if (message.author.id === owner) return next();
     const categoryName = message.command.category;
     const commandName = message.command.name;
-    const argName = (message.command.args && message.command.args[0] && !message.command.args[0].optional) ? message.args[0] : "base";
+    const argName = (command.args && command.args[0] && !command.args[0].optional) ? message.args[0] : "base";
     const permissionNodeString = [categoryName, commandName, argName].join(".");
     try {
         const result = await BitField.check(permissionNodeString, message, message.guildSetting);

@@ -1,11 +1,11 @@
 const db = module.exports = {};
 const config = require("../../../config");
-const constants = require("./constants");
+const constants = require("../../util/constants");
 const dbName = config.db.dbName || "Arys_rewrite";
-const GuildSetting = require("../structures/GuildSetting");
-const GuildChannel = require("../structures/GuildChannel");
-const GuildRole = require("../structures/GuildRole");
-const GuildMember = require("../structures/GuildMember");
+const GuildSetting = require("../../structures/bot/GuildSetting");
+const GuildChannel = require("../../structures/bot/GuildChannel");
+const GuildRole = require("../../structures/bot/GuildRole");
+const GuildMember = require("../../structures/bot/GuildMember");
 const r = require("rethinkdbdash")({
     host: config.db.host,
     port: config.db.port,
@@ -59,9 +59,9 @@ db.initGuildSetting = async (client, storedGuildArray) => {
     });
 };
 
-db.getGuildSetting = async (guildID) => {
-    if (guildID) return await r.table("guild").get(guildID).run();
-    const doc = await r.table("guild").run();
+db.getGuildSetting = async (guildsID) => {
+    if (typeof guildID === "string") return await r.table("guild").get(guildsID).run();
+    const doc = await r.table("guild").getAll(...guildsID).run();
     return new Map(doc.map((item) => [item.guildID, new GuildSetting(item)]));
 };
 

@@ -82,3 +82,19 @@ exports.PERMISSION_NODE = {
         }
     }
 };
+
+exports.IMAGE_TYPES = ["shopList"];
+
+exports.IMAGE_SHOPLIST = {
+    max: 18,
+    colors: ["#32363B", "#36393E"],
+    ctx: {
+        font: "normal normal 24px Whitney",
+        shadowColor: "black",
+        shadowOffsetX: 2,
+        shadowOffsetY: 2,
+        shadowBlur: 0
+    },
+    startText: 28,
+    startPrice: 674
+};

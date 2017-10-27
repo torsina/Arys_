@@ -1,11 +1,12 @@
 const wiggle = require("discord.js-wiggle");
 const config = require("../../config");
-const constants = require("./util/constants");
+const constants = require("../util/constants");
 const db = require("./util/rethink");
 const middlewares = require("./middleware/main");
 
 class Arys {
     constructor(options) {
+        process.send({ to: "image", type: "shopList", data: { list: [{ name: "test", hexColor: "#ff00", price: 500 }, { name: "test", hexColor: "#ff00", price: 500 }, { name: "test", hexColor: "#ff00", price: 500 }, { name: "test", hexColor: "#ff00", price: 500 }, { name: "test", hexColor: "#ff00", price: 500 }, { name: "test", hexColor: "#ff00", price: 500 }] } });
         this.settings = new Map;
         this.client = wiggle(options);
         this.client.init = async () => {
@@ -33,7 +34,7 @@ class Arys {
             .use("message", (message, next) => {
                 // check for dm channel
                 if (!message.guild) return next();
-                message.guildSetting = this.settings.get(message.guild.id);
+                message.GuildSetting = this.settings.get(message.guild.id);
                 message.constants = constants;
                 next();
             })

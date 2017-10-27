@@ -1,5 +1,5 @@
-const constants = require("../util/constants");
-const db = require("../util/rethink");
+const constants = require("../../util/constants");
+const db = require("../../bot/util/rethink");
 class GuildSetting {
     constructor(data) {
         /**

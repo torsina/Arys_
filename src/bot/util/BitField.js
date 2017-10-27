@@ -1,4 +1,4 @@
-const constants = require("./constants");
+const constants = require("../../util/constants");
 const db = require("./rethink");
 class BitField {
 
@@ -90,6 +90,7 @@ class BitField {
 
     static resolveNode(_permissionString, object = constants.PERMISSION_BITFIELD, build = false) {
         let a = _permissionString.split(".");
+        // if build is true, we only want the command property, which will be the built number for this command
         if (build) a = a.slice(0, 2);
         const b = ["commands", ...a];
         for (let i = 0, n = b.length; i < n; ++i) {
