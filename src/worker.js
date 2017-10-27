@@ -2,12 +2,10 @@ const config = require("../config");
 const moment = require("moment");
 let Raven;
 
-/**
- * if (config.sentry) {
+if (config.sentry) {
     Raven = require("raven");
     Raven.config(config.sentry).install();
 }
- */
 
 const workerConfig = JSON.parse(process.env.config);
 switch (workerConfig.type) {
@@ -16,7 +14,6 @@ switch (workerConfig.type) {
         console.log(`worker ${process.pid} started, hosting shards ${workerConfig.shardStart} to ${workerConfig.shardEnd},` +
             ` with a total of ${workerConfig.shardRange} out of ${workerConfig.totalShards}`);
         const shards = [];
-        console.log(workerConfig.shardRange, typeof workerConfig.shardRange);
         for (let i = 0; i < workerConfig.shardRange; i++) {
             try {
                 shards[i] = new Arys({ shardId: workerConfig.shardStart + i, shardCount: workerConfig.totalShards });
@@ -24,10 +21,6 @@ switch (workerConfig.type) {
                 console.error(err);
             }
         }
-        break;
-    }
-    case "image": {
-        console.log(`worker ${process.pid} started, handling image processing`);
         break;
     }
     case "web": {
