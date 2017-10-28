@@ -2,10 +2,10 @@ const db = module.exports = {};
 const config = require("../../../config");
 const constants = require("../../util/constants");
 const dbName = config.db.dbName || "Arys_rewrite";
-const GuildSetting = require("../../structures/bot/GuildSetting");
-const GuildChannel = require("../../structures/bot/GuildChannel");
-const GuildRole = require("../../structures/bot/GuildRole");
-const GuildMember = require("../../structures/bot/GuildMember");
+const GuildSetting = require("../structures/GuildSetting");
+const GuildChannel = require("../structures/GuildChannel");
+const GuildRole = require("../structures/GuildRole");
+const GuildMember = require("../structures/GuildMember");
 const r = require("rethinkdbdash")({
     host: config.db.host,
     port: config.db.port,
@@ -150,7 +150,7 @@ db.setGuildMember = async (data) => {
 
 db.getGuildMember = async (memberID, guildID) => {
     const doc = await r.table("guildMember").getAll([guildID, memberID], { index: "guildMember_guildID_memberID" }).run();
-    if (doc[0] === null) {
+    if (doc[0] === undefined) {
         const Member = new GuildMember({ memberID, guildID });
         await db.setGuildMember(Member);
         return Member;
@@ -159,12 +159,15 @@ db.getGuildMember = async (memberID, guildID) => {
     }
 };
 
-db.editGuildMember = async (memberID, guildID, data, force = false) => {
+db.editGuildMember = async (data, force = false) => {
     if (force) {
         data = new GuildMember(data);
-        return await r.table("guildMember").getAll([guildID, memberID], { index: "guildMember_guildID_memberID" }).update(data).run();
+        if (!data.id) {
+            throw new Error("Type error: the document is missing it's primary key");
+        }
+        return await r.table("guildMember").get(data.id).replace(data).run();
     }
-    return await r.table("guildMember").getAll([guildID, memberID], { index: "guildMember_guildID_memberID" }).update(data).run();
+    return await r.table("guildMember").get(data.id).update(data).run();
 };
 
 db.deleteMember = async (memberID, guildID) => {
@@ -184,11 +187,11 @@ db.deleteMember = async (memberID, guildID) => {
  * @returns {Promise.<*>}
  */
 db.getBitFields = async (_rolesID, _channelID, _memberID, _guildID) => {
-    const member = await r.table("guildMember").getAll([_guildID, _memberID], { index: "guildMember_guildID_memberID" }).pluck("bitField").run();
+    const member = await db.getGuildMember(_memberID, _guildID);
     const roles = await r.table("guildRole").getAll(..._rolesID).pluck("bitField").run();
-    const channel = await r.table("guildChannel").get(_channelID).run();
+    const channel = await db.getGuildChannel(_channelID);
     return {
-        member: member[0],
+        member: member.bitField,
         roles: roles,
         channel: {
             own: channel.bitField,

@@ -1,4 +1,4 @@
-const constants = require("../../util/constants");
+const constants = require("../util/constants");
 class ImageRequest {
     constructor(data) {
         if (!data) throw new Error("This request does not have any data");

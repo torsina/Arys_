@@ -1,17 +1,19 @@
 const db = require("../../util/rethink");
 const BitField = require("../../util/BitField");
+const GuildMember = require("../../structures/GuildMember");
+const GuildRole = require("../../structures/GuildRole");
 const constants = require("../../../util/constants");
+const util = require('util');
 const { RichEmbed } = require("discord.js");
 module.exports = {
     run: async (context) => {
-        let role, channel, user, guild;
+        let role, channel, user;
         if (context.flags.role) role = context.flags.role.id;
         if (context.flags.channel) channel = context.flags.channel.id;
         if (context.flags.user) user = context.flags.user.id;
-        if (context.flags.guild) guild = context.guild.id;
+        const guild = context.guild.id;
         const IDs = { role, channel, user, guild };
         const scope = scopeChoice(channel, role, user, guild);
-        console.log(context.message.GuildSetting);
         switch (context.args[0]) {
             case "allow":
             case "deny": {
@@ -51,10 +53,15 @@ module.exports = {
                 const node = context.args[1];
                 const set = context.args[2];
                 const member = context.flags.user ? context.flags.user.toString() : null;
-                const _role = context.flags.role ? context.flags.role.toString() : null;
+                const _role = context.flags.role ? context.flags.role.name : null;
                 const _channel = context.flags.channel ? context.flags.channel.toString() : null;
                 const isChanged = checkSame(output, node);
-                const old = (isChanged && set) ? ":x:" : ":white_check_mark:";
+                let old;
+                if (isChanged) {
+                    old = set ? ":x:" : ":white_check_mark:";
+                } else {
+                    old = set ? ":white_check_mark:" : ":x:";
+                }
                 const now = set ? ":white_check_mark:" : ":x:";
                 switch (scope) {
                     case "memberOverride": {
@@ -62,7 +69,7 @@ module.exports = {
                         break;
                     }
                     case "roleOverride": {
-                        embed.setDescription(context.t("perms.success.roleOverride", { mode, node, set, member, role: _role }));
+                        embed.setDescription(context.t("perms.success.roleOverride", { mode, node, set, channel: _channel, role: _role }));
                         break;
                     }
                     case "role": {
@@ -185,16 +192,28 @@ async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting
         case "memberOverride": {
             const channel = await db.getGuildChannel(IDs.channel);
             if (scope === "memberOverride") {
-                const index = channel.overrides.members.findIndex(member => member.id === IDs.user);
-                const memberOverride = channel.overrides.members[index];
-                const input = memberOverride || {};
+                const index = channel.overrides.members.findIndex(member => member.memberID === IDs.user);
+                const storedMemberOverride = channel.overrides.members[index];
+                let usedMemberOverride;
+                if (storedMemberOverride) {
+                    storedMemberOverride.insideGuild = true;
+                    usedMemberOverride = new GuildMember(storedMemberOverride);
+                } else {
+                    usedMemberOverride = new GuildMember({ memberID: IDs.user, insideGuild: true });
+                }
                 try {
-                    let output;
-                    if (!memberOverride) {
-                        output = buildObject(input, permissionNode, mode, option);
-                        channel.overrides.members.push(output.bitField);
+                    const output = buildObject(usedMemberOverride.bitField, permissionNode, mode, option);
+                    const memberOverride = new GuildMember({ memberID: IDs.user, bitField: output.bitField, insideGuild: true });
+                    if (!storedMemberOverride) {
+                        if (Object.keys(memberOverride.bitField).length !== 0) {
+                            channel.overrides.members.push(memberOverride);
+                        }
                     } else {
-                        channel.overrides.members[index] = input;
+                        if (Object.keys(memberOverride.bitField).length !== 0) {
+                            channel.overrides.members[index] = memberOverride;
+                        } else {
+                            channel.overrides.members.splice(index, 1);
+                        }
                     }
                     await db.editGuildChannel(IDs.channel, channel, true);
                     return { old: output.old, now: output.now };
@@ -202,16 +221,25 @@ async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting
                     return console.error(err);
                 }
             } else {
-                const index = channel.overrides.roles.findIndex(role => role.id === IDs.role);
-                const roleOverride = channel.overrides.roles[index];
-                const input = roleOverride || {};
+                const index = channel.overrides.roles.findIndex(role => role.roleID === IDs.role);
+                const storedRoleOverride = channel.overrides.roles[index];
+                let usedRoleOverride;
+                if (storedRoleOverride) {
+                    usedRoleOverride = new GuildRole(storedRoleOverride);
+                } else usedRoleOverride = new GuildRole({ roleID: IDs.role });
                 try {
-                    let output;
-                    if (!roleOverride) {
-                        output = buildObject(input, permissionNode, mode, option);
-                        channel.overrides.roles.push(output);
+                    const output = buildObject(usedRoleOverride.bitField, permissionNode, mode, option);
+                    const roleOverride = new GuildRole({ roleID: IDs.role, bitField: output.bitField });
+                    if (!storedRoleOverride) {
+                        if (Object.keys(roleOverride.bitField).length !== 0) {
+                            channel.overrides.roles.push(roleOverride);
+                        }
                     } else {
-                        channel.overrides.roles[index] = input;
+                        if (Object.keys(roleOverride.bitField).length !== 0) {
+                            channel.overrides.roles[index] = roleOverride;
+                        } else {
+                            channel.overrides.roles.splice(index, 1);
+                        }
                     }
                     await db.editGuildChannel(IDs.channel, channel, true);
                     return { old: output.old, now: output.now };
@@ -224,8 +252,9 @@ async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting
             const member = await db.getGuildMember(IDs.user, IDs.guild);
             const bitField = member.bitField || {};
             try {
-                const output = member.bitField = buildObject(bitField, permissionNode, mode, option);
-                await db.editGuildMember(IDs.user, IDs.guild, member, true);
+                const output = buildObject(bitField, permissionNode, mode, option);
+                member.bitField = output.bitField;
+                await db.editGuildMember(member, true);
                 return { old: output.old, now: output.now };
             } catch (err) {
                 return console.error(err);
@@ -235,12 +264,15 @@ async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting
             const role = await db.getGuildRole(IDs.role);
             const bitField = role.bitField || {};
             try {
-                const output = role.bitField = buildObject(bitField, permissionNode, mode, option);
+                const output = buildObject(bitField, permissionNode, mode, option);
+                role.bitField = output.bitField;
                 await db.editGuildRole(IDs.role, role, true);
-                const settingRoleIndex = GuildSetting.permission.roles.findIndex(settingRole => settingRole.roleID === IDs.role);
-                if (settingRoleIndex === -1 && Object.keys(output.commands).length) GuildSetting.permission.roles.push(role);
-                else if (settingRoleIndex !== -1 && !Object.keys(output.commands).length) GuildSetting.permission.roles[settingRoleIndex] = undefined;
+
+                const index = GuildSetting.permission.roles.findIndex(settingRole => settingRole === IDs.role);
+                if (index === -1 && Object.keys(role.bitField).length !== 0) GuildSetting.permission.roles.push(role.roleID);
+                else if (index !== -1 && Object.keys(role.bitField).length === 0) GuildSetting.permission.roles.splice(index, 1);
                 await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
+
                 return { old: output.old, now: output.now };
             } catch (err) {
                 return console.error(err);
@@ -250,7 +282,8 @@ async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting
             const channel = await db.getGuildChannel(IDs.channel);
             const bitField = channel.bitField || {};
             try {
-                const output = channel.bitField = buildObject(bitField, permissionNode, mode, option);
+                const output = buildObject(bitField, permissionNode, mode, option);
+                channel.bitField = output.bitField;
                 await db.editGuildChannel(IDs.channel, channel, true);
                 return { old: output.old, now: output.now };
             } catch (err) {
@@ -262,7 +295,8 @@ async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting
             const role = await db.getGuildRole(IDs.guild);
             const bitField = role.bitField || {};
             try {
-                const output = role.bitField = buildObject(bitField, permissionNode, mode, option);
+                const output = buildObject(bitField, permissionNode, mode, option);
+                role.bitField = output.bitField;
                 await db.editGuildRole(IDs.role, role, true);
                 return { old: output.old, now: output.now };
             } catch (err) {
@@ -291,6 +325,7 @@ function buildObject(input, permissionNode, mode, option) {
     const [pathCategory, pathCommand, pathNode] = path;
     const permissionBit = constants.PERMISSION_BITFIELD.commands[pathCategory][pathCommand][pathNode];
     // create the command categories object containing the categories
+    if (!input) input = {};
     if (!input.commands) input.commands = {};
     const cmdCategories = input.commands;
 
@@ -324,6 +359,8 @@ function buildObject(input, permissionNode, mode, option) {
             const categoryKeys = Object.keys(cmdCategories[pathCategory]);
             if (categoryKeys.length === 0) {
                 delete cmdCategories[pathCategory];
+                const keys = Object.keys(input.commands);
+                if (keys.length === 0) input = {};
             }
         }
     }
@@ -332,5 +369,6 @@ function buildObject(input, permissionNode, mode, option) {
 
 function checkSame({ old, now }, permissionString) {
     const permissionNode = BitField.resolveNode(permissionString);
-    return !!(old & now & permissionNode);
+    if (old || now) return !(old & now & permissionNode);
+    else return false;
 }

@@ -1,17 +1,18 @@
 const constants = require("../../util/constants");
 const db = require("./rethink");
+const util = require('util');
 class BitField {
 
     /**
-     *
+     * Creates a permission context to check permissions on
      * @param message
-     * @param guildSetting
+     * @param GuildSetting
      * @returns {Promise.<{commands: {}}>}
      */
-    static async build(message, guildSetting) {
+    static async build(message, GuildSetting) {
         // we sort the member's roles by their position
         const rolesID = message.member.roles
-            .filter(role => guildSetting.permission.roles.indexOf(role.id) !== -1)
+            .filter(role => GuildSetting.permission.roles.findIndex(guildRole => role.id === guildRole.roleID) !== -1)
             .sort((a, b) => { return message.guild.roles.get(a.id).position - message.guild.roles.get(b.id).position; })
             .keyArray();
         const channelID = message.channel.id;
@@ -20,19 +21,23 @@ class BitField {
         // we get all the bitFields needed for this command
         const data = await db.getBitFields(rolesID, channelID, memberID, guildID);
         const arrayBitField = [];
-        const base = constants.PERMISSION_BITFIELD_DEFAULT;
         let rolesOverrides, memberOverrides;
         // add the sorted roles to the array, then the channel, then the member
-        if (data.roles) arrayBitField.push(...data.roles);
-        if (data.channel && data.channel.own) arrayBitField.push(data.channel.own);
+        if (data.roles) {
+            for (let i = 0, n = data.roles.length; i < n; i++) {
+                const role = data.roles[i];
+                arrayBitField.push(role.bitField);
+            }
+        }
         if (data.member) arrayBitField.push(data.member);
+        if (data.channel && data.channel.own) arrayBitField.push(data.channel.own);
         // check for role overrides
         if (data.channel && data.channel.overrides) {
             const { roles, members } = data.channel.overrides;
             if (roles && roles.length > 0) {
                 // filter then sort by position the roles overrides for the roles that the member has
                 rolesOverrides = data.channel.overrides.roles
-                    .filter(role => message.member.roles.indexOf(role.id))
+                    .filter(role => message.member.roles.keyArray().indexOf(role.id))
                     .sort((a, b) => { return message.guild.roles.get(a.id).position - message.guild.roles.get(b.id).position; });
                 // push them to the array
                 rolesOverrides.forEach((role) => {
@@ -43,7 +48,7 @@ class BitField {
             if (members && members.length > 0) {
                 // get the member's override if exist
                 memberOverrides = data.channel.overrides.members
-                    .filter(member => member.id === memberID);
+                    .filter(member => member.memberID === memberID)[0];
                 // push it to the array
                 arrayBitField.push(memberOverrides.bitField);
             }
@@ -55,36 +60,35 @@ class BitField {
         // loop through all of the bitFields in the array
         for (let i = 0, n = arrayBitField.length; i < n; i++) {
             const bitField = arrayBitField[i];
-            // loop over the command categories
-            for (let j = 0, m = cmdCategories.length; j < m; j++) {
-                let cmdCategory = endBitField.commands[cmdCategories[j]];
-                // assign this category in the end bitField to an object if not already assigned
-                if (!cmdCategory) cmdCategory = endBitField.commands[cmdCategories[j]] = {};
-                const bitFieldCategory = bitField.commands[cmdCategories[j]];
-                // if empty assign to default bitField and skip loop
-                if (!bitFieldCategory) {
-                    bitField.commands[cmdCategories[j]] = base.commands[cmdCategories[j]];
-                } else {
-                    // array of all the commands in this category
-                    const cmds = Object.keys(constants.PERMISSION_BITFIELD.commands[cmdCategories[j]]);
-                    // loop over the commands in the category
-                    for (let k = 0, o = cmds.length; k < o; k++) {
-                        let cmd = cmdCategory[cmds[k]];
-                        // set this command perm number to 0 if does not already initialized
-                        if (!cmd) cmd = cmdCategory[cmds[k]] = 0; // eslint-disable-line max-depth
-                        // do this to prevent unnecessarily long lines
-                        const bitFieldCmd = bitFieldCategory[cmds[k]];
-                        const allow = bitFieldCmd.allow || 0;
-                        const deny = bitFieldCmd.deny || 0;
-                        // compile the allow and deny permission number into one (deny overrides allow if true)
-                        // and add this to the final perm number for the command
-                        cmdCategory[cmds[k]] = (cmd | allow) & ~deny;
+            // if empty skip loop
+            if (bitField && bitField.commands) {
+                // loop over the command categories
+                for (let j = 0, m = cmdCategories.length; j < m; j++) {
+                    let cmdCategory = endBitField.commands[cmdCategories[j]];
+                    // assign this category in the end bitField to an object if not already assigned
+                    if (!cmdCategory) cmdCategory = endBitField.commands[cmdCategories[j]] = {};
+                    const bitFieldCategory = bitField.commands[cmdCategories[j]];
+                    // if empty skip loop
+                    if (bitFieldCategory) {
+                        // array of all the commands in this category
+                        const cmds = Object.keys(constants.PERMISSION_BITFIELD.commands[cmdCategories[j]]);
+                        // loop over the commands in the category
+                        for (let k = 0, o = cmds.length; k < o; k++) {
+                            let cmd = cmdCategory[cmds[k]];
+                            // set this command perm number to 0 if does not already initialized
+                            if (!cmd) cmd = cmdCategory[cmds[k]] = 0; // eslint-disable-line max-depth
+                            // do this to prevent unnecessarily long lines
+                            const bitFieldCmd = bitFieldCategory[cmds[k]];
+                            const allow = bitFieldCmd.allow || 0;
+                            const deny = bitFieldCmd.deny || 0;
+                            // compile the allow and deny permission number into one (deny overrides allow if true)
+                            // and add this to the final perm number for the command
+                            cmdCategory[cmds[k]] = (cmd | allow) & ~deny;
+                        }
                     }
                 }
             }
         }
-        console.log(endBitField);
-        console.log(endBitField);
         return endBitField;
     }
 

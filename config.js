@@ -4,7 +4,7 @@ const config = {
         host: "192.168.1.30",
         port: "28015"
     },
-    env: ""
+    env: "dev"
 };
 if (process.env.NODE_ENV === "dev" || config.env === "dev") privateConfig.token = privateConfig.token.dev;
 else {

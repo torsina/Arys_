@@ -11,7 +11,7 @@ module.exports = async (message, next, wiggle) => {
     const argName = (command.args && command.args[0] && !command.args[0].optional) ? message.args[0] : "base";
     const permissionNodeString = [categoryName, commandName, argName].join(".");
     try {
-        const result = await BitField.check(permissionNodeString, message, message.guildSetting);
+        const result = await BitField.check(permissionNodeString, message, message.GuildSetting);
         if (!result) {
             const { embed } = new EmbedError(message, { error: "permission.denied", data: { node: permissionNodeString } });
             return message.channel.send(embed);

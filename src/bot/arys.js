@@ -6,7 +6,6 @@ const middlewares = require("./middleware/main");
 
 class Arys {
     constructor(options) {
-        process.send({ to: "image", type: "shopList", data: { list: [{ name: "test", hexColor: "#ff00", price: 500 }, { name: "test", hexColor: "#ff00", price: 500 }, { name: "test", hexColor: "#ff00", price: 500 }, { name: "test", hexColor: "#ff00", price: 500 }, { name: "test", hexColor: "#ff00", price: 500 }, { name: "test", hexColor: "#ff00", price: 500 }] } });
         this.settings = new Map;
         this.client = wiggle(options);
         this.client.init = async () => {
