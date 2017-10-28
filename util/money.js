@@ -30,7 +30,7 @@ money.perMessage = async (guild, member) => {
     let money;
     if(setting && setting.money && setting.money.range) money = Math.random() * (setting.money.range.max - setting.money.range.min) + setting.money.range.min;
     else money = Math.random() * (config.money.range.max - config.money.range.min) + config.money.range.min;
-    await db.changeMoney(guild, member, money, true).catch(console.error);
+    await db.changeMoney(guild, member, money, { isMessage: true}).catch(console.error);
 };
 
 money.get = async (member, guild) => {
