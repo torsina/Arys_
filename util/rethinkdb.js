@@ -223,7 +223,6 @@ db.changeMoney = async (guild, member, amount, options = {}) => {
     }
     if(isNaN(amount)) throw new Error('Amount is not a number.');
     if(options.isMessage === true) {
-        console.log("trigger");
         guildMember.money.lastGet = Date.now();
         user.money.amount += parseInt(amount);
 
