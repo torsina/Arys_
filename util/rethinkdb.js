@@ -223,8 +223,10 @@ db.changeMoney = async (guild, member, amount, options = {}) => {
     }
     if(isNaN(amount)) throw new Error('Amount is not a number.');
     if(options.isMessage === true) {
+        console.log("trigger");
         guildMember.money.lastGet = Date.now();
         user.money.amount += parseInt(amount);
+
     }
     if((guildMember.money.amount + parseInt(amount)) < 0 && options.force === false || options.scope === "user" && user.money.amount + parseInt(amount) < 0 && options.force === false) {
         throw new Error("You don't have enough money for that.");
@@ -239,13 +241,13 @@ db.changeMoney = async (guild, member, amount, options = {}) => {
         guildMember.guild = guild;
         await r.table('guildMember').insert(guildMember).run();
     } else {
-        await r.table('guildMember').get(guildMember.id).update(guildMember).run();
+        await r.table('guildMember').get(guildMember.id).replace(guildMember).run();
     }
     if(!user.member) {
         user.member = member;
         await r.table('user').insert(guildMember).run();
     } else {
-        await r.table('user').get(guildMember.id).update(guildMember).run();
+        await r.table('user').get(guildMember.id).replace(guildMember).run();
     }
     return true;
 };

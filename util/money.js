@@ -21,10 +21,13 @@ money.perMessage = async (guild, member) => {
     let setting = await db.getSetting(guild).catch(console.error);
     let doc = await db.getGuildMember(guild, member);
     if(doc) {
-        if(!setting.money && doc.money) {
-            if(doc.money && doc.money.lastGet + config.money.wait > Date.now()) return;
+        console.log("trigger first", doc.money.lastGet + setting.money.wait, Date.now());
+        if((!setting.money || !setting.money.wait) && doc.money) {
+            console.log("trigger config");
+            if(doc.money && ((doc.money.lastGet + config.money.wait) > Date.now())) return;
         } else {
-            if(doc.money && doc.money.lastGet + setting.money.wait > Date.now()) return;
+            console.log("trigger setting");
+            if(doc.money && ((doc.money.lastGet + setting.money.wait) > Date.now())) return;
         }
     }
     let money;
