@@ -1,5 +1,4 @@
-const constants = require("../../util/constants");
-const db = require("../util/rethink");
+const MoneySetting = require("./MoneySetting");
 class GuildSetting {
     constructor(data) {
         /**
@@ -7,7 +6,7 @@ class GuildSetting {
          * @type {Snowflake}
          */
         this.guildID = data.guildID;
-        if(!this.guildID) throw new Error("Type error: guildID is undefined");
+        if (!this.guildID) throw new Error("Type error: guildID is undefined");
         /**
          * The money configuration of the guild
          * @type {object}
@@ -23,6 +22,7 @@ class GuildSetting {
                 roles: []
             };
         }
+        this.money = new MoneySetting(data.money);
     }
 }
 module.exports = GuildSetting;

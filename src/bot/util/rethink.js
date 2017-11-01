@@ -163,11 +163,11 @@ db.getGuildMember = async (memberID, guildID) => {
 };
 
 db.editGuildMember = async (data, force = false) => {
+    if (!data.id) {
+        throw new Error("Type error: the document is missing it's primary key");
+    }
     if (force) {
         data = new GuildMember(data);
-        if (!data.id) {
-            throw new Error("Type error: the document is missing it's primary key");
-        }
         return await r.table("guildMember").get(data.id).replace(data).run();
     }
     return await r.table("guildMember").get(data.id).update(data).run();

@@ -42,3 +42,25 @@ Array.prototype.reverse = function () { // eslint-disable-line func-names
     }
     return this;
 };
+
+misc.isObject = (item) => {
+    return (item && typeof item === "object" && !Array.isArray(item));
+};
+
+misc.mergeDeep = (target, ...sources) => {
+    if (!sources.length) return target;
+    const source = sources.shift();
+
+    if (misc.isObject(target) && misc.isObject(source)) {
+        for (const key in source) {
+            if (misc.isObject(source[key])) {
+                if (!target[key]) Object.assign(target, { [key]: {} });
+                misc.mergeDeep(target[key], source[key]);
+            } else {
+                Object.assign(target, { [key]: source[key] });
+            }
+        }
+    }
+
+    return misc.mergeDeep(target, ...sources);
+};

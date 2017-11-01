@@ -41,17 +41,20 @@ exports.PERMISSION_BITFIELD_DEFAULT = {
         }
     }
 };
-
+// assign the permission nodes to a permission bit
 exports.PERMISSION_BITFIELD = {
     commands: {
         moderation: {},
         settings: {
             perms: {
                 visible: 1 << 0,
-                allow: 1 << 1,
-                deny: 1 << 2,
-                show: 1 << 3,
-                override: 1 << 4
+                edit: 1 << 1,
+                show: 1 << 2
+            },
+            currency: {
+                visible: 1 << 0,
+                edit: 1 << 1,
+                show: 1 << 2
             }
         },
         util: {
@@ -62,16 +65,22 @@ exports.PERMISSION_BITFIELD = {
         }
     }
 };
-
+// assign the arguments to a permission node
 exports.PERMISSION_NODE = {
     commands: {
         settings: {
             perms: {
                 visible: "settings.perms.visible",
-                allow: "settings.perms.allow",
-                deny: "settings.perms.deny",
-                show: "settings.perms.show",
-                override: "settings.perms.override"
+                allow: "settings.perms.edit",
+                deny: "settings.perms.edit",
+                show: "settings.perms.show"
+            },
+            currency: {
+                show: "settings.currency.show",
+                name: "settings.currency.edit",
+                bet: "settings.currency.edit",
+                daily: "settings.currency.edit",
+                activity: "settings.currency.edit"
             }
         },
         util: {
@@ -97,4 +106,33 @@ exports.IMAGE_SHOPLIST = {
     },
     startText: 28,
     startPrice: 674
+};
+
+exports.GUILDSETTING_DEFAULT = {
+    money: {
+        name: "credits",
+        bet: {
+            multiplier: 0.98,
+            min: 100,
+            max: null,
+            used: 0
+        },
+        daily: {
+            amount: 250,
+            bonusRange: {
+                min: 0,
+                max: 100
+            }
+        },
+        activity: {
+            wait: 120000,
+            min: 10,
+            max: 30
+        }
+    },
+    moneyNameLength: 40
+};
+
+exports.MONEYACCOUNT_DEFAULT = {
+    amount: 200
 };

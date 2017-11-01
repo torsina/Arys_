@@ -85,7 +85,8 @@ module.exports = {
                         break;
                     }
                 }
-                embed.addField(context.t("words.value"), context.t("perms.values", { old, now }));
+                embed.addField(context.t("words.oldValue"), old, true)
+                    .addField(context.t("words.newValue"), now, true);
                 context.channel.send(embed);
                 break;
             }

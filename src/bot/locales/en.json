@@ -1,6 +1,6 @@
 {
   "ping.success": "Pong! {{ms}}ms",
-  "permission.undefined": "The permission `{{node}}` does not exists. Please report this to a developer.",
+  "permission.undefined": "The permission `{{node}}` does not exists.",
   "permission.notNumber": "The permission `{{node}}` does not returns a number. Please report this to a developer.",
   "permission.denied": "You don't have the permission `{{node}}`",
   "perms.values": "Previous:\t\t{{old}}\nCurrent:\t\t  {{now}}",
@@ -9,5 +9,24 @@
   "perms.success.channel": "You successfully set the {{mode}}ed permission `{{node}}` to {{set}} in the channel {{channel}}",
   "perms.success.memberOverride": "You successfully set the {{mode}}ed permission `{{node}}` to {{set}} for the member {{member}} inside of the channel {{channel}}",
   "perms.success.roleOverride": "You successfully set the {{mode}}ed permission `{{node}}` to {{set}} for the role `{{role}}` inside of the channel {{channel}}",
-  "words.value": "Value"
+  "currency.success": "You successfully set the {{option}} to {{value}}",
+  "currency.option.name": "currency name",
+  "currency.option.bet.min": "minimum bet value",
+  "currency.option.bet.max": "maximum bet value",
+  "currency.option.daily.amount": "daily reward",
+  "currency.option.daily.minBonus": "minimum bonus for shared dailies",
+  "currency.option.daily.maxBonus": "maximum bonus for shared dailies",
+  "currency.activity.wait": "time between activity reward",
+  "currency.activity.min": "minimum reward for activity",
+  "currency.activity.max": "maximum reward for activity",
+  "currency.show.title": "Currency settings",
+  "currency.show.name": "Currency name",
+  "currency.show.bet.range": "Limits of bet use",
+  "currency.show.daily.amount": "Amount gained by dailies",
+  "currency.show.daily.bonus": "Range of the bonus for shared dailies",
+  "currency.show.activity.wait": "Time between activity reward",
+  "currency.show.activity.bonus": "Range of the reward for activity",
+  "words.value": "Value",
+  "words.oldValue": "Old value",
+  "words.newValue": "New value"
 }
