@@ -43,8 +43,9 @@ db.init = async () => {
 };
 // guildSetting getter/setter
 db.setGuildSetting = async (data) => {
-    const query = new GuildSetting(data);
-    return await r.table("guild").insert(query).run();
+    data = new GuildSetting(data);
+    data.money = data.money._data;
+    return await r.table("guild").insert(data).run();
 };
 
 db.initGuildSetting = async (client, storedGuildArray) => {
@@ -65,7 +66,9 @@ db.getGuildSetting = async (guildsID) => {
     return new Map(doc.map((item) => [item.guildID, new GuildSetting(item)]));
 };
 
-db.editGuildSetting = async (guildID, data) => {
+db.editGuildSetting = async (guildID, data, force = false) => {
+    data.money = data.money._data;
+    if (force) return await r.table("guild").get(guildID).replace(data).run();
     return await r.table("guild").get(guildID).update(data).run();
 };
 

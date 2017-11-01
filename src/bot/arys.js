@@ -2,6 +2,8 @@ const wiggle = require("discord.js-wiggle");
 const config = require("../../config");
 const constants = require("../util/constants");
 const db = require("./util/rethink");
+const GuildSetting = require("./structures/GuildSetting");
+const util = require("util");
 const middlewares = require("./middleware/main");
 
 class Arys {
@@ -15,11 +17,13 @@ class Arys {
             this.settingStream = await db.streamGuildSetting();
             this.settingStream.on("data", update => {
                 if (this.client.discordClient.guilds.get(update.new_val.guildID)) {
-                    this.settings.set(update.new_val.guildID, update.new_val);
+                    const updated = new GuildSetting(update.new_val);
+                    console.log(util.inspect(updated, false, null));
+                    this.settings.set(update.new_val.guildID, updated);
                 }
             });
             await db.initGuildSetting(this.client, this.settings);
-            console.log(this.settings);
+            console.log(util.inspect(this.settings, false, null));
         };
         this.client.set("owner", "306418399242747906")
             .set("prefixes", ["mention", `"`])
