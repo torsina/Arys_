@@ -151,11 +151,11 @@ db.setGuildMember = async (data) => {
     } else return await r.table("guildMember").insert(data).run();
 };
 
-db.getGuildMember = async (memberID, guildID, GuildSetting) => {
+db.getGuildMember = async (memberID, guildID, guildSetting) => {
     if (!GuildSetting) throw new Error("No GuildSetting provided");
     const doc = await r.table("guildMember").getAll([guildID, memberID], { index: "guildMember_guildID_memberID" }).run();
     if (doc[0] === undefined) {
-        const Member = new GuildMember({ memberID, guildID }, GuildSetting);
+        const Member = new GuildMember({ memberID, guildID }, guildSetting);
         await db.setGuildMember(Member);
         return Member;
     } else {

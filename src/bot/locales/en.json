@@ -29,6 +29,9 @@
   "currency.show.activity.wait": "Time between activity reward",
   "currency.show.activity.bonus": "Range of the reward for activity",
   "money.tooPoor": "You don't have enough {{currency}} for that!",
+  "bet.tooLow": "Your bet is too low, min: `{{min}}`",
+  "bet.win": "{{user}}, you won {{value}} {{currency}}!",
+  "bet.lost": "{{user}}, you lost {{value}} {{currency}}!",
   "words.value": "Value",
   "words.oldValue": "Old value",
   "words.newValue": "New value"

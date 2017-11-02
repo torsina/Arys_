@@ -28,15 +28,16 @@ class Arys {
             // start member stream to stay in sync
             this.memberStream = await db.streamGuildMember();
             this.memberStream.on("data", update => {
-                if (this.client.discordClient.guilds.get(update.new_val.guildID)) {
-                    const guildMember = new GuildMember(update.new_val);
+                const guild = this.client.discordClient.guilds.get(update.new_val.guildID);
+                if (guild) {
+                    const guildMember = new GuildMember(update.new_val, this.settings.get(update.new_val.guildID));
                     let guildMap = guildsMap.get(update.new_val.guildID);
                     if (!guildMap) {
                         guildMap = new Map();
                         guildsMap.set(guildMember.guildID, guildMap);
                     }
                     guildMap.set(guildMember.memberID, guildMember);
-                    if (guildMap.size > constants.MAXCACHE.members) {
+                    if (guildMap.size > 30 + Math.floor(guild.memberCount * 0.06)) {
                         const mapFirstKey = guildMap.keys().next().value;
                         guildMap.delete(mapFirstKey);
                     }
@@ -47,7 +48,7 @@ class Arys {
         this.client.set("owner", "306418399242747906")
             .set("prefixes", ["mention", `"`])
             .set("token", config.token)
-            .set("commandOptions", { sendTyping: true, replyResult: true, embedError: true })
+            .set("commandOptions", { sendTyping: true, embedError: true })
             .use("ready", async (next) => {
                 await this.client.init();
                 next();
@@ -73,7 +74,7 @@ class Arys {
                 // get guild member, call it if not cached
                 const guildMemberStored = guildMap.get(message.author.id);
                 if (!guildMemberStored) {
-                    const guildMember = await db.getGuildMember(message.author.id, message.guild.id, GuildSetting);
+                    const guildMember = await db.getGuildMember(message.author.id, message.guild.id, message.GuildSetting);
                     guildMap.set(message.author.id, guildMember);
                     message.GuildMember = guildMember;
                 } else {

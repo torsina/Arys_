@@ -57,6 +57,12 @@ exports.PERMISSION_BITFIELD = {
                 show: 1 << 2
             }
         },
+        money: {
+            bet: {
+                visible: 1 << 0,
+                base: 1 << 1
+            }
+        },
         util: {
             ping: {
                 visible: 1 << 0,
@@ -81,6 +87,14 @@ exports.PERMISSION_NODE = {
                 bet: "settings.currency.edit",
                 daily: "settings.currency.edit",
                 activity: "settings.currency.edit"
+            }
+        },
+        money: {
+            bet: {
+                h: "money.bet.base",
+                head: "money.bet.base",
+                t: "money.bet.base",
+                tail: "money.bet.base"
             }
         },
         util: {

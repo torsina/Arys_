@@ -1,4 +1,5 @@
 const db = require("../util/rethink");
+const EmbedError = require("discord.js-wiggle/lib/EmbedError");
 module.exports = async (message, next) => {
     const { min, max } = message.GuildSetting.money.activity;
     // get guild member from cache, cache it if not in it
@@ -7,7 +8,19 @@ module.exports = async (message, next) => {
     // if the cooldown is not over
     if (difference < message.GuildSetting.money.activity.wait) return next();
     const value = Math.floor((Math.random() * (max - min)) + min);
-    guildMember.money.editMoney(value);
+    try {
+        guildMember.money.editMoney(value);
+    } catch (err) {
+        console.error("trigger");
+        const error = {
+            error: err.message,
+            data: {
+                currency: message.GuildSetting.money.name
+            }
+        };
+        const { embed } = new EmbedError(message, error);
+        return message.channel.send(embed);
+    }
     guildMember.money.setActivityCooldown();
     await db.editGuildMember(guildMember);
     return next();
