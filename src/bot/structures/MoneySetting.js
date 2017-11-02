@@ -6,6 +6,14 @@ class MoneySetting {
         if (data) {
             this._data = data;
             this.name = data.name || money.name;
+            this.accounts = {};
+            if (data.accounts) {
+                this.accounts = {
+                    baseAmount: data.baseAmount || money.baseAmount
+                };
+            } else {
+                misc.mergeDeep(this.accounts, money.accounts);
+            }
 
             this.bet = {};
             if (data.bet) {
@@ -57,6 +65,25 @@ class MoneySetting {
             if (typeof value !== "string") throw new TypeError("value is not a string");
             this._data.name = value;
             this.name = value;
+        }
+    }
+    setAccountsAmount(value) {
+        if (value === money.accounts.amount) {
+            if (this._data.accounts) {
+                delete this._data.accounts.amount;
+            }
+            if (Object.keys(this._data.accounts).length === 0) {
+                delete this._data.accounts;
+                if (Object.keys(this._data).length === 0) {
+                    this._data = {};
+                }
+            }
+            this.baseAmount = value;
+        } else {
+            if (typeof value !== "number") throw new TypeError("value is not a string");
+            if (!this._data.accounts) this._data.accounts = {};
+            this._data.accounts.amount = value;
+            this.accounts.amount = value;
         }
     }
     setBetRange(value = {}) {

@@ -19,7 +19,7 @@ class BitField {
         const memberID = message.member.id;
         const guildID = message.guild.id;
         // we get all the bitFields needed for this command
-        const data = await db.getBitFields(rolesID, channelID, memberID, guildID);
+        const data = await db.getBitFields(rolesID, channelID, memberID, guildID, GuildSetting);
         const arrayBitField = [];
         let rolesOverrides, memberOverrides;
         // add the sorted roles to the array, then the channel, then the member

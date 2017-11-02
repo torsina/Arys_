@@ -1,5 +1,6 @@
+const MoneyAccount = require("./MoneyAccount");
 class GuildMember {
-    constructor(data = {}) {
+    constructor(data = {}, GuildSetting) {
         this.id = data.id;
         this.memberID = data.memberID;
         // for member overrides storage we don't need to store the id of the guild
@@ -9,6 +10,7 @@ class GuildMember {
         }
         if (!this.memberID) throw new Error("Type error: memberID is undefined");
         this.bitField = data.bitField || null;
+        this.money = new MoneyAccount(data.money, GuildSetting);
     }
 }
 module.exports = GuildMember;

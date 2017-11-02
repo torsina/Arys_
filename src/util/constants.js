@@ -111,6 +111,9 @@ exports.IMAGE_SHOPLIST = {
 exports.GUILDSETTING_DEFAULT = {
     money: {
         name: "credits",
+        accounts: {
+            amount: 200
+        },
         bet: {
             multiplier: 0.98,
             min: 100,
@@ -133,6 +136,16 @@ exports.GUILDSETTING_DEFAULT = {
     moneyNameLength: 40
 };
 
+exports.GUILDMEMBER_DEFAULT = {
+    money: {
+
+    }
+};
+
 exports.MONEYACCOUNT_DEFAULT = {
     amount: 200
+};
+
+exports.MAXCACHE = {
+    members: 100
 };

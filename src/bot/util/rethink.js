@@ -151,14 +151,15 @@ db.setGuildMember = async (data) => {
     } else return await r.table("guildMember").insert(data).run();
 };
 
-db.getGuildMember = async (memberID, guildID) => {
+db.getGuildMember = async (memberID, guildID, GuildSetting) => {
+    if (!GuildSetting) throw new Error("No GuildSetting provided");
     const doc = await r.table("guildMember").getAll([guildID, memberID], { index: "guildMember_guildID_memberID" }).run();
     if (doc[0] === undefined) {
-        const Member = new GuildMember({ memberID, guildID });
+        const Member = new GuildMember({ memberID, guildID }, GuildSetting);
         await db.setGuildMember(Member);
         return Member;
     } else {
-        return new GuildMember(doc[0]);
+        return new GuildMember(doc[0], GuildSetting);
     }
 };
 
@@ -171,6 +172,10 @@ db.editGuildMember = async (data, force = false) => {
         return await r.table("guildMember").get(data.id).replace(data).run();
     }
     return await r.table("guildMember").get(data.id).update(data).run();
+};
+
+db.streamGuildMember = async () => {
+    return await r.table("guildMember").changes().run();
 };
 
 db.deleteMember = async (memberID, guildID) => {
@@ -189,8 +194,8 @@ db.deleteMember = async (memberID, guildID) => {
  * @param _guildID
  * @returns {Promise.<*>}
  */
-db.getBitFields = async (_rolesID, _channelID, _memberID, _guildID) => {
-    const member = await db.getGuildMember(_memberID, _guildID);
+db.getBitFields = async (_rolesID, _channelID, _memberID, _guildID, GuildSetting) => {
+    const member = await db.getGuildMember(_memberID, _guildID, GuildSetting);
     const roles = await r.table("guildRole").getAll(..._rolesID).pluck("bitField").run();
     const channel = await db.getGuildChannel(_channelID);
     return {

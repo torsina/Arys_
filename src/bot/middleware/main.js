@@ -1,5 +1,7 @@
 const permission = require("./permission");
+const activity = require("./activity");
 
 module.exports = {
-    permission: permission
+    permission: permission,
+    activity: activity
 };

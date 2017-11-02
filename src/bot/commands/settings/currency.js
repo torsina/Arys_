@@ -24,6 +24,18 @@ module.exports = {
                 context.channel.send(embed);
                 return;
             }
+            case "accounts": {
+                switch (context.args[1]) {
+                    case "amount": {
+                        money.setAccountsAmount(context.args[2]);
+                        const { embed } = new context.command.EmbedError(context, { error: "currency.success",
+                            data: { option: context.t("currency.option.accounts.amount"), value: context.args[2] }, color: "GREEN" });
+                        context.channel.send(embed);
+                        break;
+                    }
+                }
+                break;
+            }
             case "name": {
                 money.setName(context.args[1]);
                 const { embed } = new context.command.EmbedError(context, { error: "currency.success",
@@ -115,6 +127,14 @@ module.exports = {
             name: {
                 type: "text",
                 max: constants.GUILDSETTING_DEFAULT.moneyNameLength
+            },
+            accounts: {
+                type: "text",
+                next: {
+                    amount: {
+                        type: "int"
+                    }
+                }
             },
             bet: {
                 type: "text",
