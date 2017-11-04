@@ -32,6 +32,8 @@
   "bet.tooLow": "Your bet is too low, min: `{{min}}`",
   "bet.win": "{{user}}, you won {{value}} {{currency}}!",
   "bet.lost": "{{user}}, you lost {{value}} {{currency}}!",
+  "credits.self": "{{user}}, you have {{value}} {{currency}}",
+  "credits.other": "{{user}}'s balance: {{value}} {{currency}}",
   "words.value": "Value",
   "words.oldValue": "Old value",
   "words.newValue": "New value"

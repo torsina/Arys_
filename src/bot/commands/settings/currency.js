@@ -132,7 +132,8 @@ module.exports = {
                 type: "text",
                 next: {
                     amount: {
-                        type: "int"
+                        type: "int",
+                        min: 0
                     }
                 }
             },

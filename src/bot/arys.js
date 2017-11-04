@@ -71,6 +71,7 @@ class Arys {
                     guildMap = new Map();
                     guildsMap.set(message.guild.id, guildMap);
                 }
+                message.GuildMemberMap = guildMap;
                 // get guild member, call it if not cached
                 const guildMemberStored = guildMap.get(message.author.id);
                 if (!guildMemberStored) {

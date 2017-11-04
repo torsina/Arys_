@@ -20,7 +20,7 @@ module.exports = {
                     .setTimestamp()
                     .setColor("GOLD")
                     .setFooter(context.t("wiggle.embed.footer", { tag: context.author.tag }))
-                    .setDescription(context.t("bet.win", { user: context.author.tag, value: min, currency: GuildSetting.money.name }));
+                    .setDescription(context.t("bet.win", { user: context.author.toString(), value: min, currency: GuildSetting.money.name }));
                 context.channel.send(embed);
             } else {
                 GuildMember.money.editMoney(-context.args[1]);
@@ -28,7 +28,7 @@ module.exports = {
                     .setTimestamp()
                     .setColor("RED")
                     .setFooter(context.t("wiggle.embed.footer", { tag: context.author.tag }))
-                    .setDescription(context.t("bet.lost", { user: context.author.tag, value: min, currency: GuildSetting.money.name }));
+                    .setDescription(context.t("bet.lost", { user: context.author.toString(), value: min, currency: GuildSetting.money.name }));
                 context.channel.send(embed);
             }
             return await db.editGuildMember(GuildMember, true);

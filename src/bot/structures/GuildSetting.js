@@ -23,6 +23,7 @@ class GuildSetting {
             };
         }
         this.money = new MoneySetting(data.money);
+        this.shop = data.shop || {};
     }
 }
 module.exports = GuildSetting;
