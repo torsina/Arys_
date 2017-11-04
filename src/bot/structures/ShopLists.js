@@ -6,7 +6,6 @@ class ShopLists {
             // to prevent from iterating over things we don't want
             if (typeof shopList === "object") {
                 if (shopList.type === "role") {
-                    
                 }
             }
         }
