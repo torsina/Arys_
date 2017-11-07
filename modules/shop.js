@@ -36,6 +36,7 @@ module.exports = {
                                 break;
                             }
                         }
+                        console.log(roleName)
                         if(roleName) {
                             if(!isNaN(parseInt(args[args.indexOf("--price") + 1]))) {
                                 let _category = await db.getShopsCategory(msg.guild.id, args[2]);
@@ -68,6 +69,7 @@ module.exports = {
                                     await db.addShopItem(msg.guild.id, args[2], msg.guild.roles.find("name", roleName).id, money.amount(args.slice(priceIndex, args.length)));
                                 }
                                 catch(e) {
+                                    console.error(e);
                                     return msg.channel.send(e.message);
                                 }
                                 return msg.channel.send("added the role " + roleName);
@@ -85,8 +87,7 @@ module.exports = {
             case "-remove": {
                 switch(args[1]) {
                     case "--role": {
-                        let name = args.slice().splice(0, 3).join(" ");
-                        console.log(name);
+                        let name = args.slice(3).join(" ");
                         let role = msg.guild.roles.find("name", name);
                         if(!role) return msg.channel.send("No such role found\n:warning: case sensitive.");
                         try {
