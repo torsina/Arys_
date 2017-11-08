@@ -7,8 +7,12 @@ module.exports = {
         switch (context.args[0]) {
             case "add": {
                 switch (context.args[1]) {
-                    case "role": {
+                    case "category": {
+                        switch (context.args[2]) {
+                            case "role": {
 
+                            }
+                        }
                     }
                 }
             }
@@ -32,6 +36,20 @@ module.exports = {
                 type: "text",
                 max: 40,
                 next: {
+                    category: {
+                        type: "text",
+                        next: {
+                            role: {
+                                type: "text",
+                                next: {
+                                    VALUE: {
+                                        type: "text",
+                                        last: true
+                                    }
+                                }
+                            }
+                        }
+                    },
                     role: {
                         type: "text",
                         label: "category",

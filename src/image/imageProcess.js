@@ -9,8 +9,8 @@ function eventLoop() {
         else {
             const { data } = message;
             switch (message.type) {
-                case "shopList": {
-                    const config = constants.IMAGE_SHOPLIST;
+                case "roleShop": {
+                    const config = constants.IMAGE_ROLESHOP;
                     const itemLength = data.list.length;
                     const canvas = new Canvas(804, itemLength * 32);
                     const ctx = canvas.getContext("2d");

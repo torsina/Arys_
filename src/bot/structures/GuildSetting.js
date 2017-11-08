@@ -1,4 +1,6 @@
 const MoneySetting = require("./MoneySetting");
+const ShopLists = require("./ShopLists");
+const misc = require("../../util/misc");
 class GuildSetting {
     constructor(data) {
         /**
@@ -6,12 +8,7 @@ class GuildSetting {
          * @type {Snowflake}
          */
         this.guildID = data.guildID;
-        if (!this.guildID) throw new Error("Type error: guildID is undefined");
-        /**
-         * The money configuration of the guild
-         * @type {object}
-         */
-        this.money = null;
+        if (!this.guildID) throw new TypeError("guildID is undefined");
 
         if (data.permission) {
             this.permission = {
@@ -23,7 +20,7 @@ class GuildSetting {
             };
         }
         this.money = new MoneySetting(data.money);
-        this.shop = data.shop || {};
+        misc.mergeDeep(this, new ShopLists(data.shop));
     }
 }
 module.exports = GuildSetting;

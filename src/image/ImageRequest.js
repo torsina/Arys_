@@ -1,5 +1,6 @@
 const constants = require("../util/constants");
 class ImageRequest {
+    // TODO do error locales instead
     constructor(data) {
         if (!data) throw new Error("This request does not have any data");
         this.type = data.type;
@@ -8,8 +9,8 @@ class ImageRequest {
         this.data = data.data;
         if (!this.data) throw new Error("The data of this request is not defined");
         switch (this.type) {
-            case "shopList": {
-                if (data.data.list.length >= constants.IMAGE_SHOPLIST.max) throw new Error("The list of roles is too long for the request");
+            case "roleShop": {
+                if (data.data.list.length >= constants.IMAGE_ROLESHOP.max) throw new Error("The list of roles is too long for the request");
             }
         }
     }

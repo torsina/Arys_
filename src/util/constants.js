@@ -106,22 +106,6 @@ exports.PERMISSION_NODE = {
     }
 };
 
-exports.IMAGE_TYPES = ["shopList"];
-
-exports.IMAGE_SHOPLIST = {
-    max: 18,
-    colors: ["#32363B", "#36393E"],
-    ctx: {
-        font: "normal normal 24px Whitney",
-        shadowColor: "black",
-        shadowOffsetX: 2,
-        shadowOffsetY: 2,
-        shadowBlur: 0
-    },
-    startText: 28,
-    startPrice: 674
-};
-
 exports.GUILDSETTING_DEFAULT = {
     money: {
         name: "credits",
@@ -147,8 +131,37 @@ exports.GUILDSETTING_DEFAULT = {
             max: 30
         }
     },
-    moneyNameLength: 40
+    moneyNameLength: 40,
+    shopCategoryNameLength: 40
 };
+
+exports.IMAGE_TYPES = ["roleShop"];
+
+exports.IMAGE_ROLESHOP = {
+    max: 18,
+    colors: ["#32363B", "#36393E"],
+    ctx: {
+        font: "normal normal 24px Whitney",
+        shadowColor: "black",
+        shadowOffsetX: 2,
+        shadowOffsetY: 2,
+        shadowBlur: 0
+    },
+    startText: 28,
+    startPrice: 674
+};
+
+exports.SHOP = {
+    listOptions: ["header"],
+    maxPriceDigit: 8,
+    role: {
+        defaultHex: "#FFFFFF"
+    }
+};
+
+exports.SHOPLISTOPTIONS = [
+    "header"
+];
 
 exports.GUILDMEMBER_DEFAULT = {
     money: {
