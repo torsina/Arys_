@@ -188,5 +188,6 @@ exports.MONEYACCOUNT_DEFAULT = {
 };
 
 exports.MAXCACHE = {
-    members: 100
+    members: 100,
+    fetchMessages: 400
 };

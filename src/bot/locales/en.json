@@ -43,6 +43,7 @@
   "kick.botTooLow": "The member {{member}} has higher roles than me, I can't kick him.",
   "ban.success": "{{member}} was successfully banned from the server.",
   "ban.botTooLow": "The member {{member}} has higher roles than me, I can't ban him.",
+  "prune.su": "",
   "arys.lackPermission": "I lack the permission `{{permission}}`",
   "member.lackPermission": "You lack the permission `{{permission}}`",
   "words.value": "Value",
