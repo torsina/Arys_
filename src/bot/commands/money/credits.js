@@ -18,11 +18,9 @@ module.exports = {
     },
     guildOnly: true,
     args: [{
-        name: "user",
-        label: "user tag",
+        label: "member tag",
         type: "member",
-        optional: true,
-        correct: ["h", "head", "t", "tail"]
+        optional: true
     }]
 };
 

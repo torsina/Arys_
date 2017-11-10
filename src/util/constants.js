@@ -44,7 +44,14 @@ exports.PERMISSION_BITFIELD_DEFAULT = {
 // assign the permission nodes to a permission bit
 exports.PERMISSION_BITFIELD = {
     commands: {
-        moderation: {},
+        moderation: {
+            kick: {
+                visible: 1 << 0
+            },
+            ban: {
+                visible: 1 << 0
+            }
+        },
         settings: {
             perms: {
                 visible: 1 << 0,
@@ -59,6 +66,10 @@ exports.PERMISSION_BITFIELD = {
         },
         money: {
             bet: {
+                visible: 1 << 0,
+                base: 1 << 1
+            },
+            credits: {
                 visible: 1 << 0,
                 base: 1 << 1
             }
@@ -95,6 +106,9 @@ exports.PERMISSION_NODE = {
                 head: "money.bet.base",
                 t: "money.bet.base",
                 tail: "money.bet.base"
+            },
+            credits: {
+                base: "money.credits.base"
             }
         },
         util: {
