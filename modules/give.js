@@ -16,7 +16,6 @@ module.exports = {
         let name = await money.getName(msg.guild.id);
         if(!msg.mentions.users.first()) {
             try{await perms.check(guildMember, msg.channel.id, "give.self")}catch(e) {return msg.channel.send(e.message)}
-            msg.channel.send("You gave yourself " + args[0] + " " + name);
             let moneyName = await money.getName(msg.guild.id);
             let amount;
             try{
