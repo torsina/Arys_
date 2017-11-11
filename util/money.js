@@ -7,10 +7,15 @@ const Canvas = require('canvas');
 Canvas.registerFont(fontFile('../Whitney_Book.ttf'), {family: 'Whitney'});
 
 money.amount = (_array) => {
-    if(!(_array instanceof Array)) throw new Error("Value is not an array");
-    let amount = parseInt(_array[1]);
-    if(isNaN(amount) || amount < 0) throw new Error("Value must be a number");
-    return amount;
+    if(!(_array instanceof Array)) {
+        let amount = parseInt(_array);
+        if(isNaN(amount) || amount < 0) throw new Error("Value must be a number");
+        return amount;
+    } else {
+        let amount = parseInt(_array[1]);
+        if(isNaN(amount) || amount < 0) throw new Error("Value must be a number");
+        return amount;
+    }
 };
 
 money.add = async (guild, member, amount) => {
