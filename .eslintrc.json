@@ -114,7 +114,7 @@
         }
       }
     ],
-    "max-depth": "error",
+    "max-depth": ["error", 6],
     "max-len": [
       "error",
       200,
@@ -214,7 +214,7 @@
           "object": true
         },
         "AssignmentExpression": {
-          "array": true,
+          "array": false,
           "object": true
         }
       },

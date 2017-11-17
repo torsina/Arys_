@@ -13,6 +13,8 @@ module.exports = {
         else option = "tail";
         const random = Math.random();
         const win = context.args[1] * 0.98;
+        GuildSetting.money.addBetUsed(context.args[1]);
+        await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
         try {
             if ((random <= 0.49 && option === "head") || (random <= 0.98 && random > 0.49 && option === "tail")) {
                 GuildMember.money.editMoney(win);

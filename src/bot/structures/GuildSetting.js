@@ -1,5 +1,5 @@
 const MoneySetting = require("./MoneySetting");
-const ShopLists = require("./ShopLists");
+const ShopLists = require("./ShopSetting");
 const misc = require("../../util/misc");
 class GuildSetting {
     constructor(data) {
@@ -20,7 +20,7 @@ class GuildSetting {
             };
         }
         this.money = new MoneySetting(data.money);
-        misc.mergeDeep(this, new ShopLists(data.shop));
+        this.shop = new ShopLists(data.shop);
     }
 }
 module.exports = GuildSetting;

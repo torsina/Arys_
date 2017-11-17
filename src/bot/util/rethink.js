@@ -6,6 +6,7 @@ const GuildSetting = require("../structures/GuildSetting");
 const GuildChannel = require("../structures/GuildChannel");
 const GuildRole = require("../structures/GuildRole");
 const GuildMember = require("../structures/GuildMember");
+const util = require('util');
 const r = require("rethinkdbdash")({
     host: config.db.host,
     port: config.db.port,

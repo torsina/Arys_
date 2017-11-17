@@ -3,7 +3,7 @@ const misc = require("../../util/misc");
 const { money } = constant;
 class MoneySetting {
     constructor(data) {
-        if (data) {
+        if (data && Object.keys(data) > 0) {
             this._data = data;
             this.name = data.name || money.name;
             this.accounts = {};
@@ -117,7 +117,8 @@ class MoneySetting {
     }
     addBetUsed(value) {
         if (!this._data.bet) this._data.bet = {};
-        this._data.bet.used += value;
+        if (!this._data.bet.used) this._data.bet.used = value;
+        else this._data.bet.used += value;
         this.bet.used += value;
         return this._data.bet.used;
     }

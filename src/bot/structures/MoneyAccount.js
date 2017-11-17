@@ -1,3 +1,4 @@
+const FriendlyError = require("./FriendlyError");
 class MoneyAccount {
     constructor(data = {}, GuildSetting) {
         this.amount = data.amount || GuildSetting.money.accounts.amount;
@@ -25,7 +26,7 @@ class MoneyAccount {
     }
     editMoney(value, force = false) {
         const result = this.amount + value;
-        if (result < 0 && force === false) throw new Error("money.tooPoor");
+        if (result < 0 && force === false) throw new FriendlyError("money.tooPoor");
         this.amount = result;
         return result;
     }

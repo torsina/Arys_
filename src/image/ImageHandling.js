@@ -12,7 +12,6 @@ class ImageHandling {
                     if (openPortErr) reject(openPortErr);
                     const bufs = [];
                     const server = net.createServer((socket) => {
-                        socket.name = "master";
                         socket.on("data", (data) => {
                             bufs.push(data);
                         });

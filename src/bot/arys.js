@@ -4,6 +4,7 @@ const constants = require("../util/constants");
 const db = require("./util/rethink");
 const GuildSetting = require("./structures/GuildSetting");
 const GuildMember = require("./structures/GuildMember");
+const FriendlyError = require("./structures/FriendlyError");
 const util = require("util");
 const middlewares = require("./middleware/main");
 const guildsMap = new Map();
@@ -56,9 +57,11 @@ class Arys {
             .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler)
             .use("message", async (message, next) => {
                 // check for dm channel
-                if (!message.guild) return next();
-                message.GuildSetting = this.settings.get(message.guild.id);
+                if (message.guild) {
+                    message.GuildSetting = this.settings.get(message.guild.id);
+                }
                 message.constants = constants;
+                message.FriendlyError = FriendlyError;
                 return next();
             })
             .use("message", async (message, next) => {

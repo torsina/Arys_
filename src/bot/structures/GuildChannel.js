@@ -1,7 +1,7 @@
 class GuildChannel {
     constructor(data) {
         this.channelID = data.channelID;
-        if (!this.channelID) throw new Error("Type error: channelID is undefined");
+        if (!this.channelID) throw new TypeError("channelID is undefined");
         this.bitField = data.bitField || null;
         if (data.overrides) {
             this.overrides = {

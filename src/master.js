@@ -30,6 +30,7 @@ async function init() {
             totalShards
         };
         const worker = cluster.fork({ config: JSON.stringify(env) });
+        worker.env = env;
         const workerList = workers.get(env.type);
         if (!workerList) workers.set(env.type, [{ env, worker }]);
         else workerList.push({ env, worker });
@@ -44,19 +45,21 @@ async function init() {
         else workerList.push({ env, worker });
     }
     cluster.on("exit", (crashedWorker, code, signal) => {
-        const env = JSON.parse(crashedWorker.env.config);
+        const { env } = crashedWorker;
+        console.log(crashedWorker);
         const workerList = workers.get(env.type);
         const workerIndex = workerList.findIndex(worker => worker.worker === crashedWorker);
         if (workerIndex !== -1) workerList.splice(workerIndex, 1);
         if (signal) {
-            console.log(`worker was killed by signal: ${signal}`);
+            console.log(`worker ${crashedWorker.process.pid} was killed by signal: ${signal}`);
         } else if (code !== 0) {
-            console.log(`worker exited with error code: ${code}`);
+            console.log(`worker ${crashedWorker.process.pid} exited with error code: ${code}`);
         } else {
             console.log("worker success!");
         }
-        console.log(`respawning worker ${process.env.pid}`);
-        const newWorker = cluster.fork(crashedWorker.env);
+        console.log(`respawning worker ${crashedWorker.process.pid}`);
+        const newWorker = cluster.fork({ config: JSON.stringify(env) });
+        newWorker.env = env;
         workerList.push = { env: crashedWorker.env, worker: newWorker };
     });
 }

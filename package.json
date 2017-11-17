@@ -4,7 +4,7 @@
   "description": "A highly configurable discord bot",
   "main": "./src/bot.js",
   "dependencies": {
-    "bufferutil": "^3.0.2",
+    "bufferutil": "^3.0.3",
     "canvas": "2.0.0-alpha.2",
     "discord.js": "^11.2.1",
     "discord.js-wiggle": "git+https://git@github.com/torsina/discord.js-wiggle.git",

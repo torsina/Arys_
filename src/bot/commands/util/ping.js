@@ -1,8 +1,8 @@
 module.exports = {
-    run: async ({ message, reply, t }) => {
-        return t("ping.success", {
+    run: async ({ message, t }) => {
+        message.channel.send(t("ping.success", {
             ms: Math.floor(message.client.ping)
-        });
+        }));
     },
     args: [
         {

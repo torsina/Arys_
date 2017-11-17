@@ -1,7 +1,7 @@
 const privateConfig = require('./config_private');
 const config = {
     db: {
-        host: "127.0.0.1",
+        host: "192.168.1.30",
         port: "28015"
     },
     env: "dev"

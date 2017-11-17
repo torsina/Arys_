@@ -146,14 +146,13 @@ exports.GUILDSETTING_DEFAULT = {
         }
     },
     moneyNameLength: 40,
-    shopCategoryNameLength: 40
 };
 
-exports.IMAGE_TYPES = ["roleShop"];
+exports.IMAGE_TYPES = ["role"];
 
 exports.IMAGE_ROLESHOP = {
-    max: 18,
-    colors: ["#32363B", "#36393E"],
+    //colors: ["#4d5059", "#2f3136"],
+    colors: ["#23272a", "#2c2f33"],
     ctx: {
         font: "normal normal 24px Whitney",
         shadowColor: "black",
@@ -166,15 +165,18 @@ exports.IMAGE_ROLESHOP = {
 };
 
 exports.SHOP = {
-    listOptions: ["header"],
+    categoryOptions: ["header", "order", "name"],
+    itemOptions: ["price"],
     maxPriceDigit: 8,
+    maxPerPage: 18,
+    maxCategoryNameLength: 40,
     role: {
         defaultHex: "#FFFFFF"
     }
 };
 
-exports.SHOPLISTOPTIONS = [
-    "header"
+exports.SHOP_LIST_OPTIONS = [
+    "header", "url"
 ];
 
 exports.GUILDMEMBER_DEFAULT = {
