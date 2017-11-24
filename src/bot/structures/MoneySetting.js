@@ -3,6 +3,7 @@ const misc = require("../../util/misc");
 const { money } = constant;
 class MoneySetting {
     constructor(data) {
+        console.log("BUILT");
         if (data && Object.keys(data) > 0) {
             this._data = data;
             this.name = data.name || money.name;

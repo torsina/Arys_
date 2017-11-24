@@ -1,6 +1,7 @@
 const db = module.exports = {};
 const config = require("../../../config");
 const constants = require("../../util/constants");
+const misc = require("../../util/misc");
 const dbName = config.db.dbName || "Arys_rewrite";
 const GuildSetting = require("../structures/GuildSetting");
 const GuildChannel = require("../structures/GuildChannel");
@@ -44,21 +45,27 @@ db.init = async () => {
 };
 // guildSetting getter/setter
 db.setGuildSetting = async (data) => {
-    data = new GuildSetting(data);
-    data.money = data.money._data;
-    return await r.table("guild").insert(data).run();
+    if (!(data instanceof GuildSetting))data = new GuildSetting(data);
+    const query = {
+        guildID: data.guildID,
+        permission: data.permission,
+        money: data.money._data,
+        shop: data.shop
+    };
+    return await r.table("guild").insert(query).run();
 };
 
 db.initGuildSetting = async (client, storedGuildArray) => {
     const guildArray = Array.from(client.discordClient.guilds.keys());
-    guildArray.forEach(async (guildID) => {
+    for (let i = 0, n = guildArray.length; i < n; i++) {
+        const guildID = guildArray[i];
         // loop through the guilds to check that no one is missing from the database
         if (!storedGuildArray.get(guildID)) {
             const { name } = client.discordClient.guilds.get(guildID);
             await db.setGuildSetting({ guildID: guildID });
             console.log(`added the guild "${name}" to the database`);
         }
-    });
+    }
 };
 
 db.getGuildSetting = async (guildsID) => {
@@ -68,9 +75,15 @@ db.getGuildSetting = async (guildsID) => {
 };
 
 db.editGuildSetting = async (guildID, data, force = false) => {
-    data.money = data.money._data;
-    if (force) return await r.table("guild").get(guildID).replace(data).run();
-    return await r.table("guild").get(guildID).update(data).run();
+    if (!(data instanceof GuildSetting))data = new GuildSetting(data);
+    const query = {
+        guildID: data.guildID,
+        permission: data.permission,
+        money: data.money._data,
+        shop: data.shop
+    };
+    if (force) return await r.table("guild").get(guildID).replace(query).run();
+    return await r.table("guild").get(guildID).update(query).run();
 };
 
 db.deleteGuildSetting = async (guildID) => {

@@ -134,7 +134,8 @@ class ShopSetting {
     editCategory(input, options = {}) {
         try {
             const result = this.checkCategory(input, true);
-            return applyOptions(options, result.category.options, "category");
+            applyOptions(options, result.category.options, "category");
+            return result.category;
         } catch (err) {
             throw err;
         }
@@ -143,6 +144,7 @@ class ShopSetting {
         try {
             const result = this.checkCategory(input, true);
             this.shopArray.splice(result.index, 1);
+            return result.category;
         } catch (err) {
             throw err;
         }
@@ -221,8 +223,7 @@ function sanitizeOptions(options, type) {
     const optionsArray = Object.keys(options);
     for (let i = 0, n = optionsArray.length; i < n; i++) {
         const optionKey = optionsArray[i];
-        const item = options[optionKey];
-        const itemIndex = reference.indexOf(item);
+        const itemIndex = reference.indexOf(optionKey);
         if (itemIndex !== -1) sanitizedOptions[optionKey] = options[optionKey];
     }
     return sanitizedOptions;

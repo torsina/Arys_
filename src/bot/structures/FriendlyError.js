@@ -1,7 +1,7 @@
 class FriendlyError extends Error {
-    constructor(message) {
+    constructor(message, data) {
         super(message);
-        this.name = "User friendly error";
+        this.data = data;
     }
 }
 module.exports = FriendlyError;

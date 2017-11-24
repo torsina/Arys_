@@ -118,52 +118,52 @@ module.exports = {
     },
     guildOnly: true,
     argTree: {
-        type: "text",
-        next: {
-            show: {
-                type: "text",
-                last: true
-            },
+        choice: {
+            show: null,
             name: {
-                type: "text",
-                max: constants.GUILDSETTING_DEFAULT.moneyNameLength
+                max: constants.GUILDSETTING_DEFAULT.moneyNameLength,
+                choice: { VALUE: null }
             },
             accounts: {
-                type: "text",
-                next: {
+                choice: {
                     amount: {
                         type: "int",
-                        min: 0
+                        min: 0,
+                        choice: { VALUE: null }
                     }
                 }
             },
             bet: {
-                type: "text",
-                next: {
+                choice: {
                     min: {
                         type: "int",
-                        min: constants.GUILDSETTING_DEFAULT.money.bet.min
+                        min: constants.GUILDSETTING_DEFAULT.money.bet.min,
+                        choice: { VALUE: null }
                     },
                     max: {
                         type: "int",
-                        min: constants.GUILDSETTING_DEFAULT.money.bet.min + 1
+                        min: constants.GUILDSETTING_DEFAULT.money.bet.min + 1,
+                        choice: { VALUE: null }
                     }
                 }
             },
             daily: {
                 type: "text",
-                next: {
+                choice: {
                     amount: {
                         type: "int",
-                        min: 0
+                        min: 0,
+                        choice: { VALUE: null }
                     },
                     min: {
                         type: "int",
-                        min: 0
+                        min: 0,
+                        choice: { VALUE: null }
                     },
                     max: {
                         type: "int",
-                        min: 0
+                        min: 0,
+                        choice: { VALUE: null }
                     }
                 }
             },
@@ -171,15 +171,18 @@ module.exports = {
                 type: "text",
                 next: {
                     wait: {
-                        type: "timespan"
+                        type: "timespan",
+                        choice: { VALUE: null }
                     },
                     min: {
                         type: "int",
-                        min: 0
+                        min: 0,
+                        choice: { VALUE: null }
                     },
                     max: {
                         type: "int",
-                        min: 0
+                        min: 0,
+                        choice: { VALUE: null }
                     }
                 }
             }

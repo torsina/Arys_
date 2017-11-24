@@ -16,7 +16,7 @@
     "rethinkdbdash": "^2.3.31"
   },
   "devDependencies": {
-    "eslint": "^4.10.0"
+    "eslint": "^4.11.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

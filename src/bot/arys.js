@@ -15,29 +15,36 @@ class Arys {
         this.client = wiggle(options);
         this.client.init = async () => {
             await db.init(this.client);
+            // get all of the GuildSetting objects needed for this shard
             this.settings = await db.getGuildSetting(this.client.discordClient.guilds.keys());
             // start setting stream to stay in sync
             this.settingStream = await db.streamGuildSetting();
             this.settingStream.on("data", update => {
+                // cache update snippet
                 if (this.client.discordClient.guilds.get(update.new_val.guildID)) {
                     const updated = new GuildSetting(update.new_val);
-                    console.log(util.inspect(updated, false, null));
                     this.settings.set(update.new_val.guildID, updated);
                 }
             });
+            // add every guild that would have join while the bot was offline
             await db.initGuildSetting(this.client, this.settings);
             // start member stream to stay in sync
             this.memberStream = await db.streamGuildMember();
             this.memberStream.on("data", update => {
                 const guild = this.client.discordClient.guilds.get(update.new_val.guildID);
                 if (guild) {
+                    // get GuildMember
                     const guildMember = new GuildMember(update.new_val, this.settings.get(update.new_val.guildID));
+                    // get the guild's GuildMember map
                     let guildMap = guildsMap.get(update.new_val.guildID);
                     if (!guildMap) {
                         guildMap = new Map();
+                        // register the guild map in the map of all the guild maps
                         guildsMap.set(guildMember.guildID, guildMap);
                     }
+                    // save the GuildMember in the guild's GuildMember map
                     guildMap.set(guildMember.memberID, guildMember);
+                    // cache limit system
                     if (guildMap.size > 30 + Math.floor(guild.memberCount * 0.06)) {
                         const mapFirstKey = guildMap.keys().next().value;
                         guildMap.delete(mapFirstKey);
@@ -67,9 +74,11 @@ class Arys {
             .use("message", async (message, next) => {
                 // check for dm channel
                 if (!message.guild) return next();
+                // check if bot talked
+                if (message.author.bot) return next();
                 // get the map of the guild
                 let guildMap = guildsMap.get(message.guild.id);
-                // create if if not initialized yet
+                // create guild map if not initialized yet
                 if (!guildMap) {
                     guildMap = new Map();
                     guildsMap.set(message.guild.id, guildMap);
@@ -80,6 +89,11 @@ class Arys {
                 if (!guildMemberStored) {
                     const guildMember = await db.getGuildMember(message.author.id, message.guild.id, message.GuildSetting);
                     guildMap.set(message.author.id, guildMember);
+                    // cache limit system
+                    if (guildMap.size > 30 + Math.floor(message.guild.memberCount * 0.06)) {
+                        const mapFirstKey = guildMap.keys().next().value;
+                        guildMap.delete(mapFirstKey);
+                    }
                     message.GuildMember = guildMember;
                 } else {
                     message.GuildMember = guildMemberStored;

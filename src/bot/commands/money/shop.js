@@ -10,7 +10,7 @@ module.exports = {
         const currency = GuildSetting.money.name;
         console.log(context.args);
         const successEmbed = new RichEmbed()
-            .setTimestamp()
+            .setTimestamp(new Date(context.message.createdTimestamp))
             .setFooter(context.t("wiggle.embed.footer", { tag: context.author.tag }))
             .setColor("GREEN");
         let errorCategory, errorItem, errorPrice;
@@ -54,7 +54,7 @@ module.exports = {
                                         currency
                                     }));
                                     context.channel.send(successEmbed);
-                                    await db.editGuildSetting(GuildSetting.guildID, GuildSetting, true);
+                                    await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
                                     break;
                                 }
                             }
@@ -70,17 +70,18 @@ module.exports = {
                         case "category": {
                             // edit category <category> <flag options...>
                             const item = shop.editCategory(resolvedCategory.index, context.flags);
-                            let options = "";
-                            const optionsKeys = Object.keys(item);
+                            const optionsKeys = Object.keys(item.options);
+                            successEmbed.addField("name", item.name)
+                                .addField("type", item.type);
                             for (let i = 0, n = optionsKeys.length; i < n; i++) {
                                 const optionKey = optionsKeys[i];
                                 const optionValue = context.flags[optionKey];
-                                options += `${optionKey} : ${optionValue}\n`;
+                                successEmbed.addField(optionKey, optionValue);
                             }
                             successEmbed.setDescription(context.t("shop.category.success.edit", {
-                                category: resolvedCategory.category.name,
-                                options
+                                category: resolvedCategory.category.name
                             }));
+                            console.log("shop", GuildSetting);
                             break;
                         }
                         case "item": {
@@ -91,40 +92,39 @@ module.exports = {
                                     errorItem = role.name;
                                     errorPrice = context.args[3];
                                     const item = shop.editItem(errorCategory, role.id, context.flags);
-                                    let options = "";
+                                    successEmbed.addField("name", role.toString());
                                     const optionsKeys = Object.keys(item);
                                     for (let i = 0, n = optionsKeys.length; i < n; i++) {
                                         const optionKey = optionsKeys[i];
+                                        if (optionKey === "id") continue;
                                         const optionValue = context.flags[optionKey];
-                                        options += `${optionKey} : ${optionValue}\n`;
+                                        successEmbed.addField(optionKey, optionValue);
                                     }
                                     successEmbed.setDescription(context.t("shop.item.success.edit.role", {
                                         role: role.name,
-                                        category: resolvedCategory.category.name,
-                                        options
+                                        category: resolvedCategory.category.name
                                     }));
                                     break;
                                 }
                             }
-                            context.channel.send(successEmbed);
-                            await db.editGuildSetting(GuildSetting.guildID, GuildSetting, true);
                             break;
                         }
                     }
+                    await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
+                    context.channel.send(successEmbed);
                     break;
                 }
                 case "remove": {
                     switch (context.args[1]) {
                         case "category": {
-                            const type = context.args[2];
-                            errorCategory = context.args[3];
-                            shop.deleteCategory(errorCategory);
+                            errorCategory = context.args[2];
+                            const result = shop.deleteCategory(errorCategory);
                             successEmbed.setDescription(context.t("shop.category.success.remove", {
-                                type,
+                                type: result,
                                 category: errorCategory
                             }));
                             context.channel.send(successEmbed);
-                            await db.editGuildSetting(GuildSetting.guildID, GuildSetting, true);
+                            await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
                             break;
                         }
                         case "item": {
@@ -137,7 +137,7 @@ module.exports = {
                                     const role = await resolver.role(context.args[3], context.message);
                                     errorItem = role.name;
                                     errorPrice = context.args[3];
-                                    shop.addItem(resolvedCategory.category.name, { id: role.id, hex: role.hexColor, errorPrice });
+                                    shop.deleteItem(resolvedCategory.index, role.id);
                                     successEmbed.setDescription(context.t("shop.item.success.remove.role", {
                                         role: role.name,
                                         category: resolvedCategory.category.name,
@@ -148,21 +148,26 @@ module.exports = {
                                 }
                             }
                             context.channel.send(successEmbed);
-                            await db.editGuildSetting(GuildSetting.guildID, GuildSetting, true);
+                            await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
                             break;
                         }
                     }
                     break;
                 }
                 case undefined: {
-                    successEmbed.setDescription(context.t("money.balance", { user: context.message.author.toString(), amount: GuildMember.money.amount, currency }));
-                    for (let i = 0, n = shop.shopArray.length; i < n; i++) {
-                        const _shop = shop.shopArray[i];
-                        const fieldTitle = _shop.options.header ? _shop.options.header : _shop.name;
-                        let fieldDesc = "";
-                        if (_shop.options.desc) fieldDesc += `${_shop.options.desc}\n`;
-                        fieldDesc += context.t("shop.list.desc", { name: _shop.name, type: _shop.type });
-                        successEmbed.addField(fieldTitle, fieldDesc);
+                    const balanceString = context.t("money.balance", { user: context.message.author.toString(), amount: GuildMember.money.amount, currency });
+                    if (shop.shopArray.length > 0) {
+                        for (let i = 0, n = shop.shopArray.length; i < n; i++) {
+                            const _shop = shop.shopArray[i];
+                            const fieldTitle = _shop.options.header ? _shop.options.header : _shop.name;
+                            let fieldDesc = "";
+                            if (_shop.options.desc) fieldDesc += `${_shop.options.desc}\n`;
+                            fieldDesc += context.t("shop.list.desc", { name: _shop.name, type: _shop.type });
+                            successEmbed.addField(fieldTitle, fieldDesc)
+                                .setDescription(balanceString);
+                        }
+                    } else {
+                        throw new context.message.FriendlyError("shop.noCategory", { currencyDisplay: balanceString });
                     }
                     context.channel.send(successEmbed);
                     break;
@@ -180,7 +185,7 @@ module.exports = {
                     const results = [];
                     switch (resolvedCategory.category.type) {
                         case "role": {
-                            if (resolvedCategory.category.url.length === 0) {
+                            if (resolvedCategory.category.url.length === 0 && pages !== 0) {
                                 for (let i = 0; i < pages; i++) {
                                     const items = allItems.slice(i * maxItems, (i + 1) * maxItems);
                                     const itemsCopy = [];
@@ -205,8 +210,10 @@ module.exports = {
                                     results.push(...images);
                                     await send(context, resolvedCategory, successEmbed, results);
                                 });
-                            } else {
+                            } else if (pages !== 0) {
                                 await send(context, resolvedCategory, successEmbed, resolvedCategory.category.url);
+                            } else {
+                                throw new context.message.FriendlyError("shop.noItems");
                             }
                         }
                     }
@@ -234,55 +241,53 @@ module.exports = {
         }
     },
     guildOnly: true,
-    flags: [
+    flags: [{
+        name: "header",
+        type: "text",
+        short: "h"
+    }, {
+        name: "name",
+        type: "text",
+        short: "n"
+    }, {
+        name: "price",
+        type: "int",
+        min: 0,
+        short: "p"
+    }
         // header
         // name
 
         // price
     ],
     argTree: {
-        type: "text",
         last: true,
-        next: {
-            // to access to a shop
-            VALUE: {
-                type: "text",
-                last: true
-            },
+        choice: {
+            VALUE: null,
             add: {
-                type: "text",
-                next: {
+                choice: {
                     category: {
-                        type: "text",
-                        next: {
+                        choice: {
                             role: {
-                                type: "text",
-                                next: {
-                                    VALUE: {
-                                        // add category role <category name>
-                                        type: "text",
-                                        last: true
-                                    }
+                                choice: {
+                                    VALUE: null
                                 }
                             }
                         }
                     },
                     item: {
-                        type: "text",
-                        next: {
+                        label: "category name",
+                        choice: {
                             VALUE: {
-                                type: "text",
-                                label: "category name",
-                                VALUE: {
+                                choice: {
                                     type: "int",
                                     min: 0,
                                     label: "price",
-                                    next: {
+                                    choice: {
                                         VALUE: {
-                                            type: "text",
-                                            label: "item",
-                                            last: true
-                                            // add item <category name> <price> <item name>
+                                            last: true,
+                                            label: "item name",
+                                            choice: { VALUE: null }
                                         }
                                     }
                                 }
@@ -292,66 +297,38 @@ module.exports = {
                 }
             },
             edit: {
-                type: "text",
-                next: {
+                choice: {
                     category: {
-                        type: "text",
-                        next: {
-                            VALUE: {
-                                type: "text",
-                                label: "category name",
-                                last: true
-                                // edit category <category> <flag options...>
-                            }
+                        label: "category name",
+                        choice: {
+                            VALUE: null
                         }
                     },
                     item: {
-                        type: "text",
-                        next: {
+                        label: "category name",
+                        choice: {
                             VALUE: {
-                                type: "text",
-                                label: "category name",
-                                next: {
-                                    VALUE: {
-                                        type: "text",
-                                        label: "item name",
-                                        last: true
-                                        // edit item <category> <item> <flag options...>
-                                    }
-                                }
+                                label: "item name",
+                                last: true,
+                                choice: { VALUE: null }
                             }
                         }
                     }
                 }
             },
             remove: {
-                // delete item <category> <item>
-                // delete category <category>
-                type: "text",
-                next: {
+                choice: {
                     category: {
-                        type: "text",
-                        next: {
-                            VALUE: {
-                                type: "text",
-                                label: "category",
-                                last: true
-                            }
-                        }
+                        label: "category name",
+                        choice: { VALUE: null }
                     },
                     item: {
-                        type: "text",
-                        next: {
+                        label: "category name",
+                        choice: {
                             VALUE: {
-                                type: "text",
-                                label: "category",
-                                next: {
-                                    VALUE: {
-                                        type: "text",
-                                        label: "item",
-                                        last: true
-                                    }
-                                }
+                                label: "item name",
+                                last: true,
+                                choice: { VALUE: null }
                             }
                         }
                     }
