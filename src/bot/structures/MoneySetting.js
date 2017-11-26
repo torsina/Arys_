@@ -3,7 +3,6 @@ const misc = require("../../util/misc");
 const { money } = constant;
 class MoneySetting {
     constructor(data) {
-        console.log("BUILT");
         if (data && Object.keys(data) > 0) {
             this._data = data;
             this.name = data.name || money.name;
@@ -21,8 +20,7 @@ class MoneySetting {
                 this.bet = {
                     multiplier: money.bet.multiplier,
                     min: data.bet.min || money.bet.min,
-                    max: data.bet.max || money.bet.max,
-                    used: data.bet.used || money.bet.used
+                    max: data.bet.max || money.bet.max
                 };
             } else {
                 misc.mergeDeep(this.bet, money.bet);
@@ -115,13 +113,6 @@ class MoneySetting {
                 this._data = {};
             }
         }
-    }
-    addBetUsed(value) {
-        if (!this._data.bet) this._data.bet = {};
-        if (!this._data.bet.used) this._data.bet.used = value;
-        else this._data.bet.used += value;
-        this.bet.used += value;
-        return this._data.bet.used;
     }
     setDailyAmount(value) {
         if (value === money.daily.amount) {

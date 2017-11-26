@@ -15,20 +15,12 @@ exports.DB_MODEL = [
         { name: "post_guildID_message", rows: ["guildID", "message"] },
         { name: "post_guildID_file_image", rows: ["guildID", "file", "image"] }
     ] },
-    { name: "shopCategory", index: [
-        { name: "shopCategory_guildID", rows: ["guildID"] },
-        { name: "shopCategory_guildID_category", rows: ["guildID", "category"] }
-    ] },
-    { name: "shopItem", index: [
-        { name: "shopItem_guildID_category", rows: ["guildID", "category"] },
-        { name: "shopItem_guildID_category_ID", rows: ["guildID", "category", "ID"] }
-    ] }
+    { name: "betCount", primary: "guildID" }
 ];
 
 /**
  * @constant bitField containing all of the bot's permissions
  * due to it's use, every permission inside of it is set to 1
- * @type {object}
  */
 exports.PERMISSION_BITFIELD_DEFAULT = {
     commands: {
@@ -191,5 +183,6 @@ exports.MONEYACCOUNT_DEFAULT = {
 
 exports.MAXCACHE = {
     members: 100,
-    fetchMessages: 400
+    fetchMessages: 400,
+    betCountWait: 6E5 // 10 minutes
 };

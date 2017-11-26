@@ -5,6 +5,7 @@ const db = require("./util/rethink");
 const GuildSetting = require("./structures/GuildSetting");
 const GuildMember = require("./structures/GuildMember");
 const FriendlyError = require("./structures/FriendlyError");
+const BetCount = require("./structures/BetCount");
 const util = require("util");
 const middlewares = require("./middleware/main");
 const guildsMap = new Map();
@@ -14,9 +15,10 @@ class Arys {
         this.settings = new Map;
         this.client = wiggle(options);
         this.client.init = async () => {
+            const { guilds } = this.client.discordClient;
             await db.init(this.client);
             // get all of the GuildSetting objects needed for this shard
-            this.settings = await db.getGuildSetting(this.client.discordClient.guilds.keys());
+            this.settings = await db.getGuildSetting(guilds.keys());
             // start setting stream to stay in sync
             this.settingStream = await db.streamGuildSetting();
             this.settingStream.on("data", update => {
@@ -51,7 +53,12 @@ class Arys {
                     }
                 }
             });
-            console.log(util.inspect(this.settings, false, null));
+            // betCount cache gestion
+            this.betCounts = new Map;
+            const betCounts = await db.getBetCount(guilds.keys());
+            betCounts.forEach(doc => {
+                this.betCounts.set(doc.guildID, new BetCount(doc, this, true));
+            });
         };
         this.client.set("owner", "306418399242747906")
             .set("prefixes", ["mention", `"`])
@@ -65,7 +72,23 @@ class Arys {
             .use("message", async (message, next) => {
                 // check for dm channel
                 if (message.guild) {
-                    message.GuildSetting = this.settings.get(message.guild.id);
+                    const guildID = message.guild.id;
+                    message.GuildSetting = this.settings.get(guildID);
+                    if (message.command) {
+                        // additional data command-specific
+                        switch (message.command.name) {
+                            case "bet": {
+                                let _BetCount = this.betCounts.get(guildID);
+                                if (!_BetCount) {
+                                    let doc = await db.createBetCount(message.guild.id);
+                                    doc = doc.changes[0].new_val;
+                                    _BetCount = new BetCount(doc);
+                                    this.betCounts.set(guildID, _BetCount);
+                                }
+                                message.BetCount = _BetCount;
+                            }
+                        }
+                    }
                 }
                 message.constants = constants;
                 message.FriendlyError = FriendlyError;
