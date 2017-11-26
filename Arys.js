@@ -92,17 +92,6 @@ Client.on('message', async message => {
     if (message.content.startsWith(`${Client.user.toString()}, what should we do of him ?`)) {
         return message.channel.send("throw him in a pit and let me do the rest");
     }
-    //emoji delete system
-    if (isEmoji(message.content) === true && message.channel.id !== "249626680434491392" && config.env !== "dev" && message.guild.id === "242655328410402816") {
-        if (message.author.bot) return;
-        console.log(`[${moment().format("Y-M-D H:m:s Z")}] there is an emoji here ${message.channel.name}, by ${message.author.tag}`);
-        message.delete();
-        return message.reply("***GTFO RETARD AND READ THE RULES IN *** <#242655328410402816> <:feelsrageman:246603943768096769>").then(m => {
-            setTimeout(() => {
-                m.delete();
-            }, 7000);
-        });
-    }
     //server emote analytics
     if (!message.author.bot && config.env !== "dev") {
         const serverEmotes = message.guild.emojis.array();
