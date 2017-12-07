@@ -176,7 +176,9 @@ function scopeChoice(channel, role, user, guild) {
  * Can be: allow | deny
  * @typedef {string} PermissionType
  */
+async function editField(options) {
 
+}
 /**
  *
  * @param mode {PermissionType}
