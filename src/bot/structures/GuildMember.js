@@ -9,7 +9,8 @@ class GuildMember {
             if (!this.guildID) throw new TypeError("guildID is undefined");
         }
         if (!this.memberID) throw new TypeError("memberID is undefined");
-        this.bitField = data.bitField || null;
+        this.bitField = data.bitField || {};
+        this.valueField = data.valueField || {};
         this.money = new MoneyAccount(data.money, GuildSetting);
     }
 }

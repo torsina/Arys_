@@ -217,27 +217,45 @@ db.deleteMember = async (memberID, guildID) => {
 };
 
 /**
- * this.member - member's bitField
- * this.roles - Array of the roles bitField
- * this.channel.own - channel's bitField
- * this.channel.overrides.members - Array of objects containing the bitField override and the id of the member
- * this.channel.overrides.roles - Array of objects containing the bitField override and the id of the role
  * @param _rolesID
  * @param _channelID
  * @param _memberID
  * @param _guildID
+ * @param guildSetting
  * @returns {Promise.<*>}
  */
-db.getBitFields = async (_rolesID, _channelID, _memberID, _guildID, GuildSetting) => {
-    const member = await db.getGuildMember(_memberID, _guildID, GuildSetting);
-    const roles = await r.table("guildRole").getAll(..._rolesID).pluck("bitField").run();
-    const channel = await db.getGuildChannel(_channelID);
-    return {
-        member: member.bitField,
-        roles: roles,
-        channel: {
-            own: channel.bitField,
-            overrides: channel.overrides
+db.getBitFields = async (_rolesID, _channelID, _memberID, _guildID, guildSetting) => {
+    const memberData = await db.getGuildMember(_memberID, _guildID, guildSetting);
+    const rolesData = await r.table("guildRole").getAll(..._rolesID).pluck("bitField", "valueField").run();
+    const channelData = await db.getGuildChannel(_channelID);
+    const endBitField = [];
+    const endValueField = [];
+    // @everyone + packed roles -> member -> channel -> channel override (packed roles) -> channel override (member)
+    // get the roles
+    for (let i = 0, n = rolesData.length; i < n; i++) {
+        const role = rolesData[i];
+        endBitField.push(role.bitField);
+        endValueField.push(role.valueField);
+    }
+    endBitField.push(memberData.bitField, channelData.bitField);
+    endValueField.push(memberData.valueField, channelData.valueField);
+    // get the roles overrides
+    for (let i = 0, n = channelData.overrides.roles.length; i < n; i++) {
+        const override = channelData.overrides.roles[i];
+        if (_rolesID.indexOf(override.roleID) !== -1) {
+            endBitField.push(override.bitField);
+            endValueField.push(override.valueField);
         }
+    }
+    // get the member override
+    const channelMemberOverrideIndex = channelData.overrides.members.findIndex(member => member.memberID === _memberID);
+    if (channelMemberOverrideIndex !== -1) {
+        const override = channelData.overrides.members[channelMemberOverrideIndex];
+        endBitField.push(override.bitField);
+        endValueField.push(override.valueField);
+    }
+    return {
+        bitField: endBitField,
+        valueField: endValueField
     };
 };

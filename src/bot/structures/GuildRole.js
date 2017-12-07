@@ -2,7 +2,8 @@ class GuildRole {
     constructor(data) {
         this.roleID = data.roleID;
         if (!this.roleID) throw new TypeError("roleID is undefined");
-        this.bitField = data.bitField || null;
+        this.bitField = data.bitField || {};
+        this.valueField = data.valueField || {};
     }
 }
 module.exports = GuildRole;

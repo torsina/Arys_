@@ -1,9 +1,151 @@
 const constants = require("../../util/constants");
 const db = require("./rethink");
+const Misc = require("../../util/misc");
 const util = require('util');
 class BitField {
 
+    static async buildContext(message, GuildSetting) {
+        // we sort the member's roles by their position
+        const rolesID = message.member.roles
+            .filter(role => GuildSetting.permission.roles.findIndex(guildRole => role.id === guildRole.roleID) !== -1)
+            .sort((a, b) => { return message.guild.roles.get(a.id).position - message.guild.roles.get(b.id).position; })
+            .keyArray();
+        const channelID = message.channel.id;
+        const memberID = message.member.id;
+        const guildID = message.guild.id;
+        const endContext = { bitField: {}, valueField: {} };
+        const constBitField = constants.PERMISSION_BITFIELD_DEFAULT;
+        const constValueField = constants.VALUEFIELD_DEFAULT;
+        // we get all the bitFields and valueFields needed for this context
+        const data = await db.getBitFields(rolesID, channelID, memberID, guildID, GuildSetting);
+        // @everyone + packed roles -> member -> channel -> channel override (packed roles) -> channel override (member)
+        for (let i = 0, n = data.bitField; i < n; i++) {
+            const dataBitField = data.bitField[i];
+            const options = {
+                mode: "bitField",
+                fill: false,
+                endObject: endContext.bitField,
+                dataObject: dataBitField,
+                defaultObject: constBitField };
+            this.stackContext(options);
+        }
+        for (let i = 0, n = data.valueField; i < n; i++) {
+            const dataValueField = data.valueField[i];
+            const options = {
+                mode: "valueField",
+                fill: false,
+                endObject: endContext.valueField,
+                dataObject: dataValueField,
+                defaultObject: constValueField };
+            this.stackContext(options);
+        }
+        const bitFieldOptions = {
+            mode: "bitField",
+            fill: true,
+            endObject: endContext.bitField,
+            defaultObject: constBitField
+        };
+        const valueFieldOptions = {
+            mode: "valueField",
+            fill: true,
+            endObject: endContext.valueField,
+            defaultObject: constValueField
+        };
+        this.stackContext(bitFieldOptions);
+        this.stackContext(valueFieldOptions);
+        return endContext;
+    }
     /**
+     * fill endObject with data from dataObject based on the structure of defaultObject
+     * @param options.mode {"bitField" | "valueField"} whether we're processing a valueField or a bitField
+     * @param options.fill {Boolean} whether we fill the gaps of dataObject with defaultObject or not
+     * @param options.endObject {Object} the output object
+     * @param options.dataObject {Object} the object containing the unfiltered data
+     * @param options.defaultObject {Object} the object containing the value of each property
+     * @param options.start {Boolean} whether we started the recursion process or not
+     * @param options.usedPath {Array}
+     * @param options.index {Number}
+     */
+    static stackContext(options) {
+        const { mode, fill = false, endObject = {}, dataObject = {}, defaultObject = {}, start = true, usedPath } = options;
+        let { index = 0 } = options;
+        if (start) {
+            const varKeys = Misc.iterate(defaultObject);
+            for (let i = 0, n = varKeys.length; i < n; i++) {
+                const varKeyArray = varKeys[i].split(".");
+                const nextOptions = {
+                    mode,
+                    fill,
+                    endObject,
+                    dataObject,
+                    defaultObject,
+                    start: false,
+                    usedPath: varKeyArray,
+                    index
+                };
+                this.stackContext(nextOptions);
+            }
+            return endObject;
+        } else {
+            let cursor = endObject;
+            let dataCursor = dataObject;
+            let constCursor = defaultObject;
+            let referenceCursor;
+            while (index < usedPath.length) {
+                const pathIndex = usedPath[index];
+                constCursor = constCursor[pathIndex];
+                // prevent `property` of undefined error
+                if (dataCursor) dataCursor = dataCursor[pathIndex];
+                // create the next layer of object if not already created
+                if (!cursor[pathIndex] && Misc.isObject(constCursor)) cursor[pathIndex] = {};
+                referenceCursor = cursor[pathIndex];
+                if (!dataCursor && fill === true && !referenceCursor) {
+                    if (Misc.isObject(constCursor)) {
+                        Misc.mergeDeep(referenceCursor, constCursor);
+                    } else if (Array.isArray(constCursor)) {
+                        cursor[pathIndex] = constCursor[0];
+                    } else {
+                        cursor[pathIndex] = constCursor;
+                    }
+                    return;
+                }
+                if (dataCursor && index === usedPath.length - 1 && mode === "bitField") {
+                    const { allow, deny } = dataCursor;
+                    // (cmd | allow) & ~deny;
+                    cursor[pathIndex] = (referenceCursor | allow) & ~deny;
+                    return;
+                }
+                if (dataCursor && index === usedPath.length - 1 && mode === "valueField") {
+                    let constValue, order;
+                    if (Array.isArray(constCursor)) [constValue, order] = constCursor;
+                    else constValue = constCursor;
+                    switch (typeof dataCursor) {
+                        case "number": {
+                            if (!isNaN(dataCursor)) {
+                                // if order is true, highest value win, constValue as minimum
+                                // if order is false, lowest value win , constvalue as maximum
+                                const compareValue = (!referenceCursor || isNaN(referenceCursor)) ? constValue : referenceCursor;
+                                if(order) {
+                                    cursor[pathIndex] = Math.max(dataCursor, compareValue);
+                                } else {
+                                    cursor[pathIndex] = Math.min(dataCursor, compareValue);
+                                }
+                            }
+                            break;
+                        }
+                        default: {
+                            cursor[pathIndex] = constValue;
+                        }
+                    }
+                }
+                cursor = referenceCursor;
+                index++;
+            }
+        }
+    }
+    /**
+     * }
+     *
      * Creates a permission context to check permissions on
      * @param message
      * @param GuildSetting
@@ -112,9 +254,10 @@ class BitField {
         const permissionNode = this.resolveNode(permissionString);
         if (!permissionNode) throw new message.command.EmbedError(message, { error: "permission.undefined", data: { node: permissionNode } });
         // we get all of the needed bitFields and build the total of them
-        const bitField = await this.build(message, guildSetting);
+        const fields = await this.buildContext(message, guildSetting);
+        console.log(fields);
         if (typeof permissionNode === "number") {
-            const bitFieldNode = this.resolveNode(permissionString, bitField, true);
+            const bitFieldNode = this.resolveNode(permissionString, fields.bitField, true);
             return !!(bitFieldNode & permissionNode);
         } else throw new message.command.EmbedError(message, { error: "permission.notNumber", data: { node: permissionNode } });
     }

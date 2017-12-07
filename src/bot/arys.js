@@ -1,13 +1,17 @@
+// libs
 const wiggle = require("discord.js-wiggle");
+const fs = require("fs");
+const util = require("util");
+// utils
 const config = require("../../config");
 const constants = require("../util/constants");
 const db = require("./util/rethink");
+const middlewares = require("./middleware/main");
+// structures
 const GuildSetting = require("./structures/GuildSetting");
 const GuildMember = require("./structures/GuildMember");
 const FriendlyError = require("./structures/FriendlyError");
 const BetCount = require("./structures/BetCount");
-const util = require("util");
-const middlewares = require("./middleware/main");
 const guildsMap = new Map();
 
 class Arys {

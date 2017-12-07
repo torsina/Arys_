@@ -18,18 +18,32 @@ exports.DB_MODEL = [
     { name: "betCount", primary: "guildID" }
 ];
 
+exports.VALUEFIELD_DEFAULT = {
+    nsfw: {
+        post: [20, false]
+    }
+};
+
 /**
  * @constant bitField containing all of the bot's permissions
  * due to it's use, every permission inside of it is set to 1
  */
 exports.PERMISSION_BITFIELD_DEFAULT = {
     commands: {
-        moderation: {},
+        money: {
+            bet: 0,
+            credits: 0,
+            shop: 0
+        },
+        nsfw: {
+            hentai: 0
+        },
         settings: {
-            perms: 0
+            perms: 0,
+            currency: 0
         },
         util: {
-            ping: 3
+            ping: 0
         }
     }
 };
