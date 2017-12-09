@@ -2,6 +2,8 @@ const db = require("../../util/rethink");
 const BitField = require("../../util/BitField");
 const GuildMember = require("../../structures/GuildMember");
 const GuildRole = require("../../structures/GuildRole");
+const RoleOverride = require("../../structures/RoleOverride");
+const MemberOverride = require("../../structures/MemberOverride");
 const constants = require("../../../util/constants");
 const util = require('util');
 const { RichEmbed } = require("discord.js");
@@ -29,7 +31,7 @@ module.exports = {
                     const { embed } = new context.command.EmbedError(context, error);
                     return context.channel.send(embed);
                 }
-                const permissionNumber = BitField.resolveNode(context.args[1]);
+                const permissionNumber = BitField.resolveNode({ node: context.args[1]});
                 if (!permissionNumber) {
                     const { embed } = new context.command.EmbedError(context, { error: "permission.undefined", data: { node: context.args[1] } });
                     return context.channel.send(embed);
@@ -176,8 +178,48 @@ function scopeChoice(channel, role, user, guild) {
  * Can be: allow | deny
  * @typedef {string} PermissionType
  */
-async function editField(options) {
+function createNode(options) {
+    let { nodeArray, value, object = {}, cursor, start = false } = options;
+    if (!start) cursor = object;
+    const propName = nodeArray[0];
+    if (nodeArray.length === 1) {
+        cursor[propName] = value;
+        return object;
+    } else if (!cursor.hasOwnProperty(propName)) {
+        cursor[propName] = {};
+        cursor = cursor[propName];
+    }
+    nodeArray = nodeArray.slice(1);
+    return createNode(nodeArray, value, object, cursor, true);
+}
 
+async function editField(options) {
+    const { mode, scope, node, IDs, guildSetting, value } = options;
+    if (mode !== "valueField" && mode !== "bitField") throw new Error(`${mode} is not a valid field mode`);
+    const nodeArray = node.split(".");
+    let isNew = false;
+    switch (scope) {
+        case "roleOverride": {
+            const channel = db.getGuildChannel(IDs.channel);
+            const rolesOverride = channel.overrides.roles;
+            let roleOverride = rolesOverride.find(override => override.roleID === IDs.role);
+            if (!roleOverride) roleOverride = { roleID: IDs.role };
+            roleOverride = new RoleOverride(roleOverride);
+            let dataValue;
+            // si on a un bitField, il faut d'abord récupéré le numéro de la node,
+            // ensuite on l'envoie dans createNode, ensuite on l'envoie dans stackContext
+            // si on a un valueField, on l'envoie directement dans createNode avec le field si déjà existant
+            // puis on l'envoie dans stackContext pour vérification
+            if (mode === "bitField") {
+                dataValue = BitField.resolveNode({ node });
+            }
+            //need to build data object
+            const options = {
+                mode,
+                endObject: roleOverride[mode],
+                dataObject: dataValue };
+        }
+    }
 }
 /**
  *

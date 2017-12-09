@@ -2,6 +2,9 @@ const constants = require("../../util/constants");
 const db = require("./rethink");
 const Misc = require("../../util/misc");
 const util = require('util');
+const constBitField = constants.PERMISSION_BITFIELD_DEFAULT;
+const constValueField = constants.VALUEFIELD_DEFAULT;
+
 class BitField {
 
     static async buildContext(message, GuildSetting) {
@@ -14,8 +17,6 @@ class BitField {
         const memberID = message.member.id;
         const guildID = message.guild.id;
         const endContext = { bitField: {}, valueField: {} };
-        const constBitField = constants.PERMISSION_BITFIELD_DEFAULT;
-        const constValueField = constants.VALUEFIELD_DEFAULT;
         // we get all the bitFields and valueFields needed for this context
         const data = await db.getBitFields(rolesID, channelID, memberID, guildID, GuildSetting);
         // @everyone + packed roles -> member -> channel -> channel override (packed roles) -> channel override (member)
@@ -23,33 +24,27 @@ class BitField {
             const dataBitField = data.bitField[i];
             const options = {
                 mode: "bitField",
-                fill: false,
                 endObject: endContext.bitField,
-                dataObject: dataBitField,
-                defaultObject: constBitField };
+                dataObject: dataBitField };
             this.stackContext(options);
         }
         for (let i = 0, n = data.valueField; i < n; i++) {
             const dataValueField = data.valueField[i];
             const options = {
                 mode: "valueField",
-                fill: false,
                 endObject: endContext.valueField,
-                dataObject: dataValueField,
-                defaultObject: constValueField };
+                dataObject: dataValueField };
             this.stackContext(options);
         }
         const bitFieldOptions = {
             mode: "bitField",
             fill: true,
-            endObject: endContext.bitField,
-            defaultObject: constBitField
+            endObject: endContext.bitField
         };
         const valueFieldOptions = {
             mode: "valueField",
             fill: true,
-            endObject: endContext.valueField,
-            defaultObject: constValueField
+            endObject: endContext.valueField
         };
         this.stackContext(bitFieldOptions);
         this.stackContext(valueFieldOptions);
@@ -61,7 +56,7 @@ class BitField {
      * @param options.fill {Boolean} whether we fill the gaps of dataObject with defaultObject or not
      * @param options.endObject {Object} the output object
      * @param options.dataObject {Object} the object containing the unfiltered data
-     * @param options.defaultObject {Object} the object containing the value of each property
+     * @param options.defaultObject {Object} the object containing the value of each property, is already set by default for both bitField and valueField modes
      * @param options.start {Boolean} whether we started the recursion process or not
      * @param options.usedPath {Array}
      * @param options.index {Number}
@@ -90,6 +85,9 @@ class BitField {
             let cursor = endObject;
             let dataCursor = dataObject;
             let constCursor = defaultObject;
+            if (mode === "bitField") constCursor = constBitField;
+            else if (mode === "valueField") constCursor = constValueField;
+            else constCursor = defaultObject;
             let referenceCursor;
             while (index < usedPath.length) {
                 const pathIndex = usedPath[index];
@@ -234,11 +232,16 @@ class BitField {
         return endBitField;
     }
 
-    static resolveNode(_permissionString, object = constants.PERMISSION_BITFIELD, build = false) {
-        let a = _permissionString.split(".");
+    static resolveNode(options) {
+        let { node, object = constants.PERMISSION_BITFIELD, build = false, mode = "bitField" } = options;
+        let nodeArray = node.split(".");
         // if build is true, we only want the command property, which will be the built number for this command
-        if (build) a = a.slice(0, 2);
-        const b = ["commands", ...a];
+        if (build) nodeArray = nodeArray.slice(0, 2);
+        let b;
+        if (mode === "bitField") {
+            b = ["commands", ...nodeArray];
+        }
+        else b = [...nodeArray];
         for (let i = 0, n = b.length; i < n; ++i) {
             const k = b[i];
             if (k in object) {
@@ -251,13 +254,13 @@ class BitField {
     }
 
     static async check(permissionString, message, guildSetting) {
-        const permissionNode = this.resolveNode(permissionString);
+        const permissionNode = this.resolveNode({ node: permissionString });
         if (!permissionNode) throw new message.command.EmbedError(message, { error: "permission.undefined", data: { node: permissionNode } });
         // we get all of the needed bitFields and build the total of them
         const fields = await this.buildContext(message, guildSetting);
         console.log(fields);
         if (typeof permissionNode === "number") {
-            const bitFieldNode = this.resolveNode(permissionString, fields.bitField, true);
+            const bitFieldNode = this.resolveNode({ node: permissionString, object: fields.bitField, build: true });
             return !!(bitFieldNode & permissionNode);
         } else throw new message.command.EmbedError(message, { error: "permission.notNumber", data: { node: permissionNode } });
     }
