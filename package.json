@@ -16,7 +16,7 @@
     "rethinkdbdash": "^2.3.31"
   },
   "devDependencies": {
-    "eslint": "^4.12.1",
+    "eslint": "^4.13.0",
     "v8-profiler": "^5.7.0"
   },
   "scripts": {

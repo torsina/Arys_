@@ -29,99 +29,93 @@ exports.VALUEFIELD_DEFAULT = {
  * due to it's use, every permission inside of it is set to 1
  */
 exports.PERMISSION_BITFIELD_DEFAULT = {
-    commands: {
-        money: {
-            bet: 0,
-            credits: 0,
-            shop: 0
-        },
-        nsfw: {
-            hentai: 0
-        },
-        settings: {
-            perms: 0,
-            currency: 0
-        },
-        util: {
-            ping: 0
-        }
+    money: {
+        bet: 0,
+        credits: 0,
+        shop: 0
+    },
+    nsfw: {
+        hentai: 0
+    },
+    settings: {
+        perms: 0,
+        currency: 0
+    },
+    util: {
+        ping: 0
     }
 };
 // assign the permission nodes to a permission bit
 exports.PERMISSION_BITFIELD = {
-    commands: {
-        moderation: {
-            kick: {
-                visible: 1 << 0
-            },
-            ban: {
-                visible: 1 << 0
-            }
+    moderation: {
+        kick: {
+            visible: 1 << 0
         },
-        settings: {
-            perms: {
-                visible: 1 << 0,
-                edit: 1 << 1,
-                show: 1 << 2
-            },
-            currency: {
-                visible: 1 << 0,
-                edit: 1 << 1,
-                show: 1 << 2
-            }
+        ban: {
+            visible: 1 << 0
+        }
+    },
+    settings: {
+        perms: {
+            visible: 1 << 0,
+            edit: 1 << 1,
+            show: 1 << 2
         },
-        money: {
-            bet: {
-                visible: 1 << 0,
-                base: 1 << 1
-            },
-            credits: {
-                visible: 1 << 0,
-                base: 1 << 1
-            }
+        currency: {
+            visible: 1 << 0,
+            edit: 1 << 1,
+            show: 1 << 2
+        }
+    },
+    money: {
+        bet: {
+            visible: 1 << 0,
+            base: 1 << 1
         },
-        util: {
-            ping: {
-                visible: 1 << 0,
-                base: 1 << 1
-            }
+        credits: {
+            visible: 1 << 0,
+            base: 1 << 1
+        }
+    },
+    util: {
+        ping: {
+            visible: 1 << 0,
+            base: 1 << 1
         }
     }
 };
 // assign the arguments to a permission node
 exports.PERMISSION_NODE = {
-    commands: {
-        settings: {
-            perms: {
-                visible: "settings.perms.visible",
-                allow: "settings.perms.edit",
-                deny: "settings.perms.edit",
-                show: "settings.perms.show"
-            },
-            currency: {
-                show: "settings.currency.show",
-                name: "settings.currency.edit",
-                bet: "settings.currency.edit",
-                daily: "settings.currency.edit",
-                activity: "settings.currency.edit"
-            }
+    settings: {
+        perms: {
+            visible: "settings.perms.visible",
+            allow: "settings.perms.edit",
+            deny: "settings.perms.edit",
+            show: "settings.perms.show"
         },
-        money: {
-            bet: {
-                h: "money.bet.base",
-                head: "money.bet.base",
-                t: "money.bet.base",
-                tail: "money.bet.base"
-            },
-            credits: {
-                base: "money.credits.base"
-            }
+        currency: {
+            show: "settings.currency.show",
+            name: "settings.currency.edit",
+            bet: "settings.currency.edit",
+            daily: "settings.currency.edit",
+            activity: "settings.currency.edit"
+        }
+    },
+    money: {
+        bet: {
+            h: "money.bet.base",
+            head: "money.bet.base",
+            t: "money.bet.base",
+            tail: "money.bet.base"
         },
-        util: {
-            ping: {
-                visible: "util.ping.visible",
-                base: "util.ping.base"
-            }
+        credits: {
+            base: "money.credits.base"
+        }
+    },
+    util: {
+        ping: {
+            visible: "util.ping.visible",
+            base: "util.ping.base"
         }
     }
 };

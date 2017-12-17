@@ -233,15 +233,12 @@ class BitField {
     }
 
     static resolveNode(options) {
-        let { node, object = constants.PERMISSION_BITFIELD, build = false, mode = "bitField" } = options;
+        const { node, build = false} = options;
+        let { object = constants.PERMISSION_BITFIELD } = options;
         let nodeArray = node.split(".");
         // if build is true, we only want the command property, which will be the built number for this command
         if (build) nodeArray = nodeArray.slice(0, 2);
-        let b;
-        if (mode === "bitField") {
-            b = ["commands", ...nodeArray];
-        }
-        else b = [...nodeArray];
+        const b = [...nodeArray];
         for (let i = 0, n = b.length; i < n; ++i) {
             const k = b[i];
             if (k in object) {

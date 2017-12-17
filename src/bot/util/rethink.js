@@ -125,9 +125,9 @@ db.setGuildRole = async (data) => {
 db.getGuildRole = async (roleID) => {
     const doc = await r.table("guildRole").get(roleID).run();
     if (doc === null) {
-        const Role = new GuildRole({ roleID });
-        await db.setGuildRole(Role);
-        return Role;
+        const role = new GuildRole({ roleID });
+        await db.setGuildRole(role);
+        return role;
     } else {
         return new GuildRole(doc);
     }
@@ -147,10 +147,8 @@ db.deleteGuildRole = async (roleID) => {
 
 // guildChannel getter/setter
 db.setGuildChannel = async (data) => {
-    if (!(data instanceof GuildChannel)) {
-        const query = new GuildChannel(data);
-        return await r.table("guildChannel").insert(query).run();
-    } else return await r.table("guildChannel").insert(data).run();
+    if (!(data instanceof GuildChannel)) data = new GuildChannel(data);
+    return await r.table("guildChannel").insert(data).run();
 };
 
 db.getGuildChannel = async (channelID) => {
@@ -179,10 +177,8 @@ db.deleteGuildChannel = async (_channelID) => {
 // guildMember getter/setter
 
 db.setGuildMember = async (data) => {
-    if (!(data instanceof GuildMember)) {
-        const query = new GuildMember(data);
-        return await r.table("guildMember").insert(query).run();
-    } else return await r.table("guildMember").insert(data).run();
+    if (!(data instanceof GuildMember)) data = new GuildMember(data);
+    return await r.table("guildMember").insert(data).run();
 };
 
 db.getGuildMember = async (memberID, guildID, guildSetting) => {
