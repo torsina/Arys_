@@ -43,6 +43,11 @@ db.init = async () => {
             }
         }
     }
+    // return the object containing all of the necessary db streams for the bot shard
+    const streamObject = {};
+    streamObject.settingStream = await db.streamGuildSetting();
+    streamObject.memberStream = await db.streamGuildMember();
+    return streamObject;
 };
 // guildSetting getter/setter
 db.setGuildSetting = async (data) => {
@@ -213,11 +218,15 @@ db.deleteMember = async (memberID, guildID) => {
 };
 
 /**
+ * this.member - member's bitField
+ * this.roles - Array of the roles bitField
+ * this.channel.own - channel's bitField
+ * this.channel.overrides.members - Array of objects containing the bitField override and the id of the member
+ * this.channel.overrides.roles - Array of objects containing the bitField override and the id of the role
  * @param _rolesID
  * @param _channelID
  * @param _memberID
  * @param _guildID
- * @param guildSetting
  * @returns {Promise.<*>}
  */
 db.getBitFields = async (_rolesID, _channelID, _memberID, _guildID, guildSetting) => {

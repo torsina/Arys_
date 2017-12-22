@@ -18,13 +18,14 @@ class Arys {
     constructor(options) {
         this.settings = new Map;
         this.client = wiggle(options);
+        this._DBSteams = options.DBStreams;
+        this.settingStream = this._DBSteams.settingStream;
+        this.memberStream = this._DBSteams.memberStream;
         this.client.init = async () => {
             const { guilds } = this.client.discordClient;
-            await db.init(this.client);
             // get all of the GuildSetting objects needed for this shard
             this.settings = await db.getGuildSetting(guilds.keys());
             // start setting stream to stay in sync
-            this.settingStream = await db.streamGuildSetting();
             this.settingStream.on("data", update => {
                 // cache update snippet
                 if (this.client.discordClient.guilds.get(update.new_val.guildID)) {
@@ -34,8 +35,6 @@ class Arys {
             });
             // add every guild that would have join while the bot was offline
             await db.initGuildSetting(this.client, this.settings);
-            // start member stream to stay in sync
-            this.memberStream = await db.streamGuildMember();
             this.memberStream.on("data", update => {
                 const guild = this.client.discordClient.guilds.get(update.new_val.guildID);
                 if (guild) {
@@ -74,7 +73,7 @@ class Arys {
             })
             .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler)
             .use("message", async (message, next) => {
-                // check for dm channel
+                // check for non-guild channel
                 if (message.guild) {
                     const guildID = message.guild.id;
                     message.GuildSetting = this.settings.get(guildID);
@@ -99,7 +98,7 @@ class Arys {
                 return next();
             })
             .use("message", async (message, next) => {
-                // check for dm channel
+                // check for non-guild channel
                 if (!message.guild) return next();
                 // check if bot talked
                 if (message.author.bot) return next();
@@ -112,8 +111,8 @@ class Arys {
                 }
                 message.GuildMemberMap = guildMap;
                 // get guild member, call it if not cached
-                const guildMemberStored = guildMap.get(message.author.id);
-                if (!guildMemberStored) {
+                message.GuildMember = guildMap.get(message.author.id);
+                if (!message.GuildMember) {
                     const guildMember = await db.getGuildMember(message.author.id, message.guild.id, message.GuildSetting);
                     guildMap.set(message.author.id, guildMember);
                     // cache limit system
@@ -122,8 +121,6 @@ class Arys {
                         guildMap.delete(mapFirstKey);
                     }
                     message.GuildMember = guildMember;
-                } else {
-                    message.GuildMember = guildMemberStored;
                 }
                 return next();
             })
