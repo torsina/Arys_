@@ -1,5 +1,6 @@
 const config = require("../config");
 const moment = require("moment");
+const db = require("./bot/util/rethink");
 let Raven;
 
 if (config.sentry) {
@@ -10,17 +11,25 @@ if (config.sentry) {
 const workerConfig = JSON.parse(process.env.config);
 switch (workerConfig.type) {
     case "bot": {
-        const Arys = require("./bot/arys");
-        console.log(`worker ${process.pid} started, hosting shards ${workerConfig.shardStart} to ${workerConfig.shardEnd},` +
-            ` with a total of ${workerConfig.shardRange} out of ${workerConfig.totalShards}`);
-        const shards = [];
-        for (let i = 0; i < workerConfig.shardRange; i++) {
-            try {
-                shards[i] = new Arys({ shardId: workerConfig.shardStart + i, shardCount: workerConfig.totalShards });
-            } catch (err) {
-                console.error(err);
+        (async function () { // eslint-disable-line
+            const Arys = require("./bot/arys");
+            const streams = await db.init();
+            console.log(`worker ${process.pid} started, hosting shards ${workerConfig.shardStart} to ${workerConfig.shardEnd},` +
+                ` with a total of ${workerConfig.shardRange} out of ${workerConfig.totalShards}`);
+            const shards = [];
+            for (let i = 0; i < workerConfig.shardRange; i++) {
+                try {
+                    const shardOptions = {
+                        shardId: workerConfig.shardStart + i,
+                        shardCount: workerConfig.totalShards,
+                        DBStreams: streams
+                    };
+                    shards[i] = new Arys(shardOptions);
+                } catch (err) {
+                    console.error(err);
+                }
             }
-        }
+        })();
         break;
     }
     case "web": {

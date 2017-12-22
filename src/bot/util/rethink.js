@@ -42,6 +42,11 @@ db.init = async () => {
             }
         }
     }
+    // return the object containing all of the necessary db streams for the bot shard
+    const streamObject = {};
+    streamObject.settingStream = await db.streamGuildSetting();
+    streamObject.memberStream = await db.streamGuildMember();
+    return streamObject;
 };
 // guildSetting getter/setter
 db.setGuildSetting = async (data) => {
