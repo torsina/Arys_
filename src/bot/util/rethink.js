@@ -7,6 +7,7 @@ const GuildSetting = require("../structures/GuildSetting");
 const GuildChannel = require("../structures/GuildChannel");
 const GuildRole = require("../structures/GuildRole");
 const GuildMember = require("../structures/GuildMember");
+const BetCount = require("../structures/BetCount");
 const util = require('util');
 const r = require("rethinkdbdash")({
     host: config.db.host,
@@ -97,6 +98,25 @@ db.deleteGuildSetting = async (guildID) => {
 
 db.streamGuildSetting = async () => {
     return await r.table("guild").changes().run();
+};
+
+// betCount getter/setter
+db.createBetCount = async (guildID) => {
+    return await r.table("betCount").insert(new BetCount({ guildID }), { returnChanges: true }).run();
+};
+
+db.addBetCount = async (guildID, count, exist = true) => {
+    if (exist) return await r.table("betCount").get(guildID).update({ count }).run();
+    else return await db.createBetCount(guildID, count);
+};
+
+db.getBetCount = async (guildsID) => {
+    return await r.table("betCount").getAll(...guildsID).run();
+};
+
+
+db.deleteBetCount = async (guildID) => {
+    return await r.table("betCount").get(guildID).delete().run();
 };
 
 // guildRole getter/setter

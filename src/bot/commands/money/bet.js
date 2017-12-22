@@ -2,7 +2,7 @@ const db = require("../../util/rethink");
 const { RichEmbed } = require("discord.js");
 module.exports = {
     run: async (context) => {
-        const { GuildSetting, GuildMember } = context.message;
+        const { GuildSetting, GuildMember, BetCount } = context.message;
         const { min } = GuildSetting.money.bet;
         if (context.args[1] < GuildSetting.money.bet.min) {
             const { embed } = new context.command.EmbedError(context, { error: "bet.tooLow", data: { min: min } });
@@ -13,8 +13,9 @@ module.exports = {
         else option = "tail";
         const random = Math.random();
         const win = context.args[1] * 0.98;
-        GuildSetting.money.addBetUsed(context.args[1]);
-        await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
+        console.log(BetCount);
+        await BetCount.addCount(context.args[1]);
+        console.log(BetCount);
         try {
             if ((random <= 0.49 && option === "head") || (random <= 0.98 && random > 0.49 && option === "tail")) {
                 GuildMember.money.editMoney(win);
