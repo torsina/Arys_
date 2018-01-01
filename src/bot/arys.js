@@ -23,7 +23,7 @@ class Arys {
         this.memberStream = this._DBSteams.memberStream;
         this.client.init = async () => {
             const { guilds } = this.client.discordClient;
-            // get all of the GuildSetting objects needed for this shard
+            // get all of the guildSetting objects needed for this shard
             this.settings = await db.getGuildSetting(guilds.keys());
             // start setting stream to stay in sync
             this.settingStream.on("data", update => {
@@ -76,7 +76,7 @@ class Arys {
                 // check for non-guild channel
                 if (message.guild) {
                     const guildID = message.guild.id;
-                    message.GuildSetting = this.settings.get(guildID);
+                    message.guildSetting = this.settings.get(guildID);
                     if (message.command) {
                         // additional data command-specific
                         switch (message.command.name) {
@@ -113,7 +113,7 @@ class Arys {
                 // get guild member, call it if not cached
                 message.GuildMember = guildMap.get(message.author.id);
                 if (!message.GuildMember) {
-                    const guildMember = await db.getGuildMember(message.author.id, message.guild.id, message.GuildSetting);
+                    const guildMember = await db.getGuildMember(message.author.id, message.guild.id, message.guildSetting);
                     guildMap.set(message.author.id, guildMember);
                     // cache limit system
                     if (guildMap.size > 30 + Math.floor(message.guild.memberCount * 0.06)) {

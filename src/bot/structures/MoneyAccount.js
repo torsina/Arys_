@@ -1,7 +1,7 @@
 const FriendlyError = require("./FriendlyError");
 class MoneyAccount {
-    constructor(data = {}, GuildSetting) {
-        this.amount = data.amount || GuildSetting.money.accounts.amount;
+    constructor(data = {}, guildSetting) {
+        this.amount = data.amount || guildSetting.money.accounts.amount;
 
         this.daily = {};
         if (data.daily) {

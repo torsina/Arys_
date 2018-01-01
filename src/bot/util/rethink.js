@@ -51,7 +51,7 @@ db.init = async () => {
 };
 // guildSetting getter/setter
 db.setGuildSetting = async (data) => {
-    if (!(data instanceof GuildSetting))data = new GuildSetting(data);
+    if (!(data instanceof guildSetting))data = new GuildSetting(data);
     const query = {
         guildID: data.guildID,
         permission: data.permission,
@@ -81,7 +81,7 @@ db.getGuildSetting = async (guildsID) => {
 };
 
 db.editGuildSetting = async (guildID, data, force = false) => {
-    if (!(data instanceof GuildSetting))data = new GuildSetting(data);
+    if (!(data instanceof guildSetting))data = new GuildSetting(data);
     const query = {
         guildID: data.guildID,
         permission: data.permission,
@@ -187,14 +187,14 @@ db.setGuildMember = async (data) => {
 };
 
 db.getGuildMember = async (memberID, guildID, guildSetting) => {
-    if (!GuildSetting) throw new Error("No GuildSetting provided");
+    if (!guildSetting) throw new Error("No guildSetting provided");
     const doc = await r.table("guildMember").getAll([guildID, memberID], { index: "guildMember_guildID_memberID" }).run();
     if (doc[0] === undefined) {
         const Member = new GuildMember({ memberID, guildID }, guildSetting);
         await db.setGuildMember(Member);
         return Member;
     } else {
-        return new GuildMember(doc[0], GuildSetting);
+        return new GuildMember(doc[0], guildSetting);
     }
 };
 

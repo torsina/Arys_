@@ -4,12 +4,11 @@ const { RichEmbed } = require("discord.js");
 const moment = require("moment");
 module.exports = {
     run: async (context) => {
-        const { GuildSetting } = context.message;
-        const { money } = GuildSetting;
+        const { guildSetting: { money }, guildSetting } = context.message;
         switch (context.args[0]) {
             case "show": {
                 // we do this to prevent the embed from printing null
-                const betMax = money.bet.max === null ? "Infinity" : money.bet.max;
+                const betMax = money.bet.max === null ? Infinity : money.bet.max;
                 const embed = new RichEmbed()
                     .setColor("GOLD")
                     .setTimestamp()
@@ -114,7 +113,7 @@ module.exports = {
                 }
             }
         }
-        await db.editGuildSetting(GuildSetting.guildID, GuildSetting, true);
+        await db.editGuildSetting(guildSetting.guildID, guildSetting, true);
     },
     guildOnly: true,
     argTree: {

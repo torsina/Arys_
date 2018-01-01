@@ -1,7 +1,12 @@
+// Symbol declarations
+Symbol.for("<");
+Symbol.for(">");
+
 /**
  * This is the setup rethink#init uses to create all of the tables and indexes of the bot's database
  * @type {[*]}
  */
+
 exports.DB_MODEL = [
     { name: "guild", primary: "guildID" },
     { name: "guildRole", primary: "roleID" },
@@ -20,7 +25,7 @@ exports.DB_MODEL = [
 
 exports.VALUEFIELD_DEFAULT = {
     nsfw: {
-        post: [20, false]
+        post: [20, Symbol.for("<")]
     }
 };
 

@@ -9,6 +9,8 @@ const util = require('util');
 const { RichEmbed } = require("discord.js");
 module.exports = {
     run: async (context) => {
+        // perms
+        const { guildSetting } = context;
         let role, channel, user;
         if (context.flags.role) role = context.flags.role.id;
         if (context.flags.channel) channel = context.flags.channel.id;
@@ -17,23 +19,53 @@ module.exports = {
         const IDs = { role, channel, user, guild };
         const scope = scopeChoice(channel, role, user, guild);
         switch (context.args[0]) {
-            case "allow":
-            case "deny": {
-                // error handling
-                const fieldValue = BitField.resolveNode({ node: context.args[1] });
-                if (!fieldValue) {
-                    const valueFieldCheck = BitField.resolveNode({ node: context.args[1], object: context.message.constants.VALUEFIELD_DEFAULT });
+            case "show": {
+                break;
+            }
+            default: {
+                // fieldType = bitField || valueField
+                // nodeString = node path
+                // resolvedNode = permission bit for bitField
+                // subType = allow || deny for bitField
+                let fieldType, nodeString, permissionBit, subField, userInput;
+                if (context.args[0] === "deny" || context.args[0] === "allow") {
+                    fieldType = "bitField";
+                    subField = context.args[0];
+                    nodeString = context.args[1];
+                    userInput = context.args[2];
+                    permissionBit = BitField.resolveNode({ node: nodeString });
+                    if (!permissionBit) {
+                        const { embed } = new context.command.EmbedError(context, { error: "permission.undefined", data: { node: nodeString } });
+                        return context.channel.send(embed);
+                    }
+                } else {
+                    fieldType = "valueField";
+                    nodeString = context.args[0];
+                    userInput = context.args[1];
+                    // we don't store the resolved node in the resolvedNode var because what we want here is just to know if this node exist
+                    const valueFieldCheck = BitField.resolveNode({ node: nodeString, object: context.message.constants.VALUEFIELD_DEFAULT });
                     if (!valueFieldCheck) {
-                        // inclure les 2 type de chemin de nodes dans le même argument
-                        const { embed } = new context.command.EmbedError(context, { error: "permission.undefined", data: { node: context.args[1] } });
+                        const { embed } = new context.command.EmbedError(context, { error: "permission.undefined", data: { node: nodeString } });
                         return context.channel.send(embed);
                     }
                 }
                 // start of process
-                // mode = allow, option = true/false, scope, permissionNode, message, IDs
+                // mode, scope, node, IDs, guildSetting, subField, permissionBit, userInput
+                // for a bitField, allow will be the user input true/false, value will be the permission bit as a int
+                // value is either the permission bit we're targeting or the input data
                 let output;
+                const editFieldOptions = {
+                    mode: fieldType,
+                    scope,
+                    node: nodeString,
+                    IDs,
+                    guildSetting,
+                    subField,
+                    permissionBit,
+                    userInput
+                };
                 try {
-                    output = await editNumber(context.args[0], context.args[2], scope, context.args[1], IDs, context.message.GuildSetting);
+                    await editField(editFieldOptions);
                 } catch (err) {
                     return console.error(err);
                 }
@@ -82,12 +114,6 @@ module.exports = {
                 context.channel.send(embed);
                 break;
             }
-            case "show": {
-                break;
-            } default: {
-                console.log("end");
-                break;
-            }
         }
     },
     guildOnly: true,
@@ -108,25 +134,33 @@ module.exports = {
         short: "g",
         type: "boolean"
     }],
+    // %perms ?<allow/deny> <node> <value>
     argTree: {
+        defaultLabel: "permission",
         choice: {
             show: null,
             allow: {
-                label: "",
+                label: "permission",
                 choice: {
                     VALUE: {
+                        label: "value",
                         type: "boolean",
-                        choice: { VALUE: null}
+                        choice: { VALUE: null }
                     }
                 }
             },
             deny: {
+                label: "permission",
                 choice: {
                     VALUE: {
+                        label: "value",
                         type: "boolean",
-                        choice: { VALUE: null}
+                        choice: { VALUE: null }
                     }
                 }
+            },
+            VALUE: {
+                choice: { VALUE: null }
             }
         }
     }
@@ -188,10 +222,10 @@ function scopeChoice(channel, role, user, guild) {
  * @property {string} [mode] bitField or valueField
  * @property {PermissionScope} [scope]
  * @property {string} [node] field node path
- * @property {string|number} [value] the value we want to edit
+ * @property {string|number} [userInput] the value we want to edit
  * @property {Object} [IDs]
  * @property {string} [subField] if mode === "bitField", is the choice between the deny or allow bitField
- * @property {boolean} [allow] if mode === "bitField", whether if we allow or disallow this bit from the permission number
+ * @property {boolean} [permissionBit] if mode === "bitField", whether if we allow or disallow this bit from the permission number
  */
 
 /**
@@ -200,37 +234,46 @@ function scopeChoice(channel, role, user, guild) {
  * @returns {{}}
  */
 function editFieldNode(options) {
-    const { value, object = {}, start, mode, subField, allow } = options;
+    const { userInput, object = {}, start, mode, subField, permissionBit } = options;
     let { nodeArray, cursor } = options;
+    // if the recursion has not started, we initialize the cursor
     if (!start) cursor = object;
+    // propName is the name of the property we want to add/go through/edit
     const propName = nodeArray[0];
     // we stop at length === 2 because the command object only contain allow and deny properties
+    // on the user side, the paths of the bitField follow this schema : <cmdCategory>.<cmd>.<action>
+    // on the dev side, the paths of the bitField follow this schema: <cmdCategory>.<cmd>.<allow/deny>
+    // here, we're using the dev side of the bitField, so the schema <cmdCategory>.<cmd>.<allow/deny>
+    // and our nodeArray will look like this : [cmdCategory, cmd]
     if (nodeArray.length === 2 && mode === "bitField") {
+        // we're preventing a TypeError <type> of undefined
         if (!cursor[propName]) {
             cursor[propName] = {};
         }
-        if (!cursor[propName][subField] || isNaN(cursor[propName][subField])) {
+        // here, subField is whether "deny" or "allow", cf the dev side of the bitField
+        // we're initializing the allow/deny field if it hasn't been done yet
+        if (!cursor[propName][subField]) {
             cursor[propName][subField] = 0;
         }
-        const permissionNumber = cursor[propName];
-        const isInPermissionNumber = (value | permissionNumber) === permissionNumber;
+        const permissionNumber = cursor[propName][subField];
+        const isValueInPermissionNumber = (permissionBit | permissionNumber) === permissionNumber;
         // here, the permission number for this subField was already set,
         // we now need to change the value of the bit we want if needed
 
         // here are the 2 cases where we need to modify the permissionNumber, as the 2 other cases does nothing
-        if (isInPermissionNumber && !allow) {
+        if (isValueInPermissionNumber && !userInput) {
             // if permissionNumber does contain our permission bit and we want to diallow it
             // we use a XOR to remove the permission bit
-            cursor[propName][subField] ^= value;
-
-        } else if (!isInPermissionNumber && allow) {
+            cursor[propName][subField] ^= permissionBit;
+        } else if (!isValueInPermissionNumber && userInput) {
             // if permissionNumber does not contain our permission bit and we want to allow it
             // we use a OR to add the permission bit
-            cursor[propName][subField] |= value;
+            cursor[propName][subField] |= permissionBit;
         }
         return object;
     } else if (nodeArray.length === 1 && mode === "valueField") {
-        cursor[propName] = value;
+        // check if above min/ below max
+        cursor[propName] = userInput;
         return object;
     } else if (!cursor.hasOwnProperty(propName)) {
         cursor[propName] = {};
@@ -239,13 +282,13 @@ function editFieldNode(options) {
     nodeArray = nodeArray.slice(1);
     const nextOptions = {
         nodeArray,
-        value,
+        userInput,
         object,
         cursor,
         start: true,
         mode,
         subField,
-        allow
+        permissionBit
     };
     return editFieldNode(nextOptions);
 }
@@ -256,62 +299,68 @@ function editFieldNode(options) {
  * @returns {Promise<void>}
  */
 async function editField(options) {
-    const { mode, scope, node, IDs, guildSetting, subField, allow } = options;
-    let { value } = options;
+    const { mode, scope, node, IDs, guildSetting, subField, permissionBit, userInput } = options;
+    // we consider that the value of the node was already resolved, aka
     if (mode !== "valueField" && mode !== "bitField") throw new Error(`${mode} is not a valid field mode`);
     if (mode === "bitField" && subField !== "allow" && subField !== "deny") throw new Error(`${subField} is not a valid type`);
     const nodeArray = node.split(".");
-    if (mode === "bitField") value = BitField.resolveNode({ node });
     const editFieldNodeOptions = {
         nodeArray,
-        value,
+        userInput,
         mode,
         subField,
-        allow
+        permissionBit
     };
-    switch (scope) {
-        case "memberOverride":
-        case "roleOverride": {
-            let overrideType, OverrideClass, isNew = false;
-            if (scope.includes("role")) overrideType = "role";
-            else overrideType = "member";
-            if (overrideType === "role") OverrideClass = RoleOverride;
-            else OverrideClass = MemberOverride;
+    try {
+        switch (scope) {
+            case "memberOverride":
+            case "roleOverride": {
+                let overrideType, OverrideClass, isNew = false;
+                if (scope.includes("role")) overrideType = "role";
+                else overrideType = "member";
+                if (overrideType === "role") OverrideClass = RoleOverride;
+                else OverrideClass = MemberOverride;
 
-            const channel = await db.getGuildChannel(IDs.channel);
-            const overrides = channel.overrides[`${overrideType}s`];
-            let override = overrides.find(_override => _override[`${overrideType}ID`] === IDs[overrideType]);
-            if (!override) {
-                override = { [`${overrideType}ID`]: IDs[overrideType] };
-                isNew = true;
+                const channel = await db.getGuildChannel(IDs.channel);
+                // overrides is wether channel.overrides.members or channel.overrides.roles
+                const overrides = channel.overrides[`${overrideType}s`];
+                let override = overrides.find(_override => _override[`${overrideType}ID`] === IDs[overrideType]);
+                if (!override) {
+                    override = { [`${overrideType}ID`]: IDs[overrideType] };
+                    isNew = true;
+                }
+                override = new OverrideClass(override);
+                // finish the configuration of the createNodeOptions object
+                // override[mode] is wether override.bitField or override.valueField
+                editFieldNodeOptions.object = override[mode];
+                // build a object with the node based on the field of the override
+                editFieldNode(editFieldNodeOptions);
+                // we add the override to the array of overrides if it's a new one
+                if (isNew) overrides.push(override);
+                await db.editGuildChannel(IDs.channel, channel);
+                break;
             }
-            override = new OverrideClass(override);
-            // finish the configuration of the createNodeOptions object
-            editFieldNodeOptions.object = override[mode];
-            // build a object with the node based on the field of the override
-            editFieldNode(editFieldNodeOptions);
-            if (isNew) overrides.push(override);
-            await db.editGuildChannel(IDs.channel, channel);
-            break;
+            case "member": {
+                const member = await db.getGuildMember(IDs.member, IDs.guild, guildSetting);
+                // we don't need to check if the member exists because getGuildMember already instantiate a GuildMember for us
+                editFieldNodeOptions.object = member[mode];
+                editFieldNode(editFieldNodeOptions);
+                await db.editGuildMember(member);
+                break;
+            }
+            case "guild":
+            case "role": {
+                const id = scope === "guild" ? IDs.guild : IDs.role;
+                const role = await db.getGuildRole(id);
+                // we don't need to check if the role exists because getGuildRole already instantiate a GuildRole for us
+                editFieldNodeOptions.object = role[mode];
+                editFieldNode(editFieldNodeOptions);
+                await db.editGuildRole(role);
+                break;
+            }
         }
-        case "member": {
-            const member = await db.getGuildMember(IDs.member, IDs.guild, guildSetting);
-            // we don't need to check if the member exists because getGuildMember already instantiate a GuildMember for us
-            editFieldNodeOptions.object = member[mode];
-            editFieldNode(editFieldNodeOptions);
-            await db.editGuildMember(member);
-            break;
-        }
-        case "guild":
-        case "role": {
-            const id = scope === "guild" ? IDs.guild : IDs.role;
-            const role = await db.getGuildRole(id);
-            // we don't need to check if the member exists because getGuildMember already instantiate a GuildRole for us
-            editFieldNodeOptions.object = role[mode];
-            editFieldNode(editFieldNodeOptions);
-            await db.editGuildRole(IDs.role);
-            break;
-        }
+    } catch (err) {
+        throw err;
     }
 }
 /**
@@ -347,7 +396,7 @@ async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting
                             channel.overrides.members.push(memberOverride);
                         }
                     } else {
-                        if (Object.keys(memberOverride.bitField).length !== 0) {
+                        if (Object.keys(memberOverride.bitField).length !== 0) { // eslint-disable-line no-lonely-if
                             channel.overrides.members[index] = memberOverride;
                         } else {
                             channel.overrides.members.splice(index, 1);
@@ -373,7 +422,7 @@ async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting
                             channel.overrides.roles.push(roleOverride);
                         }
                     } else {
-                        if (Object.keys(roleOverride.bitField).length !== 0) {
+                        if (Object.keys(roleOverride.bitField).length !== 0) { // eslint-disable-line no-lonely-if
                             channel.overrides.roles[index] = roleOverride;
                         } else {
                             channel.overrides.roles.splice(index, 1);
@@ -406,10 +455,10 @@ async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting
                 role.bitField = output.bitField;
                 await db.editGuildRole(IDs.role, role, true);
 
-                const index = GuildSetting.permission.roles.findIndex(settingRole => settingRole === IDs.role);
-                if (index === -1 && Object.keys(role.bitField).length !== 0) GuildSetting.permission.roles.push(role.roleID);
-                else if (index !== -1 && Object.keys(role.bitField).length === 0) GuildSetting.permission.roles.splice(index, 1);
-                await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
+                const index = guildSetting.permission.roles.findIndex(settingRole => settingRole === IDs.role);
+                if (index === -1 && Object.keys(role.bitField).length !== 0) guildSetting.permission.roles.push(role.roleID);
+                else if (index !== -1 && Object.keys(role.bitField).length === 0) guildSetting.permission.roles.splice(index, 1);
+                await db.editGuildSetting(guildSetting.guildID, guildSetting);
 
                 return { old: output.old, now: output.now };
             } catch (err) {

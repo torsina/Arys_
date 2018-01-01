@@ -5,9 +5,9 @@ const { RichEmbed } = require("discord.js");
 const ImageHandling = require("../../../image/ImageHandling");
 module.exports = {
     run: async (context) => { // eslint-disable-line complexity
-        const { GuildSetting, GuildMember } = context.message;
-        const { shop } = GuildSetting;
-        const currency = GuildSetting.money.name;
+        const { guildSetting, GuildMember } = context.message;
+        const { shop } = guildSetting;
+        const currency = guildSetting.money.name;
         console.log(context.args);
         const successEmbed = new RichEmbed()
             .setTimestamp(new Date(context.message.createdTimestamp))
@@ -29,7 +29,7 @@ module.exports = {
                                         category: errorCategory
                                     }));
                                     context.channel.send(successEmbed);
-                                    await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
+                                    await db.editGuildSetting(guildSetting.guildID, guildSetting);
                                     break;
                                 }
                             }
@@ -54,7 +54,7 @@ module.exports = {
                                         currency
                                     }));
                                     context.channel.send(successEmbed);
-                                    await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
+                                    await db.editGuildSetting(guildSetting.guildID, guildSetting);
                                     break;
                                 }
                             }
@@ -81,7 +81,7 @@ module.exports = {
                             successEmbed.setDescription(context.t("shop.category.success.edit", {
                                 category: resolvedCategory.category.name
                             }));
-                            console.log("shop", GuildSetting);
+                            console.log("shop", guildSetting);
                             break;
                         }
                         case "item": {
@@ -110,7 +110,7 @@ module.exports = {
                             break;
                         }
                     }
-                    await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
+                    await db.editGuildSetting(guildSetting.guildID, guildSetting);
                     context.channel.send(successEmbed);
                     break;
                 }
@@ -124,7 +124,7 @@ module.exports = {
                                 category: errorCategory
                             }));
                             context.channel.send(successEmbed);
-                            await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
+                            await db.editGuildSetting(guildSetting.guildID, guildSetting);
                             break;
                         }
                         case "item": {
@@ -148,7 +148,7 @@ module.exports = {
                                 }
                             }
                             context.channel.send(successEmbed);
-                            await db.editGuildSetting(GuildSetting.guildID, GuildSetting);
+                            await db.editGuildSetting(guildSetting.guildID, guildSetting);
                             break;
                         }
                     }
@@ -350,7 +350,7 @@ async function send(context, resolvedCategory, embed, results) {
                     resolvedCategory.category.url[i] = attachment.proxyURL;
                 }
             });
-            await db.editGuildSetting(context.message.GuildSetting.guildID, context.message.GuildSetting);
+            await db.editGuildSetting(context.message.guildSetting.guildID, context.message.guildSetting);
         } else {
             embed.setImage(image);
             context.channel.send(embed);

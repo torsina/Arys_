@@ -1,7 +1,7 @@
 const MoneySetting = require("./MoneySetting");
 const ShopLists = require("./ShopSetting");
 const misc = require("../../util/misc");
-class GuildSetting {
+class guildSetting {
     constructor(data) {
         /**
          * Discord's snowflake of that guild
@@ -23,4 +23,4 @@ class GuildSetting {
         this.shop = new ShopLists(data.shop);
     }
 }
-module.exports = GuildSetting;
+module.exports = guildSetting;
