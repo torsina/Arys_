@@ -1,13 +1,15 @@
 // Symbol declarations
+const misc = require("./misc");
 Symbol.for("<");
 Symbol.for(">");
+const constants = module.exports = {};
 
 /**
  * This is the setup rethink#init uses to create all of the tables and indexes of the bot's database
  * @type {[*]}
  */
 
-exports.DB_MODEL = [
+constants.DB_MODEL = [
     { name: "guild", primary: "guildID" },
     { name: "guildRole", primary: "roleID" },
     { name: "guildChannel", primary: "channelID" },
@@ -23,7 +25,7 @@ exports.DB_MODEL = [
     { name: "betCount", primary: "guildID" }
 ];
 
-exports.VALUEFIELD_DEFAULT = {
+constants.VALUEFIELD_DEFAULT = {
     nsfw: {
         post: [20, Symbol.for("<")]
     }
@@ -33,7 +35,7 @@ exports.VALUEFIELD_DEFAULT = {
  * @constant bitField containing all of the bot's permissions
  * due to it's use, every permission inside of it is set to 1
  */
-exports.PERMISSION_BITFIELD_DEFAULT = {
+constants.PERMISSION_BITFIELD_DEFAULT = {
     money: {
         bet: 0,
         credits: 0,
@@ -51,7 +53,7 @@ exports.PERMISSION_BITFIELD_DEFAULT = {
     }
 };
 // assign the permission nodes to a permission bit
-exports.PERMISSION_BITFIELD = {
+constants.PERMISSION_BITFIELD = {
     moderation: {
         kick: {
             visible: 1 << 0
@@ -90,7 +92,7 @@ exports.PERMISSION_BITFIELD = {
     }
 };
 // assign the arguments to a permission node
-exports.PERMISSION_NODE = {
+constants.PERMISSION_NODE = {
     settings: {
         perms: {
             visible: "settings.perms.visible",
@@ -125,7 +127,7 @@ exports.PERMISSION_NODE = {
     }
 };
 
-exports.GUILDSETTING_DEFAULT = {
+constants.GUILDSETTING_DEFAULT = {
     money: {
         name: "credits",
         accounts: {
@@ -153,9 +155,9 @@ exports.GUILDSETTING_DEFAULT = {
     moneyNameLength: 40,
 };
 
-exports.IMAGE_TYPES = ["role"];
+constants.IMAGE_TYPES = ["role"];
 
-exports.IMAGE_ROLESHOP = {
+constants.IMAGE_ROLESHOP = {
     //colors: ["#4d5059", "#2f3136"],
     colors: ["#23272a", "#2c2f33"],
     ctx: {
@@ -169,7 +171,7 @@ exports.IMAGE_ROLESHOP = {
     startPrice: 674
 };
 
-exports.SHOP = {
+constants.SHOP = {
     categoryOptions: ["header", "order", "name"],
     itemOptions: ["price"],
     maxPriceDigit: 8,
@@ -180,22 +182,27 @@ exports.SHOP = {
     }
 };
 
-exports.SHOP_LIST_OPTIONS = [
+constants.SHOP_LIST_OPTIONS = [
     "header", "url"
 ];
 
-exports.GUILDMEMBER_DEFAULT = {
+constants.GUILDMEMBER_DEFAULT = {
     money: {
 
     }
 };
 
-exports.MONEYACCOUNT_DEFAULT = {
+constants.MONEYACCOUNT_DEFAULT = {
     amount: 200
 };
 
-exports.MAXCACHE = {
+constants.MAXCACHE = {
     members: 100,
     fetchMessages: 400,
     betCountWait: 6E5 // 10 minutes
+};
+
+constants.PERMISSION_LIST = {
+    bitField: misc.iterate(constants.PERMISSION_BITFIELD),
+    valueField: misc.iterate(constants.VALUEFIELD_DEFAULT)
 };

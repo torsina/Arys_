@@ -28,6 +28,7 @@ module.exports = {
                 // resolvedNode = permission bit for bitField
                 // subType = allow || deny for bitField
                 let fieldType, nodeString, permissionBit, subField, userInput;
+                console.log(context.args);
                 if (context.args[0] === "deny" || context.args[0] === "allow") {
                     fieldType = "bitField";
                     subField = context.args[0];
@@ -65,53 +66,12 @@ module.exports = {
                     userInput
                 };
                 try {
-                    await editField(editFieldOptions);
+                    const result = await editField(editFieldOptions);
+                    const embedResult = BitField.checkSingle(result, context.message);
+                    console.log(embedResult);
                 } catch (err) {
                     return console.error(err);
                 }
-                const embed = new RichEmbed()
-                    .setTimestamp()
-                    .setFooter(context.t("wiggle.embed.footer", { tag: context.author.tag }))
-                    .setColor("GREEN");
-                const mode = context.args[0];
-                const node = context.args[1];
-                const set = context.args[2];
-                const member = context.flags.user ? context.flags.user.toString() : null;
-                const _role = context.flags.role ? context.flags.role.name : null;
-                const _channel = context.flags.channel ? context.flags.channel.toString() : null;
-                const isChanged = checkSame(output, node);
-                let old;
-                if (isChanged) {
-                    old = set ? ":x:" : ":white_check_mark:";
-                } else {
-                    old = set ? ":white_check_mark:" : ":x:";
-                }
-                const now = set ? ":white_check_mark:" : ":x:";
-                switch (scope) {
-                    case "memberOverride": {
-                        embed.setDescription(context.t("perms.success.memberOverride", { mode, node, set, member, channel: _channel }));
-                        break;
-                    }
-                    case "roleOverride": {
-                        embed.setDescription(context.t("perms.success.roleOverride", { mode, node, set, channel: _channel, role: _role }));
-                        break;
-                    }
-                    case "role": {
-                        embed.setDescription(context.t("perms.success.role", { mode, node, set, role: _role }));
-                        break;
-                    }
-                    case "channel": {
-                        embed.setDescription(context.t("perms.success.channel", { mode, node, set, channel: _channel }));
-                        break;
-                    }
-                    case "member": {
-                        embed.setDescription(context.t("perms.success.member", { mode, node, set, member }));
-                        break;
-                    }
-                }
-                embed.addField(context.t("words.oldValue"), old, true)
-                    .addField(context.t("words.newValue"), now, true);
-                context.channel.send(embed);
                 break;
             }
         }
@@ -139,28 +99,16 @@ module.exports = {
         defaultLabel: "permission",
         choice: {
             show: null,
-            allow: {
-                label: "permission",
+            set: {
+                defaultLabel: "permission node",
+                last: true,
                 choice: {
                     VALUE: {
-                        label: "value",
-                        type: "boolean",
-                        choice: { VALUE: null }
+                        choice: {
+
+                        }
                     }
                 }
-            },
-            deny: {
-                label: "permission",
-                choice: {
-                    VALUE: {
-                        label: "value",
-                        type: "boolean",
-                        choice: { VALUE: null }
-                    }
-                }
-            },
-            VALUE: {
-                choice: { VALUE: null }
             }
         }
     }
@@ -338,7 +286,7 @@ async function editField(options) {
                 // we add the override to the array of overrides if it's a new one
                 if (isNew) overrides.push(override);
                 await db.editGuildChannel(IDs.channel, channel);
-                break;
+                return override;
             }
             case "member": {
                 const member = await db.getGuildMember(IDs.member, IDs.guild, guildSetting);
@@ -346,7 +294,7 @@ async function editField(options) {
                 editFieldNodeOptions.object = member[mode];
                 editFieldNode(editFieldNodeOptions);
                 await db.editGuildMember(member);
-                break;
+                return member;
             }
             case "guild":
             case "role": {
@@ -356,7 +304,7 @@ async function editField(options) {
                 editFieldNodeOptions.object = role[mode];
                 editFieldNode(editFieldNodeOptions);
                 await db.editGuildRole(role);
-                break;
+                return role;
             }
         }
     } catch (err) {
