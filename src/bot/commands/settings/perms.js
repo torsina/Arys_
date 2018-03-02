@@ -94,18 +94,33 @@ module.exports = {
         short: "g",
         type: "boolean"
     }],
-    // %perms ?<allow/deny> <node> <value>
+    // %perms set <node> <value> ?<allow/deny>
     argTree: {
         defaultLabel: "permission",
         choice: {
+            // display all the permissions for given context
             show: null,
+            // set a permission to a given value
             set: {
                 defaultLabel: "permission node",
                 last: true,
                 choice: {
+                    // VALUE will be the permission node, ex : settings.perms.set
                     VALUE: {
+                        // we want the next argument to be a possible end of the chain
+                        last: true,
                         choice: {
-
+                            // here, VALUE will either be allow/deny for a permission comming from the bitField
+                            // in this case, we need another argument to provide room for the new value of the permission
+                            // or it can be the new value of the permission, then we stop here
+                            defaultLabel: "new value",
+                            VALUE: {
+                                last: true,
+                                choice: {
+                                    allow: null,
+                                    deny: null
+                                }
+                            }
                         }
                     }
                 }
@@ -113,6 +128,67 @@ module.exports = {
         }
     }
 };
+
+/**
+ * We will first try to check if the permission is contained in the bitField
+ * if the permission is contained in it but but the user has not used allow/deny, it will throw an error
+ * if the permission is contained in it and the user used allow/deny,
+ * we will return the permission bit & the type of the field used
+ *
+ * if the permission is not contained in the bitField
+ * & if it is contained inside the valueField
+ * if the user used allow/deny, it will throw an error
+ * if the new value is not in the same type as the permission, it will throw an error
+ * if the new value is a number, we will check if it follows the rule included in the reference field
+ * we will return that the permission is valid & the type of the field
+ */
+function checkNode(data) {
+    const { nodeString, context } = data;
+    const result = {};
+    const bitFieldCheck = BitField.resolveNode({ node: nodeString });
+    // if the permission is contained in the bitField
+    if (bitFieldCheck) {
+        // if user used allow/deny
+        if (context.args[3]) {
+            result.fieldType = "bitField";
+            result.permissionBit = bitFieldCheck;
+        } else {
+            // error did not use allow/deny while it should
+        }
+        // if the permission is not contained in the bitField
+    } else {
+        const valueFieldCheck = BitField.resolveNode({ node: nodeString, object: context.message.constants.VALUEFIELD_DEFAULT });
+        // if the permission is contained in the valueField
+        if (valueFieldCheck) {
+            if (context.args[3]) {
+                // warning allow/deny useless in valueField
+            }
+            const [ruleValue, rule] = valueFieldCheck;
+            // we compare the expected data type for this permission and the type of the user input
+            const expectedType = typeof ruleValue;
+            // we need to parse the user input as best as we can to what it should normally be
+            // inputData is the new value of the permission
+            const inputData = context.args[2];
+            // the rule variable contains a global Symbol saying what rule should be applied to filter off the bad values
+            switch (expectedType) {
+                case "number": {
+                    const parsedUserInput = parseInt(inputData);
+                    if (isNaN(parsedUserInput)) {
+                        // error expecting a number
+                    } else {
+                        if (rule === Symbol.for("<") && parsedUserInput > ruleValue) {
+                            // error higher number than maximum
+                        }
+                        if (rule === Symbol.for(">") && parsedUserInput < ruleValue) {
+                            // error lower number than minimum
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
 
 /**
  *
@@ -309,139 +385,6 @@ async function editField(options) {
         }
     } catch (err) {
         throw err;
-    }
-}
-/**
- *
- * @param mode {PermissionType}
- * @param option {PermissionAction}
- * @param scope {PermissionScope}
- * @param permissionNode
- * @param IDs {Object<Snowflake>}
- * @returns {Promise.<*>}
- */
-async function editNumber(mode, option, scope, permissionNode, IDs, GuildSetting) {
-    if (typeof option !== "boolean") throw new Error("Type error: option is not a Boolean");
-    switch (scope) {
-        case "roleOverride":
-        case "memberOverride": {
-            const channel = await db.getGuildChannel(IDs.channel);
-            if (scope === "memberOverride") {
-                const index = channel.overrides.members.findIndex(member => member.memberID === IDs.user);
-                const storedMemberOverride = channel.overrides.members[index];
-                let usedMemberOverride;
-                if (storedMemberOverride) {
-                    storedMemberOverride.insideGuild = true;
-                    usedMemberOverride = new GuildMember(storedMemberOverride);
-                } else {
-                    usedMemberOverride = new GuildMember({ memberID: IDs.user, insideGuild: true });
-                }
-                try {
-                    const output = buildObject(usedMemberOverride.bitField, permissionNode, mode, option);
-                    const memberOverride = new GuildMember({ memberID: IDs.user, bitField: output.bitField, insideGuild: true });
-                    if (!storedMemberOverride) {
-                        if (Object.keys(memberOverride.bitField).length !== 0) {
-                            channel.overrides.members.push(memberOverride);
-                        }
-                    } else {
-                        if (Object.keys(memberOverride.bitField).length !== 0) { // eslint-disable-line no-lonely-if
-                            channel.overrides.members[index] = memberOverride;
-                        } else {
-                            channel.overrides.members.splice(index, 1);
-                        }
-                    }
-                    await db.editGuildChannel(IDs.channel, channel, true);
-                    return { old: output.old, now: output.now };
-                } catch (err) {
-                    return console.error(err);
-                }
-            } else {
-                const index = channel.overrides.roles.findIndex(role => role.roleID === IDs.role);
-                const storedRoleOverride = channel.overrides.roles[index];
-                let usedRoleOverride;
-                if (storedRoleOverride) {
-                    usedRoleOverride = new GuildRole(storedRoleOverride);
-                } else usedRoleOverride = new GuildRole({ roleID: IDs.role });
-                try {
-                    const output = buildObject(usedRoleOverride.bitField, permissionNode, mode, option);
-                    const roleOverride = new GuildRole({ roleID: IDs.role, bitField: output.bitField });
-                    if (!storedRoleOverride) {
-                        if (Object.keys(roleOverride.bitField).length !== 0) {
-                            channel.overrides.roles.push(roleOverride);
-                        }
-                    } else {
-                        if (Object.keys(roleOverride.bitField).length !== 0) { // eslint-disable-line no-lonely-if
-                            channel.overrides.roles[index] = roleOverride;
-                        } else {
-                            channel.overrides.roles.splice(index, 1);
-                        }
-                    }
-                    await db.editGuildChannel(IDs.channel, channel, true);
-                    return { old: output.old, now: output.now };
-                } catch (err) {
-                    return console.error(err);
-                }
-            }
-        }
-        case "member": {
-            const member = await db.getGuildMember(IDs.user, IDs.guild);
-            const bitField = member.bitField || {};
-            try {
-                const output = buildObject(bitField, permissionNode, mode, option);
-                member.bitField = output.bitField;
-                await db.editGuildMember(member, true);
-                return { old: output.old, now: output.now };
-            } catch (err) {
-                return console.error(err);
-            }
-        }
-        case "role": {
-            const role = await db.getGuildRole(IDs.role);
-            const bitField = role.bitField || {};
-            try {
-                const output = buildObject(bitField, permissionNode, mode, option);
-                role.bitField = output.bitField;
-                await db.editGuildRole(IDs.role, role, true);
-
-                const index = guildSetting.permission.roles.findIndex(settingRole => settingRole === IDs.role);
-                if (index === -1 && Object.keys(role.bitField).length !== 0) guildSetting.permission.roles.push(role.roleID);
-                else if (index !== -1 && Object.keys(role.bitField).length === 0) guildSetting.permission.roles.splice(index, 1);
-                await db.editGuildSetting(guildSetting.guildID, guildSetting);
-
-                return { old: output.old, now: output.now };
-            } catch (err) {
-                return console.error(err);
-            }
-        }
-        case "channel": {
-            const channel = await db.getGuildChannel(IDs.channel);
-            const bitField = channel.bitField || {};
-            try {
-                const output = buildObject(bitField, permissionNode, mode, option);
-                channel.bitField = output.bitField;
-                await db.editGuildChannel(IDs.channel, channel, true);
-                return { old: output.old, now: output.now };
-            } catch (err) {
-                return console.error(err);
-            }
-        }
-        case "guild": {
-            // this case is for the @everyone role, which have the same id as the guild id
-            const role = await db.getGuildRole(IDs.guild);
-            const bitField = role.bitField || {};
-            try {
-                const output = buildObject(bitField, permissionNode, mode, option);
-                role.bitField = output.bitField;
-                await db.editGuildRole(IDs.role, role, true);
-                return { old: output.old, now: output.now };
-            } catch (err) {
-                return console.error(err);
-            }
-        }
-        case undefined:
-        case null: {
-            throw new Error("Type error: wrong permission scope");
-        }
     }
 }
 

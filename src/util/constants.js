@@ -27,7 +27,7 @@ constants.DB_MODEL = [
 
 constants.VALUEFIELD_DEFAULT = {
     nsfw: {
-        post: [20, Symbol.for("<")]
+        post: [20, Symbol.for("<")] // smaller than
     }
 };
 

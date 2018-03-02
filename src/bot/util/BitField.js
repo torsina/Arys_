@@ -114,18 +114,18 @@ class BitField {
                     return;
                 }
                 if (dataCursor && index === usedPath.length - 1 && mode === "valueField") {
-                    let constValue, order;
-                    if (Array.isArray(constCursor)) [constValue, order] = constCursor;
+                    let constValue, rule;
+                    if (Array.isArray(constCursor)) [constValue, rule] = constCursor;
                     else constValue = constCursor;
                     switch (typeof dataCursor) {
                         case "number": {
                             if (!isNaN(dataCursor)) {
-                                // if order is true, highest value win, constValue as minimum
-                                // if order is false, lowest value win , constvalue as maximum
+                                // if rule is >, highest value win, constValue as minimum
+                                // if rule is <, lowest value win , constvalue as maximum
                                 const compareValue = (!referenceCursor || isNaN(referenceCursor)) ? constValue : referenceCursor;
-                                if(order) {
+                                if(rule === Symbol.for(">")) {
                                     cursor[pathIndex] = Math.max(dataCursor, compareValue);
-                                } else {
+                                } else if (rule === Symbol.for("<")) {
                                     cursor[pathIndex] = Math.min(dataCursor, compareValue);
                                 }
                             }
