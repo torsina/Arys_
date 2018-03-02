@@ -136,10 +136,10 @@ module.exports = {
  * we will return the permission bit & the type of the field used
  *
  * if the permission is not contained in the bitField
- * & if it is contained inside the valueField
- * if the user used allow/deny, it will throw an error
- * if the new value is not in the same type as the permission, it will throw an error
- * if the new value is a number, we will check if it follows the rule included in the reference field
+ * & if it is contained inside the valueField -
+ * if the user used allow/deny, it will throw an error -
+ * if the new value is not in the same type as the permission, it will throw an error -
+ * if the new value is a number, we will check if it follows the rule included in the reference field -
  * we will return that the permission is valid & the type of the field
  */
 function checkNode(data) {
@@ -152,6 +152,7 @@ function checkNode(data) {
         if (context.args[3]) {
             result.fieldType = "bitField";
             result.permissionBit = bitFieldCheck;
+            return result;
         } else {
             // error did not use allow/deny while it should
         }
@@ -175,13 +176,13 @@ function checkNode(data) {
                     const parsedUserInput = parseInt(inputData);
                     if (isNaN(parsedUserInput)) {
                         // error expecting a number
+                    } else if (rule === Symbol.for("<") && parsedUserInput > ruleValue) {
+                        // error higher number than maximum
+                    } else if (rule === Symbol.for(">") && parsedUserInput < ruleValue) {
+                        // error lower number than minimum
                     } else {
-                        if (rule === Symbol.for("<") && parsedUserInput > ruleValue) {
-                            // error higher number than maximum
-                        }
-                        if (rule === Symbol.for(">") && parsedUserInput < ruleValue) {
-                            // error lower number than minimum
-                        }
+                        result.fieldType = "valueField";
+                        return result;
                     }
                 }
             }
