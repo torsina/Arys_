@@ -9,8 +9,9 @@ const util = require('util');
 const { RichEmbed } = require("discord.js");
 module.exports = {
     run: async (context) => {
+        console.log(context);
         // perms
-        const { guildSetting } = context;
+        const { message: { guildSetting } } = context;
         let role, channel, user;
         if (context.flags.role) role = context.flags.role.id;
         if (context.flags.channel) channel = context.flags.channel.id;
@@ -27,28 +28,21 @@ module.exports = {
                 // nodeString = node path
                 // resolvedNode = permission bit for bitField
                 // subType = allow || deny for bitField
-                let fieldType, nodeString, permissionBit, subField, userInput;
-                console.log(context.args);
-                if (context.args[0] === "deny" || context.args[0] === "allow") {
-                    fieldType = "bitField";
-                    subField = context.args[0];
-                    nodeString = context.args[1];
-                    userInput = context.args[2];
-                    permissionBit = BitField.resolveNode({ node: nodeString });
-                    if (!permissionBit) {
-                        const { embed } = new context.command.EmbedError(context, { error: "permission.undefined", data: { node: nodeString } });
-                        return context.channel.send(embed);
-                    }
-                } else {
-                    fieldType = "valueField";
-                    nodeString = context.args[0];
-                    userInput = context.args[1];
-                    // we don't store the resolved node in the resolvedNode var because what we want here is just to know if this node exist
-                    const valueFieldCheck = BitField.resolveNode({ node: nodeString, object: context.message.constants.VALUEFIELD_DEFAULT });
-                    if (!valueFieldCheck) {
-                        const { embed } = new context.command.EmbedError(context, { error: "permission.undefined", data: { node: nodeString } });
-                        return context.channel.send(embed);
-                    }
+
+                //console.log(util.inspect(context, {showHidden: false, depth: null}));
+                let fieldType, permissionBit, subField;
+                console.log("args: " + context.args);
+                const nodeString = context.args[1];
+                const userInput = context.args[2];
+                let nodeInfo;
+                try {
+                    nodeInfo = checkNode({ nodeString, context });
+                    fieldType = nodeInfo.fieldType;
+                    permissionBit = nodeInfo.permissionBit;
+                    subField = context.args[3];
+                } catch (e) {
+                    const { embed } = e;
+                    return context.channel.send(embed);
                 }
                 // start of process
                 // mode, scope, node, IDs, guildSetting, subField, permissionBit, userInput
@@ -67,8 +61,9 @@ module.exports = {
                 };
                 try {
                     const result = await editField(editFieldOptions);
+                    //console.log(result);
                     const embedResult = BitField.checkSingle(result, context.message);
-                    console.log(embedResult);
+                    console.log(result);
                 } catch (err) {
                     return console.error(err);
                 }
@@ -110,9 +105,7 @@ module.exports = {
                         // we want the next argument to be a possible end of the chain
                         last: true,
                         choice: {
-                            // here, VALUE will either be allow/deny for a permission comming from the bitField
-                            // in this case, we need another argument to provide room for the new value of the permission
-                            // or it can be the new value of the permission, then we stop here
+                            // here, VALUE will be the user input
                             defaultLabel: "new value",
                             VALUE: {
                                 last: true,
@@ -130,6 +123,9 @@ module.exports = {
 };
 
 /**
+ *
+ * This function define the type of the field of this permission & handle the user input & error handling
+ *
  * We will first try to check if the permission is contained in the bitField
  * if the permission is contained in it but but the user has not used allow/deny, it will throw an error
  * if the permission is contained in it and the user used allow/deny,
@@ -146,6 +142,8 @@ function checkNode(data) {
     const { nodeString, context } = data;
     const result = {};
     const bitFieldCheck = BitField.resolveNode({ node: nodeString });
+    console.log("node: " + nodeString);
+    console.log("bitFieldCheck: " + bitFieldCheck);
     // if the permission is contained in the bitField
     if (bitFieldCheck) {
         // if user used allow/deny
@@ -154,14 +152,17 @@ function checkNode(data) {
             result.permissionBit = bitFieldCheck;
             return result;
         } else {
+            throw new context.command.EmbedError(context, { error: "perms.error.missingSubField", data: { node: nodeString } });
             // error did not use allow/deny while it should
         }
         // if the permission is not contained in the bitField
     } else {
         const valueFieldCheck = BitField.resolveNode({ node: nodeString, object: context.message.constants.VALUEFIELD_DEFAULT });
+        console.log("valueFieldCheck" + valueFieldCheck);
         // if the permission is contained in the valueField
         if (valueFieldCheck) {
             if (context.args[3]) {
+                result.warning = new context.command.EmbedError(context, { error: "perms.error.notNeededSubField" });
                 // warning allow/deny useless in valueField
             }
             const [ruleValue, rule] = valueFieldCheck;
@@ -175,10 +176,16 @@ function checkNode(data) {
                 case "number": {
                     const parsedUserInput = parseInt(inputData);
                     if (isNaN(parsedUserInput)) {
+                        throw new context.command.EmbedError(context, { error: "perms.error.wrongType",
+                            data: { value: inputData, expectedType} });
                         // error expecting a number
                     } else if (rule === Symbol.for("<") && parsedUserInput > ruleValue) {
+                        throw new context.command.EmbedError(context, { error: "perms.error.notFollowingNumberRule",
+                            data: { value: inputData, rule: context.t("words.high"), limit: ruleValue } });
                         // error higher number than maximum
                     } else if (rule === Symbol.for(">") && parsedUserInput < ruleValue) {
+                        throw new context.command.EmbedError(context, { error: "perms.error.notFollowingNumberRule",
+                            data: { value: inputData, rule: context.t("words.low"), limit: ruleValue } });
                         // error lower number than minimum
                     } else {
                         result.fieldType = "valueField";
@@ -380,7 +387,7 @@ async function editField(options) {
                 // we don't need to check if the role exists because getGuildRole already instantiate a GuildRole for us
                 editFieldNodeOptions.object = role[mode];
                 editFieldNode(editFieldNodeOptions);
-                await db.editGuildRole(role);
+                await db.editGuildRole(role.roleID, role);
                 return role;
             }
         }

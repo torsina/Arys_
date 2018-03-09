@@ -51,7 +51,7 @@ db.init = async () => {
 };
 // guildSetting getter/setter
 db.setGuildSetting = async (data) => {
-    if (!(data instanceof guildSetting))data = new GuildSetting(data);
+    if (!(data instanceof GuildSetting))data = new GuildSetting(data);
     const query = {
         guildID: data.guildID,
         permission: data.permission,
@@ -200,7 +200,8 @@ db.getGuildMember = async (memberID, guildID, guildSetting) => {
 
 db.editGuildMember = async (data, force = false) => {
     if (!data.id) {
-        throw new Error("Type error: the document is missing it's primary key");
+        await db.setGuildMember(data);
+        return;
     }
     if (force) {
         data = new GuildMember(data);

@@ -144,7 +144,6 @@ class BitField {
 
     static resolveNode(options) {
         const { node, build = false} = options;
-        console.log(node);
         let { object = constants.PERMISSION_BITFIELD } = options;
         let nodeArray = node.split(".");
         // if build is true, we only want the command property, which will be the built number for this command
@@ -166,7 +165,6 @@ class BitField {
         if (!permissionNode) throw new message.command.EmbedError(message, { error: "permission.undefined", data: { node: permissionNode } });
         // we get all of the needed bitFields and build the total of them
         const fields = await this.buildContext(message, guildSetting);
-        console.log(fields);
         if (typeof permissionNode === "number") {
             const bitFieldNode = this.resolveNode({ node: permissionString, object: fields.bitField, build: true });
             return !!(bitFieldNode & permissionNode);
@@ -198,6 +196,9 @@ class BitField {
             fill: true,
             endObject: permissionObject.valueField
         };
+        console.error("something");
+        console.error("something");
+        //console.log("permissionObject: " + permissionObject);
         this.stackContext(bitFieldOptions);
         this.stackContext(valueFieldOptions);
         const { bitField, valueField } = constants.PERMISSION_LIST;
@@ -209,10 +210,34 @@ class BitField {
         }
         for (let i = 0, n = valueField.length; i < n; i++) {
             const node = valueField[i];
-            const nodeNumber = this.resolveNode({ node, object: constants.VALUEFIELD_DEFAULT });
+            const nodeReference = this.resolveNode({ node, object: constants.VALUEFIELD_DEFAULT });
             const permNumber = this.resolveNode({ node, object: permissionObject.valueField });
-            result.push({ node, value: !!(permNumber & nodeNumber) });
+            let value;
+            switch (typeof nodeReference[0]) {
+                case "number": {
+                    switch (nodeReference[1]) {
+                        case Symbol.for("<"): {
+                            if (permNumber !== false) {
+                                value = (permNumber < nodeReference[0]) ? permNumber : nodeReference[0];
+                            } else {
+                                value = nodeReference[0];
+                            }
+                            break;
+                        }
+                        case Symbol.for(">"): {
+                            if (permNumber !== false) {
+                                value = (permNumber > nodeReference[0]) ? permNumber : nodeReference[0];
+                            } else {
+                                value = nodeReference[0];
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            result.push({ node, value });
         }
+        return result;
     }
 }
 module.exports = BitField;
