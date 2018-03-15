@@ -9,16 +9,15 @@ const util = require('util');
 const { RichEmbed } = require("discord.js");
 module.exports = {
     run: async (context) => {
-        console.log(context);
         // perms
         const { message: { guildSetting } } = context;
-        let role, channel, user;
+        let role, channel, member;
         if (context.flags.role) role = context.flags.role.id;
         if (context.flags.channel) channel = context.flags.channel.id;
-        if (context.flags.user) user = context.flags.user.id;
+        if (context.flags.user) member = context.flags.user.id;
         const guild = context.guild.id;
-        const IDs = { role, channel, user, guild };
-        const scope = scopeChoice(channel, role, user, guild);
+        const IDs = { role, channel, member, guild };
+        const scope = scopeChoice(channel, role, member, guild);
         switch (context.args[0]) {
             case "show": {
                 break;
@@ -31,14 +30,14 @@ module.exports = {
 
                 //console.log(util.inspect(context, {showHidden: false, depth: null}));
                 let fieldType, permissionBit, subField;
-                console.log("args: " + context.args);
                 const nodeString = context.args[1];
-                const userInput = context.args[2];
+                let userInput = context.args[2];
                 let nodeInfo;
                 try {
                     nodeInfo = checkNode({ nodeString, context });
                     fieldType = nodeInfo.fieldType;
                     permissionBit = nodeInfo.permissionBit;
+                    userInput = nodeInfo.userInput;
                     subField = context.args[3];
                 } catch (e) {
                     const { embed } = e;
@@ -46,9 +45,8 @@ module.exports = {
                 }
                 // start of process
                 // mode, scope, node, IDs, guildSetting, subField, permissionBit, userInput
-                // for a bitField, allow will be the user input true/false, value will be the permission bit as a int
+                // for a bitField, allow will be the member input true/false, value will be the permission bit as a int
                 // value is either the permission bit we're targeting or the input data
-                let output;
                 const editFieldOptions = {
                     mode: fieldType,
                     scope,
@@ -62,8 +60,8 @@ module.exports = {
                 try {
                     const result = await editField(editFieldOptions);
                     //console.log(result);
-                    const embedResult = BitField.checkSingle(result, context.message);
-                    console.log(result);
+                    //const embedResult = BitField.checkSingle(result, context.message);
+                    //console.error(util.inspect(result, false, null));
                 } catch (err) {
                     return console.error(err);
                 }
@@ -142,10 +140,12 @@ function checkNode(data) {
     const { nodeString, context } = data;
     const result = {};
     const bitFieldCheck = BitField.resolveNode({ node: nodeString });
-    console.log("node: " + nodeString);
-    console.log("bitFieldCheck: " + bitFieldCheck);
     // if the permission is contained in the bitField
     if (bitFieldCheck) {
+        const userInput = context.args[2];
+        if (~["enable", "yes", "true", "1"].indexOf(userInput)) result.userInput = true;
+        else if (~["disable", "no", "false", "0"].indexOf(userInput)) result.userInput = false;
+        else throw new context.command.EmbedError(context, { error: "wiggle.resolver.error.booleanError" });
         // if user used allow/deny
         if (context.args[3]) {
             result.fieldType = "bitField";
@@ -158,7 +158,6 @@ function checkNode(data) {
         // if the permission is not contained in the bitField
     } else {
         const valueFieldCheck = BitField.resolveNode({ node: nodeString, object: context.message.constants.VALUEFIELD_DEFAULT });
-        console.log("valueFieldCheck" + valueFieldCheck);
         // if the permission is contained in the valueField
         if (valueFieldCheck) {
             if (context.args[3]) {
@@ -291,12 +290,11 @@ function editFieldNode(options) {
         const isValueInPermissionNumber = (permissionBit | permissionNumber) === permissionNumber;
         // here, the permission number for this subField was already set,
         // we now need to change the value of the bit we want if needed
-
         // here are the 2 cases where we need to modify the permissionNumber, as the 2 other cases does nothing
         if (isValueInPermissionNumber && !userInput) {
             // if permissionNumber does contain our permission bit and we want to diallow it
             // we use a XOR to remove the permission bit
-            cursor[propName][subField] ^= permissionBit;
+            cursor[propName][subField] = permissionNumber ^ permissionBit;
         } else if (!isValueInPermissionNumber && userInput) {
             // if permissionNumber does not contain our permission bit and we want to allow it
             // we use a OR to add the permission bit
@@ -348,7 +346,7 @@ async function editField(options) {
             case "memberOverride":
             case "roleOverride": {
                 let overrideType, OverrideClass, isNew = false;
-                if (scope.includes("role")) overrideType = "role";
+                if (scope === "roleOverride") overrideType = "role";
                 else overrideType = "member";
                 if (overrideType === "role") OverrideClass = RoleOverride;
                 else OverrideClass = MemberOverride;
@@ -368,9 +366,20 @@ async function editField(options) {
                 // build a object with the node based on the field of the override
                 editFieldNode(editFieldNodeOptions);
                 // we add the override to the array of overrides if it's a new one
+                console.error(override);
+                override.bitField = cleanFields(override.bitField);
+                override.valueField = cleanFields(override.valueField);
+                console.error(override);
                 if (isNew) overrides.push(override);
                 await db.editGuildChannel(IDs.channel, channel);
                 return override;
+            }
+            case "channel": {
+                const channel = await db.getGuildChannel(IDs.channel);
+                editFieldNodeOptions.object = channel[mode];
+                editFieldNode(editFieldNodeOptions);
+                await db.editGuildChannel(IDs.channel, channel);
+                return channel;
             }
             case "member": {
                 const member = await db.getGuildMember(IDs.member, IDs.guild, guildSetting);
@@ -394,6 +403,17 @@ async function editField(options) {
     } catch (err) {
         throw err;
     }
+}
+
+function cleanFields(parent) {
+    for (const property in parent) {
+        if (property === 0 || Object.keys(property).length === 0) {
+            parent[property] = undefined;
+        } else {
+            cleanFields(property);
+        }
+    }
+    return parent;
 }
 
 /**

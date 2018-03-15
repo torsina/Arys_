@@ -9,18 +9,24 @@ class BitField {
 
     static async buildContext(message, guildSetting) {
         // we sort the member's roles by their position
-        const rolesID = message.member.roles
+        // we set specific ID arrays for the rolesOverrides & the roles of the user because the user roles must be
+        // inside a array inside guildSetting to prevent querrying a blank role from the database, while the rolesOverrides doesn't have this
+        let rolesOverridesID = message.member.roles
+            .sort((a, b) => { return message.guild.roles.get(a.id).position - message.guild.roles.get(b.id).position; });
+        const rolesID = rolesOverridesID
             .filter(role => guildSetting.permission.roles.findIndex(guildRole => role.id === guildRole.roleID) !== -1)
             .sort((a, b) => { return message.guild.roles.get(a.id).position - message.guild.roles.get(b.id).position; })
             .keyArray();
+        rolesOverridesID = rolesOverridesID.keyArray();
         const channelID = message.channel.id;
         const memberID = message.member.id;
         const guildID = message.guild.id;
+        const IDs = { channelID, memberID, guildID, rolesOverridesID, rolesID };
         const endContext = { bitField: {}, valueField: {} };
         // we get all the bitFields and valueFields needed for this context
-        const data = await db.getBitFields(rolesID, channelID, memberID, guildID, guildSetting);
+        const data = await db.getBitFields(IDs, guildSetting);
         // @everyone + packed roles -> member -> channel -> channel override (packed roles) -> channel override (member)
-        for (let i = 0, n = data.bitField; i < n; i++) {
+        for (let i = 0, n = data.bitField.length; i < n; i++) {
             const dataBitField = data.bitField[i];
             const options = {
                 mode: "bitField",
@@ -28,7 +34,7 @@ class BitField {
                 dataObject: dataBitField };
             this.stackContext(options);
         }
-        for (let i = 0, n = data.valueField; i < n; i++) {
+        for (let i = 0, n = data.valueField.length; i < n; i++) {
             const dataValueField = data.valueField[i];
             const options = {
                 mode: "valueField",
@@ -62,9 +68,11 @@ class BitField {
      * @param options.index {Number}
      */
     static stackContext(options) {
-        const { mode, fill = false, endObject = {}, dataObject = {}, defaultObject = {}, start = true, usedPath } = options;
-        let { index = 0 } = options;
+        const { mode, fill = false, endObject = {}, dataObject = {}, start = true, usedPath } = options;
+        let { defaultObject, index = 0 } = options;
         if (start) {
+            if (mode === "bitField") defaultObject = constBitField;
+            else if (mode === "valueField") defaultObject = constValueField;
             const varKeys = Misc.iterate(defaultObject);
             for (let i = 0, n = varKeys.length; i < n; i++) {
                 const varKeyArray = varKeys[i].split(".");
@@ -85,9 +93,6 @@ class BitField {
             let cursor = endObject;
             let dataCursor = dataObject;
             let constCursor = defaultObject;
-            if (mode === "bitField") constCursor = constBitField;
-            else if (mode === "valueField") constCursor = constValueField;
-            else constCursor = defaultObject;
             let referenceCursor;
             while (index < usedPath.length) {
                 const pathIndex = usedPath[index];
@@ -196,9 +201,6 @@ class BitField {
             fill: true,
             endObject: permissionObject.valueField
         };
-        console.error("something");
-        console.error("something");
-        //console.log("permissionObject: " + permissionObject);
         this.stackContext(bitFieldOptions);
         this.stackContext(valueFieldOptions);
         const { bitField, valueField } = constants.PERMISSION_LIST;

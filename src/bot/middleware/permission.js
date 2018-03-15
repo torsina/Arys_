@@ -1,24 +1,24 @@
 const BitField = require("../util/BitField");
 const constants = require("../../util/constants");
-module.exports = async (message, next, wiggle) => {
-    const { command } = message;
+module.exports = async (context, next, wiggle) => {
+    const { command } = context;
     if (!command) return next();
     const { owner } = wiggle.locals.options;
     // bypass for bot owner
-    if (message.author.id === owner) return next();
-    const categoryName = message.command.category;
-    const commandName = message.command.name;
-    const argName = (command.args && command.args[0] && !command.args[0].optional) ? message.args[0] : "base";
-    const permissionNodeString = constants.PERMISSION_NODE.commands[categoryName][commandName][argName];
+    if (context.author.id === owner) return next();
+    const categoryName = context.command.category;
+    const commandName = context.command.name;
+    const permissionNodeString = constants.PERMISSION_NODE[categoryName][commandName][context.args[0]];
+    //console.log(categoryName, commandName, argName, permissionNodeString);
     try {
-        const result = await BitField.check(permissionNodeString, message, message.guildSetting);
+        const result = await BitField.check(permissionNodeString, context, context.guildSetting);
         if (!result) {
-            const { embed } = new message.command.EmbedError(message, { error: "permission.denied", data: { node: permissionNodeString } });
-            return message.channel.send(embed);
+            const { embed } = new context.command.EmbedError(context, { error: "permission.denied", data: { node: permissionNodeString } });
+            return context.channel.send(embed);
         }
     } catch (err) {
         return console.error(err);
     }
-    message.permission = permissionNodeString;
+    context.permission = permissionNodeString;
     return next();
 };

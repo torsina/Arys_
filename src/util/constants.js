@@ -96,8 +96,7 @@ constants.PERMISSION_NODE = {
     settings: {
         perms: {
             visible: "settings.perms.visible",
-            allow: "settings.perms.edit",
-            deny: "settings.perms.edit",
+            set: "settings.perms.edit",
             show: "settings.perms.show"
         },
         currency: {
