@@ -15,6 +15,8 @@ const r = require("rethinkdbdash")({
     db: dbName
 });
 
+db.r = r;
+
 db.init = async () => {
     const expected = constants.DB_MODEL;
     const dbs = await r.dbList().run();

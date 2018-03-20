@@ -6,14 +6,22 @@
   "dependencies": {
     "bufferutil": "^3.0.3",
     "canvas": "2.0.0-alpha.2",
+    "cookie-session": "^2.0.0-beta.3",
     "discord.js": "^11.3.0",
     "discord.js-wiggle": "git+https://git@github.com/torsina/discord.js-wiggle.git",
+    "ejs": "^2.5.7",
     "erlpack": "^0.1.2",
     "eventemitter3": "^2.0.3",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
     "moment": "2.18.1",
     "openport": "0.0.4",
+    "passport": "^0.4.0",
+    "passport-discord": "^0.1.3",
+    "passport-oauth2-refresh": "^1.0.0",
     "raven": "^2.4.2",
-    "rethinkdbdash": "^2.3.31"
+    "rethinkdbdash": "^2.3.31",
+    "session-rethinkdb": "^2.0.1"
   },
   "devDependencies": {
     "eslint": "^4.18.1",

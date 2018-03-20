@@ -82,10 +82,6 @@ module.exports = {
         name: "user",
         short: "u",
         type: "user"
-    }, {
-        name: "guild",
-        short: "g",
-        type: "boolean"
     }],
     // %perms set <node> <value> ?<allow/deny>
     argTree: {
@@ -205,7 +201,7 @@ function checkNode(data) {
  * @param guild {Snowflake}
  * @returns {PermissionScope}
  */
-function scopeChoice(channel, role, user, guild) {
+function scopeChoice(channel, role, user) {
     if (channel && user) {
         return "memberOverride";
     } else if (channel && role) {
@@ -216,8 +212,6 @@ function scopeChoice(channel, role, user, guild) {
         return "role";
     } else if (channel) {
         return "channel";
-    } else if (guild) {
-        return "guild";
     }
 }
 
@@ -389,7 +383,6 @@ async function editField(options) {
                 await db.editGuildMember(member);
                 return member;
             }
-            case "guild":
             case "role": {
                 const id = scope === "guild" ? IDs.guild : IDs.role;
                 const role = await db.getGuildRole(id);
