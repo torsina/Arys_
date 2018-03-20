@@ -26,7 +26,7 @@ class ImageHandling {
                 });
             });
         } catch (err) {
-            return console.error(err);
+            throw err;
         }
     }
 }

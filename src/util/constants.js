@@ -1,8 +1,15 @@
+// Symbol declarations
+const misc = require("./misc");
+Symbol.for("<");
+Symbol.for(">");
+const constants = module.exports = {};
+
 /**
  * This is the setup rethink#init uses to create all of the tables and indexes of the bot's database
  * @type {[*]}
  */
-exports.DB_MODEL = [
+
+constants.DB_MODEL = [
     { name: "guild", primary: "guildID" },
     { name: "guildRole", primary: "roleID" },
     { name: "guildChannel", primary: "channelID" },
@@ -15,104 +22,112 @@ exports.DB_MODEL = [
         { name: "post_guildID_message", rows: ["guildID", "message"] },
         { name: "post_guildID_file_image", rows: ["guildID", "file", "image"] }
     ] },
-    { name: "betCount", primary: "guildID" }
+    { name: "betCount", primary: "guildID" },
+    { name: "oauth", primary: "userID", rows: ["token"]}
 ];
+
+constants.VALUEFIELD_DEFAULT = {
+    nsfw: {
+        post: [20, Symbol.for("<")] // smaller than
+    }
+};
 
 /**
  * @constant bitField containing all of the bot's permissions
  * due to it's use, every permission inside of it is set to 1
  */
-exports.PERMISSION_BITFIELD_DEFAULT = {
-    commands: {
-        moderation: {},
-        settings: {
-            perms: 0
-        },
-        util: {
-            ping: 3
-        }
+constants.PERMISSION_BITFIELD_DEFAULT = {
+    money: {
+        bet: 0,
+        credits: 0,
+        shop: 0
+    },
+    nsfw: {
+        hentai: 0
+    },
+    settings: {
+        perms: 0,
+        currency: 0
+    },
+    util: {
+        ping: 0
     }
 };
 // assign the permission nodes to a permission bit
-exports.PERMISSION_BITFIELD = {
-    commands: {
-        moderation: {
-            kick: {
-                visible: 1 << 0
-            },
-            ban: {
-                visible: 1 << 0
-            }
+constants.PERMISSION_BITFIELD = {
+    moderation: {
+        kick: {
+            visible: 1 << 0
         },
-        settings: {
-            perms: {
-                visible: 1 << 0,
-                edit: 1 << 1,
-                show: 1 << 2
-            },
-            currency: {
-                visible: 1 << 0,
-                edit: 1 << 1,
-                show: 1 << 2
-            }
+        ban: {
+            visible: 1 << 0
+        }
+    },
+    settings: {
+        perms: {
+            visible: 1 << 0,
+            edit: 1 << 1,
+            show: 1 << 2
         },
-        money: {
-            bet: {
-                visible: 1 << 0,
-                base: 1 << 1
-            },
-            credits: {
-                visible: 1 << 0,
-                base: 1 << 1
-            }
+        currency: {
+            visible: 1 << 0,
+            edit: 1 << 1,
+            show: 1 << 2
+        }
+    },
+    money: {
+        bet: {
+            visible: 1 << 0,
+            base: 1 << 1
         },
-        util: {
-            ping: {
-                visible: 1 << 0,
-                base: 1 << 1
-            }
+        credits: {
+            visible: 1 << 0,
+            base: 1 << 1
+        }
+    },
+    util: {
+        ping: {
+            visible: 1 << 0,
+            base: 1 << 1
         }
     }
 };
 // assign the arguments to a permission node
-exports.PERMISSION_NODE = {
-    commands: {
-        settings: {
-            perms: {
-                visible: "settings.perms.visible",
-                allow: "settings.perms.edit",
-                deny: "settings.perms.edit",
-                show: "settings.perms.show"
-            },
-            currency: {
-                show: "settings.currency.show",
-                name: "settings.currency.edit",
-                bet: "settings.currency.edit",
-                daily: "settings.currency.edit",
-                activity: "settings.currency.edit"
-            }
+constants.PERMISSION_NODE = {
+    settings: {
+        perms: {
+            visible: "settings.perms.visible",
+            set: "settings.perms.edit",
+            show: "settings.perms.show"
         },
-        money: {
-            bet: {
-                h: "money.bet.base",
-                head: "money.bet.base",
-                t: "money.bet.base",
-                tail: "money.bet.base"
-            },
-            credits: {
-                base: "money.credits.base"
-            }
+        currency: {
+            show: "settings.currency.show",
+            name: "settings.currency.edit",
+            bet: "settings.currency.edit",
+            daily: "settings.currency.edit",
+            activity: "settings.currency.edit"
+        }
+    },
+    money: {
+        bet: {
+            h: "money.bet.base",
+            head: "money.bet.base",
+            t: "money.bet.base",
+            tail: "money.bet.base"
         },
-        util: {
-            ping: {
-                visible: "util.ping.visible",
-                base: "util.ping.base"
-            }
+        credits: {
+            base: "money.credits.base"
+        }
+    },
+    util: {
+        ping: {
+            visible: "util.ping.visible",
+            base: "util.ping.base"
         }
     }
 };
 
-exports.GUILDSETTING_DEFAULT = {
+constants.GUILDSETTING_DEFAULT = {
     money: {
         name: "credits",
         accounts: {
@@ -140,9 +155,9 @@ exports.GUILDSETTING_DEFAULT = {
     moneyNameLength: 40,
 };
 
-exports.IMAGE_TYPES = ["role"];
+constants.IMAGE_TYPES = ["role"];
 
-exports.IMAGE_ROLESHOP = {
+constants.IMAGE_ROLESHOP = {
     //colors: ["#4d5059", "#2f3136"],
     colors: ["#23272a", "#2c2f33"],
     ctx: {
@@ -156,7 +171,7 @@ exports.IMAGE_ROLESHOP = {
     startPrice: 674
 };
 
-exports.SHOP = {
+constants.SHOP = {
     categoryOptions: ["header", "order", "name"],
     itemOptions: ["price"],
     maxPriceDigit: 8,
@@ -167,22 +182,27 @@ exports.SHOP = {
     }
 };
 
-exports.SHOP_LIST_OPTIONS = [
+constants.SHOP_LIST_OPTIONS = [
     "header", "url"
 ];
 
-exports.GUILDMEMBER_DEFAULT = {
+constants.GUILDMEMBER_DEFAULT = {
     money: {
 
     }
 };
 
-exports.MONEYACCOUNT_DEFAULT = {
+constants.MONEYACCOUNT_DEFAULT = {
     amount: 200
 };
 
-exports.MAXCACHE = {
+constants.MAXCACHE = {
     members: 100,
     fetchMessages: 400,
     betCountWait: 6E5 // 10 minutes
+};
+
+constants.PERMISSION_LIST = {
+    bitField: misc.iterate(constants.PERMISSION_BITFIELD),
+    valueField: misc.iterate(constants.VALUEFIELD_DEFAULT)
 };
