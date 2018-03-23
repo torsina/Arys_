@@ -2,7 +2,8 @@ const privateConfig = require('./config_private');
 const config = {
     db: {
         host: "127.0.0.1",
-        port: "28015"
+        port: "28015",
+        name: "Arys_rewrite"
     },
     env: "dev"
 };

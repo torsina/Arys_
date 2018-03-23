@@ -9,11 +9,7 @@ const GuildRole = require("../structures/GuildRole");
 const GuildMember = require("../structures/GuildMember");
 const BetCount = require("../structures/BetCount");
 const util = require('util');
-const r = require("rethinkdbdash")({
-    host: config.db.host,
-    port: config.db.port,
-    db: dbName
-});
+const r = require("rethinkdbdash")(config.db);
 
 db.r = r;
 
