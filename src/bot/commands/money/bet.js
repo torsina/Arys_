@@ -2,7 +2,7 @@ const db = require("../../util/rethink");
 const { RichEmbed } = require("discord.js");
 module.exports = {
     run: async (context) => {
-        const { guildSetting, GuildMember, BetCount } = context.message;
+        const { guildSetting, guildMember, betCount } = context.message;
         const { min } = guildSetting.money.bet;
         if (context.args[1] < guildSetting.money.bet.min) {
             const { embed } = new context.command.EmbedError(context, { error: "bet.tooLow", data: { min: min } });
@@ -13,12 +13,10 @@ module.exports = {
         else option = "tail";
         const random = Math.random();
         const win = context.args[1] * 0.98;
-        console.log(BetCount);
-        await BetCount.addCount(context.args[1]);
-        console.log(BetCount);
+        await betCount.addCount(context.args[1]);
         try {
             if ((random <= 0.49 && option === "head") || (random <= 0.98 && random > 0.49 && option === "tail")) {
-                GuildMember.money.editMoney(win);
+                guildMember.money.editMoney(win);
                 const embed = new RichEmbed()
                     .setTimestamp()
                     .setColor("GOLD")
@@ -26,7 +24,7 @@ module.exports = {
                     .setDescription(context.t("bet.win", { user: context.author.toString(), value: min, currency: guildSetting.money.name }));
                 context.channel.send(embed);
             } else {
-                GuildMember.money.editMoney(-context.args[1]);
+                guildMember.money.editMoney(-context.args[1]);
                 const embed = new RichEmbed()
                     .setTimestamp()
                     .setColor("RED")
@@ -34,7 +32,7 @@ module.exports = {
                     .setDescription(context.t("bet.lost", { user: context.author.toString(), value: min, currency: guildSetting.money.name }));
                 context.channel.send(embed);
             }
-            return await db.editGuildMember(GuildMember, true);
+            return await db.editGuildMember(guildMember, true);
         } catch (err) {
             const error = {
                 error: err.message,

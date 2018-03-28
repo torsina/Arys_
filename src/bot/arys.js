@@ -88,7 +88,7 @@ class Arys {
                                     _BetCount = new BetCount(doc);
                                     this.betCounts.set(guildID, _BetCount);
                                 }
-                                message.BetCount = _BetCount;
+                                message.betCount = _BetCount;
                             }
                         }
                     }
@@ -109,10 +109,10 @@ class Arys {
                     guildMap = new Map();
                     guildsMap.set(message.guild.id, guildMap);
                 }
-                message.GuildMemberMap = guildMap;
+                message.guildMemberMap = guildMap;
                 // get guild member, call it if not cached
-                message.GuildMember = guildMap.get(message.author.id);
-                if (!message.GuildMember) {
+                message.guildMember = guildMap.get(message.author.id);
+                if (!message.guildMember) {
                     const guildMember = await db.getGuildMember(message.author.id, message.guild.id, message.guildSetting);
                     guildMap.set(message.author.id, guildMember);
                     // cache limit system
@@ -120,7 +120,7 @@ class Arys {
                         const mapFirstKey = guildMap.keys().next().value;
                         guildMap.delete(mapFirstKey);
                     }
-                    message.GuildMember = guildMember;
+                    message.guildMember = guildMember;
                 }
                 return next();
             })
