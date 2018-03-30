@@ -31,8 +31,6 @@ passport.use(new Strategy({
     return done(null, profile);
 }));
 
-app.set("view engine", "ejs");
-
 app.use(session({
     secret: "keyboard cat",
     resave: true,
@@ -47,10 +45,7 @@ app.use("/auth", authRoutes);
 app.use("/profile", profileRoutes);
 app.use("/api", APIRoutes);
 
-// create home route
-app.get("/", (req, res) => {
-    res.render("home", { user: req.user });
-});
+// use nginx server to get index.html, then angular does it's job and we only have routes to retrives/post data and not html
 
 app.get("/logout", (req, res) => {
     req.logout();
