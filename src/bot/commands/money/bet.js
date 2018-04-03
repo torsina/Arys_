@@ -13,9 +13,7 @@ module.exports = {
         else option = "tail";
         const random = Math.random();
         const win = context.args[1] * 0.98;
-        console.log(betCount);
         await betCount.addCount(context.args[1]);
-        console.log(betCount);
         try {
             if ((random <= 0.49 && option === "head") || (random <= 0.98 && random > 0.49 && option === "tail")) {
                 guildMember.money.editMoney(win);
