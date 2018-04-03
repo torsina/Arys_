@@ -1,7 +1,7 @@
 const FriendlyError = require("./FriendlyError");
 class MoneyAccount {
-    constructor(data = {}, GuildSetting) {
-        this.amount = data.amount || GuildSetting.money.accounts.amount;
+    constructor(data = {}, guildSetting) {
+        this.amount = data.amount || guildSetting.money.accounts.amount;
 
         this.daily = {};
         if (data.daily) {
@@ -9,6 +9,16 @@ class MoneyAccount {
         } else {
             this.daily.lastGet = 0;
         }
+        this.getDaily = (hasBonus = false) => {
+            const { lastGet } = this.daily;
+            const timestamp = new Date().getTime();
+            if ((lastGet + 86400000) < timestamp) throw "daily.tooSoon";
+            const { min, max } = guildSetting.money.daily.bonusRange;
+            const addedMoney = guildSetting.money.daily.amount + (hasBonus ? Math.floor(Math.random() * (max - min + 1) + min) : 0);
+            this.amount += addedMoney;
+            this.daily.lastGet = timestamp;
+            return addedMoney;
+        };
 
         this.bet = {};
         if (data.bet) {

@@ -4,8 +4,8 @@ const { RichEmbed } = require("discord.js");
 const moment = require("moment");
 module.exports = {
     run: async (context) => {
-        const { GuildSetting } = context.message;
-        const { money } = GuildSetting;
+        const { guildSetting } = context.message;
+        const { money } = guildSetting;
         switch (context.args[0]) {
             case "show": {
                 // we do this to prevent the embed from printing null
@@ -114,7 +114,7 @@ module.exports = {
                 }
             }
         }
-        await db.editGuildSetting(GuildSetting.guildID, GuildSetting, true);
+        await db.editGuildSetting(guildSetting.guildID, guildSetting, true);
     },
     guildOnly: true,
     argTree: {

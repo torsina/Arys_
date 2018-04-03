@@ -73,7 +73,7 @@ class Arys {
                 // check for non-guild channel
                 if (message.guild) {
                     const guildID = message.guild.id;
-                    message.GuildSetting = this.settings.get(guildID);
+                    message.guildSetting = this.settings.get(guildID);
                     if (message.command) {
                         // additional data command-specific
                         switch (message.command.name) {
@@ -85,7 +85,7 @@ class Arys {
                                     _BetCount = new BetCount(doc);
                                     this.betCounts.set(guildID, _BetCount);
                                 }
-                                message.BetCount = _BetCount;
+                                message.betCount = _BetCount;
                             }
                         }
                     }
@@ -106,9 +106,9 @@ class Arys {
                     guildMap = new Map();
                     guildsMap.set(message.guild.id, guildMap);
                 }
-                message.GuildMemberMap = guildMap;
+                message.guildMemberMap = guildMap;
                 // get guild member, call it if not cached
-                message.GuildMember = guildMap.get(message.author.id);
+                message.guildMember = guildMap.get(message.author.id);
                 if (!message.GuildMember) {
                     const guildMember = await db.getGuildMember(message.author.id, message.guild.id, message.GuildSetting);
                     guildMap.set(message.author.id, guildMember);
@@ -117,7 +117,7 @@ class Arys {
                         const mapFirstKey = guildMap.keys().next().value;
                         guildMap.delete(mapFirstKey);
                     }
-                    message.GuildMember = guildMember;
+                    message.guildMember = guildMember;
                 }
                 return next();
             })

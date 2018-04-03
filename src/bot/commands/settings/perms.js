@@ -41,7 +41,7 @@ module.exports = {
                 // mode = allow, option = true/false, scope, permissionNode, message, IDs
                 let output;
                 try {
-                    output = await editNumber(context.args[0], context.args[2], scope, context.args[1], IDs, context.message.GuildSetting);
+                    output = await editNumber(context.args[0], context.args[2], scope, context.args[1], IDs, context.message.guildSetting);
                 } catch (err) {
                     return console.error(err);
                 }
