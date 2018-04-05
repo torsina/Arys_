@@ -44,7 +44,7 @@
   "daily.self": "{{user}}, you received your {{value}} {{currency}}",
   "daily.other": "{{user}}, you gave your {{value}} {{currency}} to {{taggedUser}}",
   "daily.tooSoon": "{{user}}, you can get your next dailies in {{time}}",
-  "daily.timeDisplay": "H hours, m minutes and s seconds",
+  "daily.timeDisplay": "{{h}} hours, {{m}} minutes and {{s}} seconds",
   "shop.category.alreadyExist": "The shop category `{{category}}` already exists.",
   "shop.category.noExist": "The shop category `{{category}}` does not exists.",
   "shop.category.noSpace": "The shop category name must not have any spaces.",

@@ -83,7 +83,7 @@ db.getGuildSetting = async (guildsID) => {
 };
 
 db.editGuildSetting = async (guildID, data, force = false) => {
-    if (!(data instanceof guildSetting))data = new GuildSetting(data);
+    if (!(data instanceof GuildSetting))data = new GuildSetting(data);
     const query = {
         guildID: data.guildID,
         permission: data.permission,
@@ -185,7 +185,9 @@ db.deleteGuildChannel = async (_channelID) => {
 
 db.setGuildMember = async (data) => {
     if (!(data instanceof GuildMember)) data = new GuildMember(data);
-    return await r.table("guildMember").insert(data).run();
+    const guildSettingSave = data.money._deleteGuildSetting();
+    await r.table("guildMember").insert(data).run();
+    data.money._reloadGuildSetting(guildSettingSave);
 };
 
 db.getGuildMember = async (memberID, guildID, guildSetting) => {
@@ -201,15 +203,18 @@ db.getGuildMember = async (memberID, guildID, guildSetting) => {
 };
 
 db.editGuildMember = async (data, force = false) => {
+    if (!(data instanceof GuildMember)) data = new GuildMember(data);
     if (!data.id) {
         await db.setGuildMember(data);
         return;
     }
+    const guildSettingSave = data.money._deleteGuildSetting();
     if (force) {
-        data = new GuildMember(data);
-        return await r.table("guildMember").get(data.id).replace(data).run();
+        await r.table("guildMember").get(data.id).replace(data).run();
+    } else {
+        await r.table("guildMember").get(data.id).update(data).run();
     }
-    return await r.table("guildMember").get(data.id).update(data).run();
+    data.money._reloadGuildSetting(guildSettingSave);
 };
 
 db.streamGuildMember = async () => {
