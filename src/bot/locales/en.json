@@ -41,6 +41,9 @@
   "bet.lost": "{{user}}, you lost {{value}} {{currency}}!",
   "credits.self": "{{user}}, you have {{value}} {{currency}}",
   "credits.other": "{{user}}'s balance: {{value}} {{currency}}",
+  "transfer.success": "{{debtor}} transfered {{value}} {{currency}} to {{creditor}}",
+  "transfer.fail": "{{debtor}} you don't have enough {{currency}} to perform this transaction",
+  "transfer.negativeError": "{{debtor}}, you can't transfer negative number"
   "daily.self": "{{user}}, you received your {{value}} {{currency}}",
   "daily.other": "{{user}}, you gave your {{value}} {{currency}} to {{taggedUser}}",
   "daily.tooSoon": "{{user}}, you can get your next dailies in {{time}}",

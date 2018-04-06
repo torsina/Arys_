@@ -172,8 +172,15 @@ class BitField {
         const fields = await this.buildContext(message, guildSetting);
         if (typeof permissionNode === "number") {
             const bitFieldNode = this.resolveNode({ node: permissionString, object: fields.bitField, build: true });
-            return !!(bitFieldNode & permissionNode);
+            return { fields, result: !!(bitFieldNode & permissionNode)};
         } else throw new message.command.EmbedError(message, { error: "permission.notNumber", data: { node: permissionNode } });
+    }
+
+    static checkBuilt(permissionString, permissionObject) {
+        const permissionNode = this.resolveNode({ node: permissionString });
+        if (!permissionNode) throw new Error("can't resolve permission string: " + permissionString);
+        const bitFieldNode = this.resolveNode({ node: permissionString, object: permissionObject.bitField });
+        return !!(bitFieldNode & permissionNode);
     }
     /**
      * * check if a user in the context of the message can use a permission node

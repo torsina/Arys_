@@ -7,41 +7,25 @@ module.exports = {
             .setTimestamp()
             .setFooter(context.t("wiggle.embed.footer", { tag: context.author.tag }))
             .setColor("#93ef1f");
+        let locale, usedGuildMember;
         if (!context.args[0]) {
-            display.setDescription(context.t("credits.self", { user: context.author.toString(), value: guildMember.money.amount, currency: guildSetting.money.name }));
+            locale = "credits.self";
+            usedGuildMember = guildMember;
         } else {
-            let taggedGuildMember = guildMemberMap.get(context.args[0].id);
-            if (!taggedGuildMember) taggedGuildMember = await db.getGuildMember(context.args[0].id, context.guild.id, guildSetting);
-            switch (context.args[1]) {
-                case "check": {
-                    display.setDescription(context.t("credits.other", { user: context.args[0].toString(), value: taggedGuildMember.money.amount, currency: guildSetting.money.name }));
-                    break;
-                }
-                default: {
-                    const parsedAmount = parseInt(context.args[1]);
-                    if (isNaN(parsedAmount)) {
-                        const { embed } = new context.command.EmbedError(context.message, { error: "wiggle.resolver.error.NaN" });
-                        return context.channel.send(embed);
-                    } else if (parsedAmount < 0) {
-                        const { embed } = new context.command.EmbedError(context.message, { error: "wiggle.resolver.error.belowMin", data: { min: 0 } });
-                        return context.channel.send(embed);
-                    } else {
-                        guildMember.money.editMoney(-parsedAmount);
-                        taggedGuildMember.money.editMoney(parsedAmount);
-                        aw
-                    }
-                }
-            }
+            locale = "credits.other";
+            usedGuildMember = guildMemberMap.get(context.args[0].id);
+            if (!usedGuildMember) usedGuildMember = await db.getGuildMember(context.args[0].id, context.guild.id, guildSetting);
         }
+        display.setDescription(context.t(locale, {
+            user: context.guild.members.get(usedGuildMember.memberID).toString(),
+            value: usedGuildMember.money.amount,
+            currency: guildSetting.money.name }));
         context.channel.send(display);
     },
     guildOnly: true,
     args: [{
         label: "member tag",
         type: "member",
-        optional: true
-    }, {
-        label: "amount | check",
         optional: true
     }]
 };

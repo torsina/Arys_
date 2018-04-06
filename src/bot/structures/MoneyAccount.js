@@ -34,7 +34,7 @@ class MoneyAccount {
     }
     editMoney(value, force = false) {
         const result = this.amount + value;
-        if (result < 0 && force === false) throw new FriendlyError("money.tooPoor");
+        if (result < 0 && force === false) throw new Error("money.tooPoor");
         this.amount = result;
         return result;
     }

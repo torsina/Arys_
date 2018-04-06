@@ -6,6 +6,7 @@ const util = require("util");
 const config = require("../../config");
 const constants = require("../util/constants");
 const db = require("./util/rethink");
+const BitField = require("./util/BitField");
 const middlewares = require("./middleware/main");
 // structures
 const GuildSetting = require("./structures/GuildSetting");
@@ -95,8 +96,11 @@ class Arys {
                 }
                 message.constants = constants;
                 message.FriendlyError = FriendlyError;
+                message.BitField = BitField;
+                message.isOwner = (this.client.locals.options.owner === message.author.id);
                 return next();
             })
+            // guildMember & guildMemberMap injection
             .use("message", async (message, next) => {
                 // check for non-guild channel
                 if (!message.guild) return next();

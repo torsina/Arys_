@@ -39,7 +39,6 @@ module.exports = {
                 } });
             context.channel.send(embed);
         }
-        console.log(usedGuildMember);
     },
     guildOnly: true,
     args: [{

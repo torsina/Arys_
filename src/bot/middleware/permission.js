@@ -2,20 +2,21 @@ const BitField = require("../util/BitField");
 const constants = require("../../util/constants");
 module.exports = async (context, next, wiggle) => {
     const { command } = context;
+    const { isOwner } = context.message;
     if (!command) return next();
-    const { owner } = wiggle.locals.options;
     // bypass for bot owner
-    if (context.author.id === owner) return next();
+    if (isOwner) return next();
     const categoryName = context.command.category;
     const commandName = context.command.name;
-    const permissionNodeString = constants.PERMISSION_NODE[categoryName][commandName][context.args[0]];
-    //console.log(categoryName, commandName, argName, permissionNodeString);
+    const argumentName = (typeof context.args[0] === "string") ? context.args[0] : "base";
+    const permissionNodeString = constants.PERMISSION_NODE[categoryName][commandName][argumentName];
     try {
-        const result = await BitField.check(permissionNodeString, context, context.guildSetting);
-        if (!result) {
+        const evaluated = await BitField.check(permissionNodeString, context, context.guildSetting);
+        if (!evaluated.result) {
             const { embed } = new context.command.EmbedError(context, { error: "permission.denied", data: { node: permissionNodeString } });
             return context.channel.send(embed);
         }
+        context.permissionFields = evaluated.fields;
     } catch (err) {
         return console.error(err);
     }
