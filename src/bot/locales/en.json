@@ -43,7 +43,7 @@
   "credits.other": "{{user}}'s balance: {{value}} {{currency}}",
   "transfer.success": "{{debtor}} transfered {{value}} {{currency}} to {{creditor}}",
   "transfer.fail": "{{debtor}} you don't have enough {{currency}} to perform this transaction",
-  "transfer.negativeError": "{{debtor}}, you can't transfer negative number"
+  "transfer.negativeError": "{{debtor}}, you can't transfer negative number",
   "daily.self": "{{user}}, you received your {{value}} {{currency}}",
   "daily.other": "{{user}}, you gave your {{value}} {{currency}} to {{taggedUser}}",
   "daily.tooSoon": "{{user}}, you can get your next dailies in {{time}}",
@@ -69,6 +69,7 @@
   "kick.botTooLow": "The member {{member}} has higher roles than me, I can't kick him.",
   "ban.success": "{{member}} was successfully banned from the server.",
   "ban.botTooLow": "The member {{member}} has higher roles than me, I can't ban him.",
+  "prune.success": "Successfully deleted {{amount}} messages",
   "arys.lackPermission": "I lack the permission `{{permission}}`",
   "member.lackPermission": "You lack the permission `{{permission}}`",
   "words.value": "Value",

@@ -41,7 +41,8 @@ constants.PERMISSION_BITFIELD_DEFAULT = {
         bet: 0,
         credits: 0,
         shop: 0,
-        daily: 0
+        daily: 0,
+        transfer: 0
     },
     nsfw: {
         hentai: 0
@@ -93,6 +94,11 @@ constants.PERMISSION_BITFIELD = {
         daily: {
             visible: 1 << 0,
             base: 1 << 1
+        },
+        transfer: {
+            visible: 1 << 0,
+            base: 1 << 1,
+            force: 1 << 2
         }
     },
     util: {
@@ -126,7 +132,7 @@ constants.PERMISSION_NODE = {
             tail: "money.bet.base"
         },
         credits: {
-            base: "money.credits.base",
+            base: "money.credits.base"
         },
         shop: {
             add: "money.shop.edit",
@@ -135,6 +141,9 @@ constants.PERMISSION_NODE = {
         },
         daily: {
             base: "money.daily.base"
+        },
+        transfer: {
+            base: "money.transfer.base"
         }
     },
     util: {
