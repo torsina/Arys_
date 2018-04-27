@@ -4,7 +4,7 @@ module.exports = async (message, next) => {
     if (!message.author.bot) {
         const { min, max } = message.guildSetting.money.activity;
         // get guild member from cache, cache it if not in it
-        const guildMember = message.GuildMember;
+        const { guildMember } = message;
         const difference = Date.now() - guildMember.money.activity.lastGet;
         // if the cooldown is not over
         if (difference < message.guildSetting.money.activity.wait) return next();

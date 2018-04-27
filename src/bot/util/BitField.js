@@ -1,7 +1,6 @@
 const constants = require("../../util/constants");
 const db = require("./rethink");
 const Misc = require("../../util/misc");
-const util = require('util');
 const constBitField = constants.PERMISSION_BITFIELD_DEFAULT;
 const constValueField = constants.VALUEFIELD_DEFAULT;
 
@@ -128,7 +127,7 @@ class BitField {
                                 // if rule is >, highest value win, constValue as minimum
                                 // if rule is <, lowest value win , constvalue as maximum
                                 const compareValue = (!referenceCursor || isNaN(referenceCursor)) ? constValue : referenceCursor;
-                                if(rule === Symbol.for(">")) {
+                                if (rule === Symbol.for(">")) {
                                     cursor[pathIndex] = Math.max(dataCursor, compareValue);
                                 } else if (rule === Symbol.for("<")) {
                                     cursor[pathIndex] = Math.min(dataCursor, compareValue);
@@ -148,7 +147,7 @@ class BitField {
     }
 
     static resolveNode(options) {
-        const { node, build = false} = options;
+        const { node, build = false } = options;
         let { object = constants.PERMISSION_BITFIELD } = options;
         let nodeArray = node.split(".");
         // if build is true, we only want the command property, which will be the built number for this command
@@ -172,8 +171,16 @@ class BitField {
         const fields = await this.buildContext(message, guildSetting);
         if (typeof permissionNode === "number") {
             const bitFieldNode = this.resolveNode({ node: permissionString, object: fields.bitField, build: true });
-            return !!(bitFieldNode & permissionNode);
+            return { fields, result: !!(bitFieldNode & permissionNode) };
         } else throw new message.command.EmbedError(message, { error: "permission.notNumber", data: { node: permissionNode } });
+    }
+
+    static checkBuilt(permissionString, permissionObject, isOwner) {
+        if (isOwner) return isOwner;
+        const permissionNode = this.resolveNode({ node: permissionString });
+        if (!permissionNode) throw new Error(`can't resolve permission string: ${permissionString}`);
+        const bitFieldNode = this.resolveNode({ node: permissionString, object: permissionObject.bitField, build: true });
+        return !!(bitFieldNode & permissionNode);
     }
     /**
      * * check if a user in the context of the message can use a permission node
@@ -207,7 +214,7 @@ class BitField {
         for (let i = 0, n = bitField.length; i < n; i++) {
             const node = bitField[i];
             const nodeNumber = this.resolveNode({ node });
-            const permNumber = this.resolveNode({ node, object: permissionObject.bitField});
+            const permNumber = this.resolveNode({ node, object: permissionObject.bitField });
             result.push({ node, value: !!(permNumber & nodeNumber) });
         }
         for (let i = 0, n = valueField.length; i < n; i++) {
