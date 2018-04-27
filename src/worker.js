@@ -33,7 +33,9 @@ switch (workerConfig.type) {
         break;
     }
     case "web": {
-        console.log(`worker ${process.pid} started, handling the web server`);
+        const WebConstructor = require("./web/app");
+        const web = new WebConstructor();
+        console.log(`worker ${process.pid} started, handling the web server and the API`);
         break;
     }
 }

@@ -37,3 +37,31 @@ app.controller('aboutController', function($scope) {
 app.controller('contactController', function($scope) {
     $scope.message = 'Contact us! JK. This is just a demo.';
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var list = [
+    { name: "arys home",
+        imageURL: "http://....." },
+    {}
+];

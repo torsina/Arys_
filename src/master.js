@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 const { token } = require("../config");
 const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
-const webWorkersCount = 0;
+const webWorkersCount = 1;
 const botCPUs = numCPUs - webWorkersCount;
 
 console.log(`Master ${process.pid} is running`);

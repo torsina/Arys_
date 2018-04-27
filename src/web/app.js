@@ -2,68 +2,80 @@ const express = require("express");
 const session = require("express-session");
 const passport = require("passport");
 const { Strategy } = require("passport-discord");
-const app = express();
-const authRoutes = require("./routes/auth-routes");
-const profileRoutes = require("./routes/profile-routes");
-const APIRoutes = require("./routes/api-routes");
-const { db } = require("../../config");
-const { oauth } = require("../../config_private");
+const AuthRouter = require("./routes/auth-routes");
+const ProfileRouter = require("./routes/profile-routes");
+const APIRouter = require("./routes/api-routes");
+const config = require("../../config");
+const { db } = config;
+const privateConfig = require("../../config_private");
+const oAuthConfig = privateConfig.oauth;
 const r = require("rethinkdbdash")(db);
 const RDBStore = require("session-rethinkdb")(session);
 
 const store = new RDBStore(r);
 
-passport.serializeUser((user, done) => {
-    done(null, user);
-});
-passport.deserializeUser((obj, done) => {
-    done(null, obj);
-});
+class API {
+    constructor(data) {
+        this.db = r;
+        this.app = express();
+        this.passport = passport;
+        const routerOptions = { db: this.db };
+        this.authRouter = new AuthRouter(routerOptions);
+        this.APIRouter = new APIRouter(routerOptions);
+        this.profileRouter = new ProfileRouter(routerOptions);
+        const { app } = this;
 
-const scopes = ["identify", "guilds"];
+        this.passport.serializeUser((user, done) => {
+            done(null, user);
+        });
+        this.passport.deserializeUser((obj, done) => {
+            done(null, obj);
+        });
 
-passport.use(new Strategy({
-    clientID: oauth.clientID,
-    clientSecret: oauth.clientSecret,
-    callbackURL: "http://localhost:5000/auth/discord/redirect",
-    scope: scopes
-}, (accessToken, refreshToken, profile, done) => {
-    return done(null, profile);
-}));
+        this.passport.use(new Strategy({
+            clientID: oAuthConfig.clientID,
+            clientSecret: oAuthConfig.clientSecret,
+            callbackURL: oAuthConfig.callbackURL,
+            scope: config.oauthScopes
+        }, (accessToken, refreshToken, profile, done) => {
+            return done(null, profile);
+        }));
 
-app.use(session({
-    secret: "keyboard cat",
-    resave: true,
-    saveUninitialized: true,
-    store
-}));
-app.use(passport.initialize());
-app.use(passport.session());
+        app.use(session({
+            secret: privateConfig.API.sessionSecret,
+            resave: true,
+            saveUninitialized: true,
+            store
+        }));
+        app.use(passport.initialize());
+        app.use(passport.session());
 
-// set up routes
-app.use("/auth", authRoutes);
-app.use("/profile", profileRoutes);
-app.use("/api", APIRoutes);
+        // set up routes
+        app.use("/auth", this.authRouter.router);
+        app.use("/profile", ProfileRouter);
+        app.use("/api", APIRouter);
 
-// use nginx server to get index.html, then angular does it's job and we only have routes to retrives/post data and not html
+        // use nginx server to get index.html, then angular does it's job and we only have routes to retrives/post data and not html
 
-app.get("/logout", (req, res) => {
-    req.logout();
-    res.redirect("/");
-});
-app.get("/info", checkAuth, (req, res) => {
-    // console.log(req.user)
-    res.json(req.user);
-});
+        app.get("/logout", (req, res) => {
+            req.logout();
+            res.redirect("/");
+        });
+        app.get("/info", checkAuth, (req, res) => {
+            // console.log(req.user)
+            res.json(req.user);
+        });
 
 
-function checkAuth(req, res, next) {
-    if (req.isAuthenticated()) return next();
-    res.send("not logged in :(");
+        function checkAuth(req, res, next) {
+            if (req.isAuthenticated()) return next();
+            res.send("not logged in :(");
+        }
+
+
+        app.listen(5000, (err) => {
+            if (err) return console.log(err);
+            console.log("Listening at http://localhost:5000/");
+        });
+    }
 }
-
-
-app.listen(5000, (err) => {
-    if (err) return console.log(err);
-    console.log("Listening at http://localhost:5000/");
-});
