@@ -5,10 +5,10 @@ const { RichEmbed } = require("discord.js");
 const ImageHandling = require("../../../image/ImageHandling");
 module.exports = {
     run: async (context) => { // eslint-disable-line complexity
-        const { guildSetting, GuildMember } = context.message;
+        const { guildSetting, guildMember } = context.message;
+        console.log(guildSetting);
         const { shop } = guildSetting;
         const currency = guildSetting.money.name;
-        console.log(context.args);
         const successEmbed = new RichEmbed()
             .setTimestamp(new Date(context.message.createdTimestamp))
             .setFooter(context.t("wiggle.embed.footer", { tag: context.author.tag }))
@@ -155,7 +155,7 @@ module.exports = {
                     break;
                 }
                 case undefined: {
-                    const balanceString = context.t("money.balance", { user: context.message.author.toString(), amount: GuildMember.money.amount, currency });
+                    const balanceString = context.t("money.balance", { user: context.message.author.toString(), amount: guildMember.money.amount, currency });
                     if (shop.shopArray.length > 0) {
                         for (let i = 0, n = shop.shopArray.length; i < n; i++) {
                             const _shop = shop.shopArray[i];
@@ -226,7 +226,7 @@ module.exports = {
                     error: err.message,
                     data: {
                         currency,
-                        value: GuildMember.money.amount,
+                        value: guildMember.money.amount,
                         user: context.author.toString(),
                         max: SHOP.maxPriceDigit
                     }
