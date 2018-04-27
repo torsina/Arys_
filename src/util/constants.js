@@ -37,6 +37,11 @@ constants.VALUEFIELD_DEFAULT = {
  * due to it's use, every permission inside of it is set to 1
  */
 constants.PERMISSION_BITFIELD_DEFAULT = {
+    moderation: {
+        kick: 0,
+        ban: 0,
+        prune: 0
+    },
     money: {
         bet: 0,
         credits: 0,
@@ -62,6 +67,9 @@ constants.PERMISSION_BITFIELD = {
             visible: 1 << 0
         },
         ban: {
+            visible: 1 << 0
+        },
+        prune: {
             visible: 1 << 0
         }
     },
@@ -225,7 +233,7 @@ constants.MONEYACCOUNT_DEFAULT = {
 
 constants.MAXCACHE = {
     members: 100,
-    fetchMessages: 400,
+    fetchMessages: 1000,
     betCountWait: 6E5 // 10 minutes
 };
 

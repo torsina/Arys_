@@ -6,6 +6,8 @@ module.exports = async (message, next, wiggle) => {
     // bypass for bot owner
     if (isOwner) return next();
     const categoryName = message.command.category;
+    // bypass for moderation cause discord perm are used
+    if (categoryName === "moderation") return next();
     const commandName = message.command.name;
     const argumentName = (typeof message.args[0] === "string") ? message.args[0] : "base";
     const permissionNodeString = constants.PERMISSION_NODE[categoryName][commandName][argumentName];
