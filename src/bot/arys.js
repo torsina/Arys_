@@ -72,7 +72,7 @@ class Arys {
                 await this.client.init();
                 next();
             })
-            .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler)
+            .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler, async (message, next) => { await middlewares.argParser(message, next); })
             .use("message", async (message, next) => {
                 // check for non-guild channel
                 if (message.guild) {

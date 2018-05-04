@@ -23,10 +23,15 @@ module.exports = {
         context.channel.send(display);
     },
     guildOnly: true,
-    args: [{
-        label: "member tag",
-        type: "member",
-        optional: true
-    }]
+    argParser: async (message, args) => {
+        try {
+            if (args.length > 0) {
+                args[0] = await message.command.resolver.member(args[1], message);
+                return args.slice(0, 1);
+            } else return [];
+        } catch (err) {
+            throw err;
+        }
+    }
 };
 

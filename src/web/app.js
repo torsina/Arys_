@@ -19,7 +19,7 @@ class API {
         this.db = r;
         this.app = express();
         this.passport = passport;
-        const routerOptions = { db: this.db };
+        const routerOptions = { db: this.db, oauthScopes: config.oauthScopes };
         this.authRouter = new AuthRouter(routerOptions);
         this.APIRouter = new APIRouter(routerOptions);
         this.profileRouter = new ProfileRouter(routerOptions);
@@ -79,3 +79,4 @@ class API {
         });
     }
 }
+module.exports = API;

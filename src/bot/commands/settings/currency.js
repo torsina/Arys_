@@ -115,6 +115,79 @@ module.exports = {
         }
         await db.editGuildSetting(guildSetting.guildID, guildSetting, true);
     },
+    argParser: async (message, args) => {
+        try {
+            switch (args[0]) {
+                default: {
+                    throw new Error();
+                }
+                case "show": {
+                    return args.slice(0, 1);
+                }
+                case "name": {
+                    if (args[1].length < message.constants.GUILDSETTING_DEFAULT.moneyNameLength) {
+                        return args.slice(0, 2);
+                    } else throw new Error();
+                }
+                case "accounts": {
+                    switch (args[1]) {
+                        default: {
+                            throw new Error();
+                        }
+                        case "amount": {
+                            args[2] = await message.command.resolver.int(args[2], message, { min: 0 });
+                            return args.slice(0, 3);
+                        }
+                    }
+                }
+                case "bet": {
+                    switch (args[1]) {
+                        default: {
+                            throw new Error();
+                        }
+                        case "min": {
+                            args[2] = await message.command.resolver.int(args[2], message, { min: message.constants.GUILDSETTING_DEFAULT.money.bet.min });
+                            return args.slice(0, 3);
+                        }
+                        case "max": {
+                            args[2] = await message.command.resolver.int(args[2], message, { max: message.constants.GUILDSETTING_DEFAULT.money.bet.max });
+                            return args.slice(0, 3);
+                        }
+                    }
+                }
+                case "daily": {
+                    switch (args[1]) {
+                        default: {
+                            throw new Error();
+                        }
+                        case "amount":
+                        case "min":
+                        case "max": {
+                            args[2] = await message.command.resolver.int(args[2], message, { min: 0 });
+                            return args.slice(0, 3);
+                        }
+                    }
+                }
+                case "activity": {
+                    switch (args[1]) {
+                        default: {
+                            throw new Error();
+                        }
+                        case "min":
+                        case "max": {
+                            args[2] = await message.command.resolver.int(args[2], message, { min: 0 });
+                            return args.slice(0, 3);
+                        }
+                        case "wait": {
+                            args[2] = await message.command.resolver.int(args[2], message, { min: 0 });
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            throw err;
+        }
+    },
     guildOnly: true,
     argTree: {
         choice: {

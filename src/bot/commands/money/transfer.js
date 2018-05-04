@@ -60,14 +60,14 @@ module.exports = {
         type: "member",
         short: "c"
     }],
-    args: [{
-        label: "member tag",
-        type: "member",
-        optional: false
-    }, {
-        label: "amount",
-        type: "int",
-        optional: false
-    }]
+    argParser: async (message, args) => {
+        try {
+            args[0] = await message.command.resolver.member(args[0], message);
+            args[1] = await message.command.resolver.int(args[1], message);
+            return args.slice(0, 2);
+        } catch (err) {
+            throw err;
+        }
+    }
 };
 
