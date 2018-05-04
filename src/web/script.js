@@ -13,13 +13,13 @@ app.config(function($routeProvider) {
 
         // route for the about page
         .when('/about', {
-            templateUrl : 'pages/about.html',
+            templateUrl : 'pages/home.html',
             controller  : 'aboutController'
         })
 
         // route for the contact page
         .when('/contact', {
-            templateUrl : 'pages/contact.html',
+            templateUrl : 'pages/home.html',
             controller  : 'contactController'
         });
 });
@@ -31,37 +31,14 @@ app.controller('mainController', function($scope) {
 });
 
 app.controller('aboutController', function($scope) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "http://lovalhosy:5000/API/", true);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send();
+    var response = JSON.parse(xhttp.responseText);
     $scope.message = 'Look! I am an about page.';
 });
 
 app.controller('contactController', function($scope) {
     $scope.message = 'Contact us! JK. This is just a demo.';
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var list = [
-    { name: "arys home",
-        imageURL: "http://....." },
-    {}
-];
