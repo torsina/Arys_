@@ -1,13 +1,10 @@
 const privateConfig = require("./config_private");
 const config = {
     env: "dev",
-    oauthScopes: ["identify", "guilds"]
+    oauthScopes: ["identify", "guilds"],
+    token: privateConfig.token.dev,
+    sentry: privateConfig.sentry
 };
-if (process.env.NODE_ENV === "dev" || config.env === "dev") privateConfig.token = privateConfig.token.dev;
-else {
-    privateConfig.token = privateConfig.token.bot;
-    config.sentry = privateConfig.sentry;
-}
 config.db = privateConfig.db;
 config.token = privateConfig.token;
 module.exports = config;
