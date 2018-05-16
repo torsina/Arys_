@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
-const { token } = require("../config");
+const ws = require("ws");
+const { token, webSocket } = require("../config");
 const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
 const webWorkersCount = 1;
@@ -44,6 +45,7 @@ async function init() {
         if (!workerList) workers.set(env.type, [{ env, worker }]);
         else workerList.push({ env, worker });
     }
+    // worker crash handling
     cluster.on("exit", (crashedWorker, code, signal) => {
         const { env } = crashedWorker;
         console.log(crashedWorker);
@@ -61,5 +63,18 @@ async function init() {
         const newWorker = cluster.fork({ config: JSON.stringify(env) });
         newWorker.env = env;
         workerList.push = { env: crashedWorker.env, worker: newWorker };
+    });
+    const webSocketConfig = { verifyClient: (socket) => {
+        // only allow connections from localHost
+            console.log("REMOTE IP : " + socket.req.connection.remoteAddress);
+            //return socket.req.connection.remoteAddress === webSocket.host;
+            return true;
+        }};
+    Object.assign(webSocketConfig, webSocket);
+
+    const webSocketServer = new ws.Server(webSocketConfig);
+    const webSocketClient = new ws(`ws://${webSocket.host}:${webSocket.port}`); // eslint-disable-line new-cap
+    webSocketClient.on("message", (data) => {
+        console.log(data);
     });
 }

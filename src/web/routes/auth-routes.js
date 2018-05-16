@@ -6,10 +6,6 @@ class authRouter {
         this.db = data.db;
         this.oAuthScopes = data.oauthScopes;
         this.router = require("express").Router(); // eslint-disable-line new-cap
-        this.router.get("/login", (req, res) => {
-            res.render("login", { user: req.user });
-        });
-
         this.router.get("/logout", (req, res) => {
             req.logout();
             res.redirect("/");
@@ -18,8 +14,7 @@ class authRouter {
         this.router.get("/discord", passport.authenticate("discord", { scope: this.oAuthScopes }));
         this.router.get("/discord/redirect",
             passport.authenticate("discord", { failureRedirect: "/" }), (req, res) => {
-                res.redirect("/profile");
-                console.log(req.user);
+                res.redirect("/info");
             }
             // auth success
         );

@@ -4,7 +4,6 @@
   "description": "A highly configurable discord bot",
   "main": "./src/bot.js",
   "dependencies": {
-    "bufferutil": "^3.0.4",
     "canvas": "2.0.0-alpha.2",
     "cookie-session": "^2.0.0-beta.3",
     "discord.js": "^11.3.2",
@@ -21,7 +20,10 @@
     "passport-oauth2-refresh": "^1.0.0",
     "raven": "^2.6.0",
     "rethinkdbdash": "^2.3.31",
-    "session-rethinkdb": "^2.0.1"
+    "session-rethinkdb": "^2.0.1",
+    "utf-8-validate": "^4.0.2",
+    "ws": "^5.1.1",
+    "bufferutil": "^3.0.5"
   },
   "devDependencies": {
     "eslint": "^4.19.1",

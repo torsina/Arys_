@@ -1,4 +1,5 @@
 const express = require("express");
+const ws = require("ws");
 const session = require("express-session");
 const passport = require("passport");
 const { Strategy } = require("passport-discord");
@@ -6,7 +7,7 @@ const AuthRouter = require("./routes/auth-routes");
 const ProfileRouter = require("./routes/profile-routes");
 const APIRouter = require("./routes/api-routes");
 const config = require("../../config");
-const { db } = config;
+const { db, webSocket } = config;
 const privateConfig = require("../../config_private");
 const oAuthConfig = privateConfig.oauth;
 const r = require("rethinkdbdash")(db);
@@ -15,16 +16,24 @@ const RDBStore = require("session-rethinkdb")(session);
 const store = new RDBStore(r);
 
 class API {
-    constructor(data) {
+    constructor() {
         this.db = r;
         this.app = express();
         this.passport = passport;
+        this.ws = new ws(`ws://${webSocket.host}:${webSocket.port}`); // eslint-disable-line new-cap
         this.oauthScopes = config.oauthScopes;
         const routerOptions = { db: this.db, oauthScopes: config.oauthScopes, checkAuth: this.checkAuth };
         this.authRouter = new AuthRouter(routerOptions);
         this.APIRouter = new APIRouter(routerOptions);
         this.profileRouter = new ProfileRouter(routerOptions);
         const { app } = this;
+
+        this.ws.on("open", () => {
+            setTimeout(() => {
+                console.log("ping");
+                this.ws.send("something");
+            }, 10000);
+        });
 
         this.passport.serializeUser((user, done) => {
             done(null, user);
