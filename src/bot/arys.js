@@ -2,6 +2,7 @@
 const wiggle = require("discord.js-wiggle");
 const fs = require("fs");
 const util = require("util");
+const WebSocket = require("ws");
 // utils
 const config = require("../../config");
 const constants = require("../util/constants");
@@ -63,6 +64,31 @@ class Arys {
             betCounts.forEach(doc => {
                 this.betCounts.set(doc.guildID, new BetCount(doc, this, true));
             });
+            // ws client
+            const { webSocket } = config;
+            this.ws = new WebSocket(`ws://${webSocket.host}:${webSocket.port}`);
+            this.ws.on("message", (message) => {
+                switch (message.request) {
+                    case "context": {
+                        const { guildID, memberID } = message;
+                        if (this.client.discordClient.guilds.has(guildID)) {
+                            const guild = this.client.discordClient.guilds.get(guildID);
+                            const guildSetting = this.settings.get(guildID)
+                            if (guild.members.has(memberID)) {
+                                const member = guild.members.get(memberID);
+                                const context = { guild, member };
+                                const permissionFields = BitField.buildContext(context, guildSetting);
+                                const response = {
+                                    UUID: message.UUID,
+                                    isOwner: guild.owner.id === memberID,
+                                    permissionFields
+
+                                }
+                            }
+                        }
+                    }
+                }
+            })
         };
         this.client.set("owner", "306418399242747906")
             .set("prefixes", ["mention", `"`])

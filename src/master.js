@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const ws = require("ws");
+const WebSocket = require("ws");
 const { token, webSocket } = require("../config");
 const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
@@ -65,16 +65,21 @@ async function init() {
         workerList.push = { env: crashedWorker.env, worker: newWorker };
     });
     const webSocketConfig = { verifyClient: (socket) => {
-        // only allow connections from localHost
-            console.log("REMOTE IP : " + socket.req.connection.remoteAddress);
-            //return socket.req.connection.remoteAddress === webSocket.host;
-            return true;
-        }};
+        // only allow connections from 127.0.0.1
+        console.log(`REMOTE IP : ${socket.req.connection.remoteAddress}`);
+        return socket.req.connection.remoteAddress === webSocket.host;
+    } };
     Object.assign(webSocketConfig, webSocket);
 
-    const webSocketServer = new ws.Server(webSocketConfig);
-    const webSocketClient = new ws(`ws://${webSocket.host}:${webSocket.port}`); // eslint-disable-line new-cap
-    webSocketClient.on("message", (data) => {
-        console.log(data);
+    const wss = new WebSocket.Server(webSocketConfig);
+    wss.on("connection", (ws) => {
+        ws.on("message", (data) => {
+            // Broadcast to everyone else.
+            wss.clients.forEach((client) => {
+                if (client !== ws && client.readyState === WebSocket.OPEN) {
+                    client.send(data);
+                }
+            });
+        });
     });
 }

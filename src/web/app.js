@@ -22,18 +22,11 @@ class API {
         this.passport = passport;
         this.ws = new ws(`ws://${webSocket.host}:${webSocket.port}`); // eslint-disable-line new-cap
         this.oauthScopes = config.oauthScopes;
-        const routerOptions = { db: this.db, oauthScopes: config.oauthScopes, checkAuth: this.checkAuth };
+        const routerOptions = { db: this.db, oauthScopes: config.oauthScopes, checkAuth: this.checkAuth, ws: this.ws };
         this.authRouter = new AuthRouter(routerOptions);
         this.APIRouter = new APIRouter(routerOptions);
         this.profileRouter = new ProfileRouter(routerOptions);
         const { app } = this;
-
-        this.ws.on("open", () => {
-            setTimeout(() => {
-                console.log("ping");
-                this.ws.send("something");
-            }, 10000);
-        });
 
         this.passport.serializeUser((user, done) => {
             done(null, user);

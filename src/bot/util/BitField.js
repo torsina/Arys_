@@ -17,7 +17,8 @@ class BitField {
             .sort((a, b) => { return message.guild.roles.get(a.id).position - message.guild.roles.get(b.id).position; })
             .keyArray();
         rolesOverridesID = rolesOverridesID.keyArray();
-        const channelID = message.channel.id;
+        let channelID;
+        if (message.channel) channelID = message.channel.id;
         const memberID = message.member.id;
         const guildID = message.guild.id;
         const IDs = { channelID, memberID, guildID, rolesOverridesID, rolesID };
