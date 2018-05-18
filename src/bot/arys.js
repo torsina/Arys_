@@ -2,10 +2,12 @@
 const wiggle = require("discord.js-wiggle");
 const fs = require("fs");
 const util = require("util");
+const WebSocket = require("ws");
 // utils
 const config = require("../../config");
 const constants = require("../util/constants");
 const db = require("./util/rethink");
+const BitField = require("./util/BitField");
 const middlewares = require("./middleware/main");
 // structures
 const GuildSetting = require("./structures/GuildSetting");
@@ -18,9 +20,9 @@ class Arys {
     constructor(options) {
         this.settings = new Map;
         this.client = wiggle(options);
-        this._DBSteams = options.DBStreams;
-        this.settingStream = this._DBSteams.settingStream;
-        this.memberStream = this._DBSteams.memberStream;
+        this._DBStreams = options.DBStreams;
+        this.settingStream = this._DBStreams.settingStream;
+        this.memberStream = this._DBStreams.memberStream;
         this.client.init = async () => {
             const { guilds } = this.client.discordClient;
             // get all of the guildSetting objects needed for this shard
@@ -62,6 +64,32 @@ class Arys {
             betCounts.forEach(doc => {
                 this.betCounts.set(doc.guildID, new BetCount(doc, this, true));
             });
+            // ws client
+            const { webSocket } = config;
+            this.ws = new WebSocket(`ws://${webSocket.host}:${webSocket.port}`);
+            this.ws.on("message", async (message) => {
+                message = JSON.parse(message);
+                switch (message.request) {
+                    case "context": {
+                        const { guildID, memberID } = message;
+                        if (this.client.discordClient.guilds.has(guildID)) {
+                            const guild = this.client.discordClient.guilds.get(guildID);
+                            const guildSetting = this.settings.get(guildID);
+                            if (guild.members.has(memberID)) {
+                                const member = guild.members.get(memberID);
+                                const context = { guild, member };
+                                const permissionFields = await BitField.buildContext(context, guildSetting);
+                                const response = {
+                                    UUID: message.UUID,
+                                    isOwner: guild.owner.id === memberID,
+                                    permissionFields
+                                };
+                                this.ws.send(JSON.stringify(response));
+                            }
+                        }
+                    }
+                }
+            })
         };
         this.client.set("owner", "306418399242747906")
             .set("prefixes", ["mention", `"`])
@@ -71,7 +99,7 @@ class Arys {
                 await this.client.init();
                 next();
             })
-            .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler)
+            .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler, async (message, next) => { await middlewares.argParser(message, next); })
             .use("message", async (message, next) => {
                 // check for non-guild channel
                 if (message.guild) {
@@ -88,15 +116,18 @@ class Arys {
                                     _BetCount = new BetCount(doc);
                                     this.betCounts.set(guildID, _BetCount);
                                 }
-                                message.BetCount = _BetCount;
+                                message.betCount = _BetCount;
                             }
                         }
                     }
                 }
                 message.constants = constants;
                 message.FriendlyError = FriendlyError;
+                message.BitField = BitField;
+                message.isOwner = (this.client.locals.options.owner === message.author.id);
                 return next();
             })
+            // guildMember & guildMemberMap injection
             .use("message", async (message, next) => {
                 // check for non-guild channel
                 if (!message.guild) return next();
@@ -109,10 +140,10 @@ class Arys {
                     guildMap = new Map();
                     guildsMap.set(message.guild.id, guildMap);
                 }
-                message.GuildMemberMap = guildMap;
+                message.guildMemberMap = guildMap;
                 // get guild member, call it if not cached
-                message.GuildMember = guildMap.get(message.author.id);
-                if (!message.GuildMember) {
+                message.guildMember = guildMap.get(message.author.id);
+                if (!message.guildMember) {
                     const guildMember = await db.getGuildMember(message.author.id, message.guild.id, message.guildSetting);
                     guildMap.set(message.author.id, guildMember);
                     // cache limit system
@@ -120,7 +151,7 @@ class Arys {
                         const mapFirstKey = guildMap.keys().next().value;
                         guildMap.delete(mapFirstKey);
                     }
-                    message.GuildMember = guildMember;
+                    message.guildMember = guildMember;
                 }
                 return next();
             })

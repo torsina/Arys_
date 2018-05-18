@@ -142,7 +142,7 @@
     "no-array-constructor": "error",
     "no-inline-comments": "error",
     "no-lonely-if": "error",
-    "no-mixed-operators": "error",
+    "no-mixed-operators": "off",
     "no-multiple-empty-lines": [
       "error",
       {

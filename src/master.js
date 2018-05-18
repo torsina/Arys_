@@ -1,8 +1,9 @@
 const Discord = require("discord.js");
-const { token } = require("../config");
+const WebSocket = require("ws");
+const { token, webSocket } = require("../config");
 const cluster = require("cluster");
 const numCPUs = require("os").cpus().length;
-const webWorkersCount = 0;
+const webWorkersCount = 1;
 const botCPUs = numCPUs - webWorkersCount;
 
 console.log(`Master ${process.pid} is running`);
@@ -44,6 +45,7 @@ async function init() {
         if (!workerList) workers.set(env.type, [{ env, worker }]);
         else workerList.push({ env, worker });
     }
+    // worker crash handling
     cluster.on("exit", (crashedWorker, code, signal) => {
         const { env } = crashedWorker;
         console.log(crashedWorker);
@@ -61,5 +63,23 @@ async function init() {
         const newWorker = cluster.fork({ config: JSON.stringify(env) });
         newWorker.env = env;
         workerList.push = { env: crashedWorker.env, worker: newWorker };
+    });
+    const webSocketConfig = { verifyClient: (socket) => {
+        // only allow connections from 127.0.0.1
+        console.log(`REMOTE IP : ${socket.req.connection.remoteAddress}`);
+        return socket.req.connection.remoteAddress === webSocket.host;
+    } };
+    Object.assign(webSocketConfig, webSocket);
+
+    const wss = new WebSocket.Server(webSocketConfig);
+    wss.on("connection", (ws) => {
+        ws.on("message", (data) => {
+            // Broadcast to everyone else.
+            wss.clients.forEach((client) => {
+                if (client !== ws && client.readyState === WebSocket.OPEN) {
+                    client.send(data);
+                }
+            });
+        });
     });
 }

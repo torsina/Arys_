@@ -1,16 +1,13 @@
-const privateConfig = require('./config_private');
+const privateConfig = require("./config_private");
 const config = {
-    db: {
+    env: "dev",
+    oauthScopes: ["identify", "guilds"],
+    token: privateConfig.token.dev,
+    sentry: privateConfig.sentry,
+    webSocket: {
         host: "127.0.0.1",
-        port: "28015",
-        name: "Arys_rewrite"
-    },
-    env: "dev"
+        port: 15000
+    }
 };
-if (process.env.NODE_ENV === "dev" || config.env === "dev") privateConfig.token = privateConfig.token.dev;
-else {
-    privateConfig.token = privateConfig.token.bot;
-    config.sentry = privateConfig.sentry;
-}
-config.token = privateConfig.token;
+config.db = privateConfig.db;
 module.exports = config;

@@ -1,23 +1,26 @@
 const router = require("express").Router(); // eslint-disable-line new-cap
 const passport = require("passport");
 
-router.get("/login", (req, res) => {
-    res.render("login", { user: req.user });
-});
+class authRouter {
+    constructor(data) {
+        this.db = data.db;
+        this.oAuthScopes = data.oauthScopes;
+        this.router = require("express").Router(); // eslint-disable-line new-cap
+        this.router.get("/logout", (req, res) => {
+            req.logout();
+            res.redirect("/");
+        });
 
-router.get("/logout", (req, res) => {
-    req.logout();
-    res.redirect("/");
-});
-
-router.get("/discord", passport.authenticate("discord", { scope: ["identify", "guilds"] }));
-router.get("/discord/redirect",
-    passport.authenticate("discord", { failureRedirect: "/" }), (req, res) => {
-        res.redirect("/profile");
-        console.log(req.user);
+        this.router.get("/discord", passport.authenticate("discord", { scope: this.oAuthScopes }));
+        this.router.get("/discord/redirect",
+            passport.authenticate("discord", { failureRedirect: "/" }), (req, res) => {
+                console.log(req.session.passport);
+                res.redirect("/info");
+            }
+            // auth success
+        );
     }
-    // auth success
-);
+}
 
 /**
  *
@@ -31,4 +34,4 @@ router.get("/discord/redirect",
 });
  */
 
-module.exports = router;
+module.exports = authRouter;

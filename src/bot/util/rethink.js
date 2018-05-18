@@ -9,6 +9,7 @@ const GuildRole = require("../structures/GuildRole");
 const GuildMember = require("../structures/GuildMember");
 const BetCount = require("../structures/BetCount");
 const util = require('util');
+config.db.db = config.db.dbName;
 const r = require("rethinkdbdash")(config.db);
 
 db.r = r;
@@ -79,7 +80,7 @@ db.getGuildSetting = async (guildsID) => {
 };
 
 db.editGuildSetting = async (guildID, data, force = false) => {
-    if (!(data instanceof guildSetting))data = new GuildSetting(data);
+    if (!(data instanceof GuildSetting))data = new GuildSetting(data);
     const query = {
         guildID: data.guildID,
         permission: data.permission,
@@ -181,7 +182,9 @@ db.deleteGuildChannel = async (_channelID) => {
 
 db.setGuildMember = async (data) => {
     if (!(data instanceof GuildMember)) data = new GuildMember(data);
-    return await r.table("guildMember").insert(data).run();
+    const guildSettingSave = data.money._deleteGuildSetting();
+    await r.table("guildMember").insert(data).run();
+    data.money._reloadGuildSetting(guildSettingSave);
 };
 
 db.getGuildMember = async (memberID, guildID, guildSetting) => {
@@ -197,15 +200,18 @@ db.getGuildMember = async (memberID, guildID, guildSetting) => {
 };
 
 db.editGuildMember = async (data, force = false) => {
+    if (!(data instanceof GuildMember)) data = new GuildMember(data);
     if (!data.id) {
         await db.setGuildMember(data);
         return;
     }
+    const guildSettingSave = data.money._deleteGuildSetting();
     if (force) {
-        data = new GuildMember(data);
-        return await r.table("guildMember").get(data.id).replace(data).run();
+        await r.table("guildMember").get(data.id).replace(data).run();
+    } else {
+        await r.table("guildMember").get(data.id).update(data).run();
     }
-    return await r.table("guildMember").get(data.id).update(data).run();
+    data.money._reloadGuildSetting(guildSettingSave);
 };
 
 db.streamGuildMember = async () => {
@@ -229,46 +235,50 @@ db.deleteMember = async (memberID, guildID) => {
  * @returns {Promise.<*>}
  */
 db.getBitFields = async (IDs, guildSetting) => {
-    const { rolesID, rolesOverridesID, channelID, memberID, guildID } = IDs;
-    const memberData = await db.getGuildMember(memberID, guildID, guildSetting);
-    const rolesData = await r.table("guildRole").getAll(...rolesID).pluck("bitField", "valueField").run();
-    const channelData = await db.getGuildChannel(channelID);
+    const { rolesID = [], rolesOverridesID = [], channelID, memberID, guildID } = IDs;
+    let memberData, rolesData, channelData;
+    if (memberID) memberData = await db.getGuildMember(memberID, guildID, guildSetting);
+    if (rolesID.length > 0) rolesData = await r.table("guildRole").getAll(...rolesID).pluck("bitField", "valueField").run();
+    if (channelID) channelData = await db.getGuildChannel(channelID);
     const endBitField = [];
     const endValueField = [];
     // @everyone + packed roles -> member -> channel -> channel override (packed roles) -> channel override (member)
     // get the roles
-    for (let i = 0, n = rolesData.length; i < n; i++) {
-        const role = rolesData[i];
-        console.log(`roleData: ${role}`);
-        endBitField.push(role.bitField);
-        endValueField.push(role.valueField);
+    if (rolesData) {
+        for (let i = 0, n = rolesData.length; i < n; i++) {
+            const role = rolesData[i];
+            //console.log(`roleData: ${role}`);
+            endBitField.push(role.bitField);
+            endValueField.push(role.valueField);
+        }
     }
     if (memberData) {
-        console.log(`memberData: ${util.inspect(memberData, false, null)}`);
+        //console.log(`memberData: ${util.inspect(memberData, false, null)}`);
         if (memberData.bitField) endBitField.push(memberData.bitField);
         if (memberData.valueField) endValueField.push(memberData.valueField);
     }
     if (channelData) {
-        console.log(`channelData: ${util.inspect(channelData, false, null)}`);
+        //console.log(`channelData: ${util.inspect(channelData, false, null)}`);
         if (channelData.bitField) endBitField.push(channelData.bitField);
         if (channelData.valueField) endValueField.push(channelData.valueField);
-    }
-    // get the roles overrides
-    for (let i = 0, n = channelData.overrides.roles.length; i < n; i++) {
-        const override = channelData.overrides.roles[i];
-        console.log(`channel role override: ${util.inspect(override, false, null)}`);
-        if (rolesOverridesID.indexOf(override.roleID) !== -1) {
+
+        // get the roles overrides
+        for (let i = 0, n = channelData.overrides.roles.length; i < n; i++) {
+            const override = channelData.overrides.roles[i];
+            //console.log(`channel role override: ${util.inspect(override, false, null)}`);
+            if (rolesOverridesID.indexOf(override.roleID) !== -1) {
+                endBitField.push(override.bitField);
+                endValueField.push(override.valueField);
+            }
+        }
+        // get the member override
+        const channelMemberOverrideIndex = channelData.overrides.members.findIndex(member => member.memberID === memberID);
+        if (channelMemberOverrideIndex !== -1) {
+            const override = channelData.overrides.members[channelMemberOverrideIndex];
+            //console.log(`channel member override: ${util.inspect(override, false, null)}`);
             endBitField.push(override.bitField);
             endValueField.push(override.valueField);
         }
-    }
-    // get the member override
-    const channelMemberOverrideIndex = channelData.overrides.members.findIndex(member => member.memberID === memberID);
-    if (channelMemberOverrideIndex !== -1) {
-        const override = channelData.overrides.members[channelMemberOverrideIndex];
-        console.log(`channel member override: ${util.inspect(override, false, null)}`);
-        endBitField.push(override.bitField);
-        endValueField.push(override.valueField);
     }
     return {
         bitField: endBitField,
