@@ -235,10 +235,11 @@ db.deleteMember = async (memberID, guildID) => {
  * @returns {Promise.<*>}
  */
 db.getBitFields = async (IDs, guildSetting) => {
-    const { rolesID = [], rolesOverridesID = [], channelID = "", memberID = "", guildID = "" } = IDs;
-    const memberData = await db.getGuildMember(memberID, guildID, guildSetting);
-    const rolesData = await r.table("guildRole").getAll(...rolesID).pluck("bitField", "valueField").run();
-    const channelData = await db.getGuildChannel(channelID);
+    const { rolesID = [], rolesOverridesID = [], channelID, memberID, guildID } = IDs;
+    let memberData, rolesData, channelData;
+    if (memberID) memberData = await db.getGuildMember(memberID, guildID, guildSetting);
+    if (rolesID.length > 0) rolesData = await r.table("guildRole").getAll(...rolesID).pluck("bitField", "valueField").run();
+    if (channelID) channelData = await db.getGuildChannel(channelID);
     const endBitField = [];
     const endValueField = [];
     // @everyone + packed roles -> member -> channel -> channel override (packed roles) -> channel override (member)

@@ -14,6 +14,7 @@ class authRouter {
         this.router.get("/discord", passport.authenticate("discord", { scope: this.oAuthScopes }));
         this.router.get("/discord/redirect",
             passport.authenticate("discord", { failureRedirect: "/" }), (req, res) => {
+                console.log(req.session.passport);
                 res.redirect("/info");
             }
             // auth success

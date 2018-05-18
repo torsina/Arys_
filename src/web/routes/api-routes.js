@@ -18,7 +18,7 @@ class APIRouter {
             }
             res.json(responseArray);
         });
-        this.router.get("/servers/:server", (req, res) => {
+        this.router.get("/servers/:server", async (req, res) => {
             const guildID = req.params.server;
             const UUID = uuid();
             const sentMessage = {
@@ -27,18 +27,44 @@ class APIRouter {
                 guildID,
                 memberID: req.user.id
             };
+            const { guilds } = req.session.passport.user;
+            for (let i = 0, n = guilds.length; i < n; i++) {
+                if (guilds[i].id === guildID) break;
+                if (i === n - 1) {
+                    return res.status(401).send("guild is not in user scope");
+                }
+            }
             const event = () => {
-                this.ws.once("message", (message) => {
-                    if (message.UUID !== UUID) return event();
-                    const { permissionFields, isOwner } = message;
-                    const access = {
-                        permEdit: bitField.checkBuilt("settings.perms.edit", permissionFields, isOwner),
-                        currencyEdit: bitField.checkBuilt("settings.currency.edit", permissionFields, isOwner),
-                        shopEdit: bitField.checkBuilt("money.shop.edit", permissionFields, isOwner)
-                    };
-                });
+                return new Promise((resolve, reject) => {
+                    try {
+                        setTimeout(() => {
+                            reject({
+                                error: 401,
+                                reason: "guild is not in bot scope"
+                            });
+                        }, 5000);
+                        this.ws.once("message", (message) => {
+                            message = JSON.parse(message);
+                            if (message.UUID !== UUID) return event();
+                            const { permissionFields, isOwner } = message;
+                            const response = {
+                                guildID,
+                                access: {
+                                    permEdit: bitField.checkBuilt("settings.perms.edit", permissionFields, isOwner),
+                                    currencyEdit: bitField.checkBuilt("settings.currency.edit", permissionFields, isOwner),
+                                    shopEdit: bitField.checkBuilt("money.shop.edit", permissionFields, isOwner)
+                                }
+                            };
+
+                            resolve(response);
+                        });
+                    } catch (err) {
+                        reject(err);
+                    }
+                })
             };
-            this.ws.send(sentMessage);
+            this.ws.send(JSON.stringify(sentMessage));
+            event().then((result) => res.json(result)).catch((err) => res.status(err.error).send(err.reason));
         });
     }
 }

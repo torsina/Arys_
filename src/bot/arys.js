@@ -67,23 +67,24 @@ class Arys {
             // ws client
             const { webSocket } = config;
             this.ws = new WebSocket(`ws://${webSocket.host}:${webSocket.port}`);
-            this.ws.on("message", (message) => {
+            this.ws.on("message", async (message) => {
+                message = JSON.parse(message);
                 switch (message.request) {
                     case "context": {
                         const { guildID, memberID } = message;
                         if (this.client.discordClient.guilds.has(guildID)) {
                             const guild = this.client.discordClient.guilds.get(guildID);
-                            const guildSetting = this.settings.get(guildID)
+                            const guildSetting = this.settings.get(guildID);
                             if (guild.members.has(memberID)) {
                                 const member = guild.members.get(memberID);
                                 const context = { guild, member };
-                                const permissionFields = BitField.buildContext(context, guildSetting);
+                                const permissionFields = await BitField.buildContext(context, guildSetting);
                                 const response = {
                                     UUID: message.UUID,
                                     isOwner: guild.owner.id === memberID,
                                     permissionFields
-
-                                }
+                                };
+                                this.ws.send(JSON.stringify(response));
                             }
                         }
                     }
