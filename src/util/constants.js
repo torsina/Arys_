@@ -23,7 +23,7 @@ constants.DB_MODEL = [
         { name: "post_guildID_file_image", rows: ["guildID", "file", "image"] }
     ] },
     { name: "betCount", primary: "guildID" },
-    { name: "oauth", primary: "userID", rows: ["token"]}
+    { name: "oauth", primary: "userID", rows: ["token"] }
 ];
 
 constants.VALUEFIELD_DEFAULT = {
@@ -37,10 +37,17 @@ constants.VALUEFIELD_DEFAULT = {
  * due to it's use, every permission inside of it is set to 1
  */
 constants.PERMISSION_BITFIELD_DEFAULT = {
+    moderation: {
+        kick: 0,
+        ban: 0,
+        prune: 0
+    },
     money: {
         bet: 0,
         credits: 0,
-        shop: 0
+        shop: 0,
+        daily: 0,
+        transfer: 0
     },
     nsfw: {
         hentai: 0
@@ -60,6 +67,9 @@ constants.PERMISSION_BITFIELD = {
             visible: 1 << 0
         },
         ban: {
+            visible: 1 << 0
+        },
+        prune: {
             visible: 1 << 0
         }
     },
@@ -83,6 +93,20 @@ constants.PERMISSION_BITFIELD = {
         credits: {
             visible: 1 << 0,
             base: 1 << 1
+        },
+        shop: {
+            visible: 1 << 0,
+            edit: 1 << 1,
+            see: 1 << 2
+        },
+        daily: {
+            visible: 1 << 0,
+            base: 1 << 1
+        },
+        transfer: {
+            visible: 1 << 0,
+            base: 1 << 1,
+            force: 1 << 2
         }
     },
     util: {
@@ -117,6 +141,17 @@ constants.PERMISSION_NODE = {
         },
         credits: {
             base: "money.credits.base"
+        },
+        shop: {
+            add: "money.shop.edit",
+            edit: "money.shop.edit",
+            remove: "money.shop.edit"
+        },
+        daily: {
+            base: "money.daily.base"
+        },
+        transfer: {
+            base: "money.transfer.base"
         }
     },
     util: {
@@ -198,7 +233,7 @@ constants.MONEYACCOUNT_DEFAULT = {
 
 constants.MAXCACHE = {
     members: 100,
-    fetchMessages: 400,
+    fetchMessages: 1000,
     betCountWait: 6E5 // 10 minutes
 };
 

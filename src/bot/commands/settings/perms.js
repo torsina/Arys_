@@ -83,37 +83,36 @@ module.exports = {
         short: "u",
         type: "user"
     }],
-    // %perms set <node> <value> ?<allow/deny>
-    argTree: {
-        defaultLabel: "permission",
-        choice: {
-            // display all the permissions for given context
-            show: null,
-            // set a permission to a given value
-            set: {
-                defaultLabel: "permission node",
-                last: true,
-                choice: {
-                    // VALUE will be the permission node, ex : settings.perms.set
-                    VALUE: {
-                        // we want the next argument to be a possible end of the chain
-                        last: true,
-                        choice: {
-                            // here, VALUE will be the user input
-                            defaultLabel: "new value",
-                            VALUE: {
-                                last: true,
-                                choice: {
-                                    allow: null,
-                                    deny: null
-                                }
+    argParser: async (message, args) => {
+        try {
+            switch (args[0]) {
+                default: {
+                    throw new Error();
+                }
+                case "show": {
+                    return args.slice(0, 1);
+                }
+                case "set": {
+                    if (args[4]) {
+                        switch (args[4]) {
+                            default: {
+                                throw new Error();
+                            }
+                            case "allow":
+                            case "deny": {
+                                return args.slice(0, 5);
                             }
                         }
+                    } else {
+                        return args.slice(0, 4);
                     }
                 }
             }
+        } catch (err) {
+            throw err;
         }
     }
+    // %perms set <node> <value> ?<allow/deny>
 };
 
 /**
