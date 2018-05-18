@@ -1,0 +1,62 @@
+
+
+.margin{
+    margin-left: 200px;
+    margin-right: 200px;
+}
+
+
+#main {
+    margin-top: 50px;
+    position: relative;
+}
+
+.search {
+    margin-left:5%;
+    margin-right: 80%;
+    margin-top: 40px;
+
+}
+
+/* champs de saisi */
+#searchthis #search {
+    background-color: #424242;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #000000;
+    padding: 5px 10px 5px 10px;
+    width: 98.5%;
+    box-sizing: border-box;
+    font-family: Lato;
+    font-size: 12px;
+    font-weight: normal;
+    letter-spacing: 1px;
+}
+/* bouton*/
+#searchthis #search-btn {
+    background-color: #2e973a;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #000000;
+    padding: 5px 10px 5px 10px;
+    width: 98.5%;
+    box-sizing: border-box;
+    font-family: PT sans;
+    font-size: 13px;
+    font-weight: normal;
+    letter-spacing: 2px;
+    margin: 10px 0 0 0;
+    text-transform: uppercase;
+    color: #4e4e4e;
+}
+
+#text{
+    font-color: #40FF00;
+}
+footer {
+    position: absolute; bottom: 0; left: 0; right: 0
+}
+
+listbtn {
+    width: 30%;
+}

@@ -21,6 +21,11 @@ app.config(function($routeProvider) {
         .when('/contact', {
             templateUrl : 'pages/contact.html',
             controller  : 'contactController'
+        })
+
+        .when('/server',{
+            templateUrl : 'pages/server.html' ,
+            controller : 'serverController'
         });
 });
 
@@ -37,3 +42,7 @@ app.controller('aboutController', function($scope) {
 app.controller('contactController', function($scope) {
     $scope.message = 'Contact us! JK. This is just a demo.';
 });
+
+app.controller('serverController', function($scope) {
+    $scope.money = '200';
+})
