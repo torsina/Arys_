@@ -66,7 +66,6 @@ async function init() {
     });
     const webSocketConfig = { verifyClient: (socket) => {
         // only allow connections from 127.0.0.1
-        console.log(`REMOTE IP : ${socket.req.connection.remoteAddress}`);
         return socket.req.connection.remoteAddress === webSocket.host;
     } };
     Object.assign(webSocketConfig, webSocket);

@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const ws = require("ws");
 const session = require("express-session");
@@ -47,7 +48,7 @@ class API {
         app.use(session({
             secret: privateConfig.API.sessionSecret,
             resave: true,
-            saveUninitialized: true,
+            saveUninitialized: false,
             store
         }));
         app.use(passport.initialize());
@@ -56,17 +57,21 @@ class API {
         // set up routes
         app.use("/auth", this.authRouter.router);
         app.use("/profile", this.profileRouter.router);
-        app.use("/api", this.checkAuth);
         app.use("/api", this.checkAuth, this.APIRouter.router);
+        app.use("/index.html", (req, res) => {
+            res.sendFile(`${__dirname}/index.html`);
+        });
 
         // use nginx server to get index.html, then angular does it's job and we only have routes to retrives/post data and not html
 
         app.get("/logout", (req, res) => {
-            req.logout();
-            res.redirect("/");
+            req.session.destroy((err) => {
+                if (err) throw err;
+                req.logout();
+                res.redirect("/");
+            });
         });
         app.get("/info", this.checkAuth, (req, res) => {
-            // console.log(req.user)
             res.json(req.user);
         });
         app.listen(5000, (err) => {

@@ -1,44 +1,44 @@
 // create the module and name it scotchApp
-var app = angular.module('app', ['ngRoute']);
+var app = angular.module("app", ["ngRoute"]);
 
 // configure our routes
-app.config(function($routeProvider) {
+app.config(($routeProvider) => {
     $routeProvider
 
     // route for the home page
-        .when('/', {
-            templateUrl : 'pages/home.html',
-            controller  : 'mainController'
+        .when("/", {
+            templateUrl: "pages/home.html",
+            controller: "mainController"
         })
 
         // route for the about page
-        .when('/about', {
-            templateUrl : 'pages/home.html',
-            controller  : 'aboutController'
+        .when("/about", {
+            templateUrl: "pages/home.html",
+            controller: "aboutController"
         })
 
         // route for the contact page
-        .when('/contact', {
-            templateUrl : 'pages/home.html',
-            controller  : 'contactController'
+        .when("/contact", {
+            templateUrl: "pages/home.html",
+            controller: "contactController"
         });
 });
 
 // create the controller and inject Angular's $scope
-app.controller('mainController', function($scope) {
+app.controller("mainController", ($scope) => {
     // create a message to display in our view
-    $scope.message = 'Everyone come and see how good I look!';
+    $scope.message = "Everyone come and see how good I look!";
 });
 
-app.controller('aboutController', function($scope) {
+app.controller("aboutController", ($scope) => {
     var xhttp = new XMLHttpRequest();
     xhttp.open("GET", "http://lovalhosy:5000/API/", true);
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.send();
     var response = JSON.parse(xhttp.responseText);
-    $scope.message = 'Look! I am an about page.';
+    $scope.message = "Look! I am an about page.";
 });
 
-app.controller('contactController', function($scope) {
-    $scope.message = 'Contact us! JK. This is just a demo.';
+app.controller("contactController", ($scope) => {
+    $scope.message = "Contact us! JK. This is just a demo.";
 });
