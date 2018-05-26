@@ -49,6 +49,9 @@ class API {
             secret: privateConfig.API.sessionSecret,
             resave: true,
             saveUninitialized: false,
+            cookie: {
+                httpOnly: false
+            },
             store
         }));
         app.use(passport.initialize());

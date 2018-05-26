@@ -30,6 +30,36 @@ app.controller("mainController", ($scope) => {
     $scope.message = "Everyone come and see how good I look!";
 });
 
+function cookie(name) {
+    var cookie = document.cookie;
+    var index = cookie.indexOf(name);
+    var indexEndCookieName = index + name.length + 1;
+    if (index ==! -1) {
+        var indexEnd = cookie.indexOf(" ", indexEndCookieName);
+        if (indexEnd !== -1) {
+            return cookie.slice(indexEndCookieName, indexEnd);
+        }
+        return "";
+    }
+    return "";
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
 app.controller("aboutController", ($scope) => {
     var xhttp = new XMLHttpRequest();
     xhttp.open("GET", "http://lovalhosy:5000/API/", true);
