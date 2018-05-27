@@ -22,6 +22,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/home.html',
             controller  : 'contactController'
         })
+        .when('/servers',{
+            templateUrl : 'pages/servers.html' ,
+            controller : 'serversController'
+        })
 
         .when('/server',{
             templateUrl : 'pages/server.html' ,
@@ -49,5 +53,10 @@ app.controller('contactController', function($scope) {
 });
 
 app.controller('serverController', function($scope) {
+    $scope.money = '200';
+})
+
+
+app.controller('serversController', function($scope) {
     $scope.money = '200';
 })

@@ -1,7 +1,7 @@
-const express = require("express");
-const ws = require("ws");
-const session = require("express-session");
-const passport = require("passport");
+const express = require("express"); // lien express
+const ws = require("ws"); //
+const session = require("express-session"); // permet aux gens de rester connecté
+const passport = require("passport"); // lien discord
 const { Strategy } = require("passport-discord");
 const AuthRouter = require("./routes/auth-routes");
 const ProfileRouter = require("./routes/profile-routes");

@@ -1,62 +1,57 @@
-
-
-.margin{
-    margin-left: 200px;
-    margin-right: 200px;
-}
-
-
-#main {
-    margin-top: 50px;
-    position: relative;
-}
-
-.search {
-    margin-left:5%;
-    margin-right: 80%;
-    margin-top: 40px;
-
-}
-
-/* champs de saisi */
-#searchthis #search {
-    background-color: #424242;
-    border-style: solid;
-    border-width: 1px;
-    border-color: #000000;
-    padding: 5px 10px 5px 10px;
-    width: 98.5%;
-    box-sizing: border-box;
-    font-family: Lato;
-    font-size: 12px;
-    font-weight: normal;
-    letter-spacing: 1px;
-}
-/* bouton*/
-#searchthis #search-btn {
-    background-color: #2e973a;
-    border-style: solid;
-    border-width: 1px;
-    border-color: #000000;
-    padding: 5px 10px 5px 10px;
-    width: 98.5%;
-    box-sizing: border-box;
-    font-family: PT sans;
-    font-size: 13px;
-    font-weight: normal;
-    letter-spacing: 2px;
-    margin: 10px 0 0 0;
-    text-transform: uppercase;
-    color: #4e4e4e;
-}
-
-#text{
-    font-color: #40FF00;
-}
 footer {
     position: absolute; bottom: 0; left: 0; right: 0
 }
 
-listbtn {
-    width: 30%;
+
+/* navbar*/
+#navbar{
+    background-color: #4e4e4e;
+    font-size: 28px;
+    height: 80px;
+    padding-top: 10px;
+}
+
+.navbar-brand{
+    font-size: 40px;
+}
+#text-navbar{
+    color: #7e7e7e !important;
+    border-bottom: red 1px;
+}
+
+#navbar-btn{
+    background-color: #7e7e7e;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #000000;
+    padding: 8px 13px 8px 13px;
+    width: 98.5%;
+    box-sizing: border-box;
+    font-family: "Times New Roman";
+    font-size: 16px;
+    font-weight: normal;
+    letter-spacing: 2px;
+    margin: 0px 0 0 0;
+    color: #4e4e4e;
+}
+
+.brand{
+    font-size: 50px;
+}
+
+
+/* severs*/
+    /* liste servers*/
+.panel-heading {
+    border-style: solid;
+    border-width: 2px;
+    border-color: #4e4e4e;
+}
+
+.panel-heading {
+    background-color: #4e4e4e;
+}
+
+h1 {
+    color: black;
 }
