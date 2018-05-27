@@ -49,9 +49,6 @@ class API {
             secret: privateConfig.API.sessionSecret,
             resave: true,
             saveUninitialized: false,
-            cookie: {
-                httpOnly: false
-            },
             store
         }));
         app.use(passport.initialize());
@@ -67,7 +64,7 @@ class API {
         app.use("/script.js", (req, res) => {
             res.sendFile(`${__dirname}/script.js`);
         });
-        app.use('/pages', express.static('/pages'));
+        app.use("/pages", express.static(`${__dirname}/pages`));
 
         // use nginx server to get index.html, then angular does it's job and we only have routes to retrives/post data and not html
 
