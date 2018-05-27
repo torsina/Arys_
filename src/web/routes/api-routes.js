@@ -47,6 +47,8 @@ class APIRouter {
                             message = JSON.parse(message);
                             if (message.UUID !== UUID) return event();
                             const { permissionFields, isOwner } = message;
+                            // rajouter guild name
+
                             const response = {
                                 guildID,
                                 access: {

@@ -1,7 +1,8 @@
-const express = require("express"); // lien express
-const ws = require("ws"); //
-const session = require("express-session"); // permet aux gens de rester connecté
-const passport = require("passport"); // lien discord
+const path = require("path");
+const express = require("express");
+const ws = require("ws");
+const session = require("express-session");
+const passport = require("passport");
 const { Strategy } = require("passport-discord");
 const AuthRouter = require("./routes/auth-routes");
 const ProfileRouter = require("./routes/profile-routes");
@@ -47,7 +48,10 @@ class API {
         app.use(session({
             secret: privateConfig.API.sessionSecret,
             resave: true,
-            saveUninitialized: true,
+            saveUninitialized: false,
+            cookie: {
+                httpOnly: false
+            },
             store
         }));
         app.use(passport.initialize());
@@ -56,17 +60,25 @@ class API {
         // set up routes
         app.use("/auth", this.authRouter.router);
         app.use("/profile", this.profileRouter.router);
-        app.use("/api", this.checkAuth);
         app.use("/api", this.checkAuth, this.APIRouter.router);
+        app.use("/index.html", (req, res) => {
+            res.sendFile(`${__dirname}/index.html`);
+        });
+        app.use("/script.js", (req, res) => {
+            res.sendFile(`${__dirname}/script.js`);
+        });
+        app.use('/pages', express.static('/pages'));
 
         // use nginx server to get index.html, then angular does it's job and we only have routes to retrives/post data and not html
 
         app.get("/logout", (req, res) => {
-            req.logout();
-            res.redirect("/");
+            req.session.destroy((err) => {
+                if (err) throw err;
+                req.logout();
+                res.redirect("/");
+            });
         });
         app.get("/info", this.checkAuth, (req, res) => {
-            // console.log(req.user)
             res.json(req.user);
         });
         app.listen(5000, (err) => {
