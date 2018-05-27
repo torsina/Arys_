@@ -76,5 +76,10 @@
   "words.value": "Value",
   "words.oldValue": "Old value",
   "words.newValue": "New value",
-  "words.page": "Page {{current}}/{{total}}"
+  "words.page": "Page {{current}}/{{total}}",
+  "shop.usage.add.category.role": "`{{prefix}}shop add category role rainbow` will create a shop category nammed `rainbow`",
+  "shop.usage.add.item": "`{{prefix}}shop add item rainbow 1500 A Rainbowy role` will add the role `A Rainbowy role` to the shop category `rainbow` and set it's price at `1500` `{{currency}}`",
+  "shop.usage.edit.category": "`{{prefix}}shop edit category rainbow --header :rainbow:` will set the header name of the `rainbow` category in `{{prefix}}shop display` to :rainbow:",
+  "shop.usage.edit.item": "`{{prefix}}shop edit item --price`"
+
 }

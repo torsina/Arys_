@@ -23,7 +23,7 @@ constants.DB_MODEL = [
         { name: "post_guildID_file_image", rows: ["guildID", "file", "image"] }
     ] },
     { name: "betCount", primary: "guildID" },
-    { name: "oauth", primary: "userID", rows: ["token"]}
+    { name: "oauth", primary: "userID", rows: ["token"] }
 ];
 
 constants.VALUEFIELD_DEFAULT = {

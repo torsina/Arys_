@@ -6,7 +6,6 @@ const ImageHandling = require("../../../image/ImageHandling");
 module.exports = {
     run: async (context) => { // eslint-disable-line complexity
         const { guildSetting, guildMember } = context.message;
-        console.log(guildSetting);
         const { shop } = guildSetting;
         const currency = guildSetting.money.name;
         const successEmbed = new RichEmbed()
@@ -43,7 +42,7 @@ module.exports = {
                             errorCategory = resolvedCategory.category.name;
                             switch (resolvedCategory.category.type) {
                                 case "role": {
-                                    const role = await resolver.role(context.args[4], context.message);
+                                    const role = context.args[4];
                                     errorItem = role.name;
                                     errorPrice = context.args[3];
                                     shop.addItem(resolvedCategory.index, { id: role.id, price: errorPrice });
@@ -81,7 +80,6 @@ module.exports = {
                             successEmbed.setDescription(context.t("shop.category.success.edit", {
                                 category: resolvedCategory.category.name
                             }));
-                            console.log("shop", guildSetting);
                             break;
                         }
                         case "item": {
@@ -260,80 +258,80 @@ module.exports = {
 
         // price
     ],
-    argTree: {
-        last: true,
-        choice: {
-            VALUE: null,
-            add: {
-                choice: {
-                    category: {
-                        choice: {
-                            role: {
-                                choice: {
-                                    VALUE: null
+    argParser: async (message, args) => {
+        try {
+            switch (args[0]) {
+                default: {
+                    return args;
+                }
+                case "add": {
+                    switch (args[1]) {
+                        default: {
+                            throw new Error();
+                        }
+                        case "category": {
+                            switch (args[2]) {
+                                default: {
+                                    throw new Error();
+                                }
+                                case "role": {
+                                    return args.slice(0, 4);
                                 }
                             }
                         }
-                    },
-                    item: {
-                        label: "category name",
-                        choice: {
-                            VALUE: {
-                                choice: {
-                                    type: "int",
-                                    min: 0,
-                                    label: "price",
-                                    choice: {
-                                        VALUE: {
-                                            last: true,
-                                            label: "item name",
-                                            choice: { VALUE: null }
-                                        }
-                                    }
-                                }
+                        case "item": {
+                            // category name 2, price 3, item name 4+
+                            args[3] = await message.command.resolver.int(args[3], message, { min: 0 });
+                            args[4] = await message.command.resolver.role(args.slice(4).join(" "), message);
+                            return args.slice(0, 5);
+                        }
+                    }
+                }
+                case "edit": {
+                    switch (args[1]) {
+                        default: {
+                            throw new Error();
+                        }
+                        case "category": {
+                            return args.slice(0, 3);
+                        }
+                        case "item": {
+                            const lastArg = args.slice(3);
+                            // category name 2, item name 3
+                            try {
+                                args[3] = await message.command.resolver.role(lastArg, message);
+                                return args.slice(0, 4);
+                            } catch (err) {
+                                args[3] = lastArg;
+                                return args.slice(0, 4);
                             }
                         }
                     }
                 }
-            },
-            edit: {
-                choice: {
-                    category: {
-                        label: "category name",
-                        choice: {
-                            VALUE: null
+                case "remove": {
+                    switch (args[1]) {
+                        default: {
+                            throw new Error();
                         }
-                    },
-                    item: {
-                        label: "category name",
-                        choice: {
-                            VALUE: {
-                                label: "item name",
-                                last: true,
-                                choice: { VALUE: null }
-                            }
+                        case "category": {
+                            return args.slice(0, 3);
                         }
-                    }
-                }
-            },
-            remove: {
-                choice: {
-                    category: {
-                        label: "category name",
-                        choice: { VALUE: null }
-                    },
-                    item: {
-                        label: "category name",
-                        choice: {
-                            VALUE: {
-                                label: "item name",
-                                last: true,
-                                choice: { VALUE: null }
+                        case "item": {
+                            const lastArg = args.slice(3);
+                            // category name 2, item name 3
+                            try {
+                                args[3] = await message.command.resolver.role(lastArg, message);
+                                return args.slice(0, 4);
+                            } catch (err) {
+                                args[3] = lastArg;
+                                return args.slice(0, 4);
                             }
                         }
                     }
                 }
             }
+        } catch (err) {
+            throw err;
         }
     }
 };

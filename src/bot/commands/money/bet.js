@@ -8,6 +8,7 @@ module.exports = {
             const { embed } = new context.command.EmbedError(context, { error: "bet.tooLow", data: { min: min } });
             return context.channel.send(embed);
         }
+        console.log(context.args);
         let option;
         if (context.args[0].includes("h")) option = "head";
         else option = "tail";
@@ -24,7 +25,7 @@ module.exports = {
                     .setDescription(context.t("bet.win", { user: context.author.toString(), value: min, currency: guildSetting.money.name }));
                 context.channel.send(embed);
             } else {
-                guildMember.money.editMoney(-context.args[1]);
+                guildMember.money.editMoney(-context.args[1], true);
                 const embed = new RichEmbed()
                     .setTimestamp()
                     .setColor("RED")
@@ -45,18 +46,14 @@ module.exports = {
         }
     },
     guildOnly: true,
-    args: [{
-        name: "option",
-        label: "h|head t|tail",
-        type: "text",
-        optional: false,
-        correct: ["h", "head", "t", "tail"]
-    }, {
-        name: "value",
-        label: "bet",
-        type: "int",
-        min: 0,
-        optional: false
-    }]
+    argParser: async (message, args) => {
+        try {
+            args[0] = (args[0].toLowerCase().includes("h")) ? "head" : "tail";
+            args[1] = await message.command.resolver.int(args[1], message);
+            return args.slice(0, 2);
+        } catch (err) {
+            throw err;
+        }
+    }
 };
 

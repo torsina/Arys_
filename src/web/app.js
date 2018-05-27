@@ -1,12 +1,13 @@
-const express = require("express");
-const session = require("express-session");
-const passport = require("passport");
+const express = require("express"); // lien express
+const ws = require("ws"); //
+const session = require("express-session"); // permet aux gens de rester connecté
+const passport = require("passport"); // lien discord
 const { Strategy } = require("passport-discord");
 const AuthRouter = require("./routes/auth-routes");
 const ProfileRouter = require("./routes/profile-routes");
 const APIRouter = require("./routes/api-routes");
 const config = require("../../config");
-const { db } = config;
+const { db, webSocket } = config;
 const privateConfig = require("../../config_private");
 const oAuthConfig = privateConfig.oauth;
 const r = require("rethinkdbdash")(db);
@@ -15,11 +16,13 @@ const RDBStore = require("session-rethinkdb")(session);
 const store = new RDBStore(r);
 
 class API {
-    constructor(data) {
+    constructor() {
         this.db = r;
         this.app = express();
         this.passport = passport;
-        const routerOptions = { db: this.db };
+        this.ws = new ws(`ws://${webSocket.host}:${webSocket.port}`); // eslint-disable-line new-cap
+        this.oauthScopes = config.oauthScopes;
+        const routerOptions = { db: this.db, oauthScopes: config.oauthScopes, checkAuth: this.checkAuth, ws: this.ws };
         this.authRouter = new AuthRouter(routerOptions);
         this.APIRouter = new APIRouter(routerOptions);
         this.profileRouter = new ProfileRouter(routerOptions);
@@ -52,8 +55,9 @@ class API {
 
         // set up routes
         app.use("/auth", this.authRouter.router);
-        app.use("/profile", ProfileRouter);
-        app.use("/api", APIRouter);
+        app.use("/profile", this.profileRouter.router);
+        app.use("/api", this.checkAuth);
+        app.use("/api", this.checkAuth, this.APIRouter.router);
 
         // use nginx server to get index.html, then angular does it's job and we only have routes to retrives/post data and not html
 
@@ -61,21 +65,18 @@ class API {
             req.logout();
             res.redirect("/");
         });
-        app.get("/info", checkAuth, (req, res) => {
+        app.get("/info", this.checkAuth, (req, res) => {
             // console.log(req.user)
             res.json(req.user);
         });
-
-
-        function checkAuth(req, res, next) {
-            if (req.isAuthenticated()) return next();
-            res.send("not logged in :(");
-        }
-
-
         app.listen(5000, (err) => {
             if (err) return console.log(err);
             console.log("Listening at http://localhost:5000/");
         });
     }
+    checkAuth(req, res, next) {
+        if (req.isAuthenticated()) return next();
+        res.send("not logged in :(");
+    }
 }
+module.exports = API;
