@@ -21,24 +21,52 @@ app.config(function($routeProvider) {
         .when('/contact', {
             templateUrl : 'pages/home.html',
             controller  : 'contactController'
+        })
+        .when('/servers',{
+            templateUrl : 'pages/servers.html' ,
+            controller : 'serversController'
+        })
+
+        .when('/server',{
+            templateUrl : 'pages/server.html' ,
+            controller : 'serverController'
         });
 });
 
 // create the controller and inject Angular's $scope
-app.controller('mainController', function($scope) {
+app.controller("mainController", ($scope) => {
     // create a message to display in our view
-    $scope.message = 'Everyone come and see how good I look!';
+    $scope.message = "Everyone come and see how good I look!";
 });
 
-app.controller('aboutController', function($scope) {
+app.controller("aboutController", ($scope) => {
     var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", "http://lovalhosy:5000/API/", true);
+    xhttp.open("GET", "http://localhost:5000/API/servers");
     xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.setRequestHeader("Cookie", "connect.sid=" + getCookie("connect.sid"));
     xhttp.send();
+    xhttp.onload = function (data) {
+        if (xhttp.readyState === 4) {
+            if (xhttp.status === 200) {
+                console.log(xhr.responseText);
+            } else {
+                console.error(xhttp.statusText);
+            }
+        }
+    };
     var response = JSON.parse(xhttp.responseText);
-    $scope.message = 'Look! I am an about page.';
+    $scope.message = "Look! I am an about page.";
 });
 
 app.controller('contactController', function($scope) {
     $scope.message = 'Contact us! JK. This is just a demo.';
 });
+
+app.controller('serverController', function($scope) {
+    $scope.money = '200';
+})
+
+
+app.controller('serversController', function($scope) {
+    $scope.money = '200';
+})

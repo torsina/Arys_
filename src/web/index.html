@@ -1,49 +1,60 @@
 <!DOCTYPE html>
 
-<!-- define angular app -->
-<html ng-app="app">
+
 
 <head>
-    <!-- SCROLLS -->
+    <link rel="stylesheet" type="text/css" href="index.css"/>
+    <link rel="stylesheet" type="text/css" href="https://tatsumaki.xyz/css/main.css"/>
+    <!--SCROLLS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.css" />
+    <link rel="stylesheet" href="https://tatsumaki.xyz/css/main.css">
 
     <!-- SPELLS -->
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.js"></script>
     <script src="script.js"></script>
+    <script src="js/script.js"></script>
 </head>
 
 <!-- define angular controller -->
-<body ng-controller="mainController">
+<body ng-controller="mainController" >
 
-<nav class="navbar navbar-default">
-    <div class="container">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/">Angular Routing Example</a>
-        </div>
+<!-- define angular app -->
+<html ng-app="app">
 
-        <ul class="nav navbar-nav navbar-right">
-            <li><a href="#"><i class="fa fa-home"></i> Home</a></li>
-            <li><a href="#about"><i class="fa fa-shield"></i> About</a></li>
-            <li><a href="#contact"><i class="fa fa-comment"></i> Contact</a></li>
-        </ul>
+
+    <div class="container-fluid">
+
+
+        <nav class="navbar navbar-default row-md-1 " role="navigation" Id="navbar">
+            <div class="navbar-header col-md-1 col-md-offset-1">
+                <a class="navbar-brand col-md-1" href="#home" style="color: red;">
+                    <b class="brand">Arys</b>
+                </a>
+            </div>
+            <ul  class="nav navbar-nav col-md-5 col-md-offset-2">
+                <li class=" col-md-4 navbar-right"> <a id="text-navbar" href="#servers" class="fa fa-home">Servers</a> </li>
+                <li class="col-md-offset-1 col-md-4 navbar-right "> <a id="text-navbar" href="#home" class="fa fa-home">Home </a> </li>
+            </ul>
+            <form class=" row-md-1 navbar-form navbar-right">
+                <button id="navbar-btn" type="button" class="btn btn-default navbar-btn">Deconnexion</button>
+            </form>
+        </nav>
+
+
+
+        <!-- angular templating -->
+        <!-- this is where content will be injected -->
+        <div ng-view ></div>
+
+    <footer class="text-center">
+         <p>View the tutorial on <a href="http://scotch.io/tutorials/javascript/single-page-apps-with-angularjs-routing-and-templating">Scotch.io</a></p>
+
+         <p>View a tutorial on <a href="http://scotch.io/tutorials/javascript/animating-angularjs-apps-ngview">Animating Your Angular Single Page App</a></p>
+    </footer>
     </div>
-</nav>
-
-<div id="main">
-
-    <!-- angular templating -->
-    <!-- this is where content will be injected -->
-    <div ng-view></div>
-
-</div>
-
-<footer class="text-center">
-    <p>View the tutorial on <a href="http://scotch.io/tutorials/javascript/single-page-apps-with-angularjs-routing-and-templating">Scotch.io</a></p>
-
-    <p>View a tutorial on <a href="http://scotch.io/tutorials/javascript/animating-angularjs-apps-ngview">Animating Your Angular Single Page App</a></p>
-</footer>
+</html>
 
 </body>
 
