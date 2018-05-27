@@ -2,12 +2,12 @@ const bitField = require("../../bot/util/BitField");
 const uuid = require("uuid/v4");
 class APIRouter {
     constructor(data) {
-        this.db = data.db;
+        this.db = data.db; // accès de la base de donnée
         this.ws = data.ws;
         this.router = require("express").Router(); // eslint-disable-line new-cap
 
         this.router.get("/servers", (req, res) => {
-            const { guilds } = req.user;
+            const { guilds } = req.user; //la ou sont gardées les données de l'utilisateur
             const responseArray = [];
             for (let i = 0, n = guilds.length; i < n; i++) {
                 const guild = guilds[i];
@@ -17,7 +17,7 @@ class APIRouter {
                 responseArray.push({ guildID, iconURL, guildName: guild.name });
             }
             res.json(responseArray);
-        });
+        }); // appeler les donnée pour la liste des serveurs
         this.router.get("/servers/:server", async (req, res) => {
             const guildID = req.params.server;
             const UUID = uuid();
@@ -67,7 +67,7 @@ class APIRouter {
             };
             this.ws.send(JSON.stringify(sentMessage));
             event().then((result) => res.json(result)).catch((err) => res.status(err.error).send(err.reason));
-        });
+        }); // fonction qui est executée quand la route est appellée
     }
 }
-module.exports = APIRouter;
+module.exports = APIRouter; // pour qu'on importe un donnée en node.js

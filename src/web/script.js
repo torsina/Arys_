@@ -21,6 +21,15 @@ app.config(function($routeProvider) {
         .when('/contact', {
             templateUrl : 'pages/home.html',
             controller  : 'contactController'
+        })
+        .when('/servers',{
+            templateUrl : 'pages/servers.html' ,
+            controller : 'serversController'
+        })
+
+        .when('/server',{
+            templateUrl : 'pages/server.html' ,
+            controller : 'serverController'
         });
 });
 
@@ -29,22 +38,6 @@ app.controller("mainController", ($scope) => {
     // create a message to display in our view
     $scope.message = "Everyone come and see how good I look!";
 });
-
-function getCookie(cname) {
-    var name = cname + "=";
-    var decodedCookie = decodeURIComponent(document.cookie);
-    var ca = decodedCookie.split(';');
-    for(var i = 0; i <ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return "";
-}
 
 app.controller("aboutController", ($scope) => {
     var xhttp = new XMLHttpRequest();
@@ -65,6 +58,15 @@ app.controller("aboutController", ($scope) => {
     $scope.message = "Look! I am an about page.";
 });
 
-app.controller("contactController", ($scope) => {
-    $scope.message = "Contact us! JK. This is just a demo.";
+app.controller('contactController', function($scope) {
+    $scope.message = 'Contact us! JK. This is just a demo.';
 });
+
+app.controller('serverController', function($scope) {
+    $scope.money = '200';
+})
+
+
+app.controller('serversController', function($scope) {
+    $scope.money = '200';
+})
