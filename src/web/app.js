@@ -22,7 +22,7 @@ class API {
         this.passport = passport;
         this.ws = new ws(`ws://${webSocket.host}:${webSocket.port}`); // eslint-disable-line new-cap
         this.oauthScopes = config.oauthScopes;
-        const routerOptions = { db: this.db, oauthScopes: config.oauthScopes, checkAuth: this.checkAuth, ws: this.ws };
+        const routerOptions = { db: r, oauthScopes: config.oauthScopes, checkAuth: this.checkAuth, ws: this.ws };
         this.authRouter = new AuthRouter(routerOptions);
         this.APIRouter = new APIRouter(routerOptions);
         this.profileRouter = new ProfileRouter(routerOptions);
@@ -56,7 +56,6 @@ class API {
         // set up routes
         app.use("/auth", this.authRouter.router);
         app.use("/profile", this.profileRouter.router);
-        app.use("/api", this.checkAuth);
         app.use("/api", this.checkAuth, this.APIRouter.router);
 
         // use nginx server to get index.html, then angular does it's job and we only have routes to retrives/post data and not html
