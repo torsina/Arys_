@@ -93,6 +93,9 @@ class API {
         app.use("/script.js", (req, res) => {
             res.sendFile(`${__dirname}/script.js`);
         });
+        app.use("/fond.jpg", (req, res) => {
+            res.sendFile(`${__dirname}/fond.jpg`);
+        });
         app.use("/pages", express.static(`${__dirname}/pages`));
 
         app.get("/logout", (req, res) => {
