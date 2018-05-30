@@ -53,10 +53,7 @@ app.controller('serverController', function($scope) {
 
 
 app.controller('serversController', ["$scope", "API", function($scope, API) {
-    //console.log(API.servers());
-    //$scope.message = API.servers();
     API.servers().then(function (data) {
-        console.log(data);
         $scope.servers = data;
     });
 }]);
