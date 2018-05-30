@@ -126,7 +126,19 @@ app.controller('contactController', function($scope) {
 
 app.controller('serverController', function($scope) {
     $scope.money = '200';
-});
+    var data = {
+        guildID: "307230041748668426",
+        guildName: "Arys home",
+        iconURL: "https://cdn.discordapp.com/icons/81384788765712384/a8eccf1628b1e739d535a813f279e905.jpg",
+        currencyName: "credits",
+        edits: {
+            perm: false,
+            currency: true,
+            shop: false
+        }
+    };
+    document.getElementById('nom_serveur').innerHTML= guildName;
+})
 
 
 app.controller('serversController', function($scope) {
@@ -148,5 +160,4 @@ app.controller('serversController', function($scope) {
         }
     };
     $scope.money = '200';
-});
- */
+})

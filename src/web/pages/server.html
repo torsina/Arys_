@@ -1,48 +1,27 @@
-<div class="row">
-    <div class="col-md-4">
-        <div class="profile-item row-centered">
+<div  class="container">
+    <div class="row">
+        <div class="container" id="profile_container">
+    <span class="col-md-2">
+        <div class="profile-item">
             <img src="https://cdn.discordapp.com/avatars/413774367957319692/1bfa341c1ffb070510fef81b74ee8759.jpg">
         </div>
-    </div>
-    <div class="col-md-8">
-        <h1 style="white-space: nowrap; overflow: hidden;text-overflow: ellipsis;">Nixri<span class="profile-discriminator">#7662</span></h1>
-            <div class="row">
-                 <div class="col-md-8">
-                     <table class="table borderless">
-                         <tbody>
-                            <tr><th>Money {{money}}</th>
-                             <span style="margin-left:15px;font-size:16px;"></span>
-                            </tr>
-                         </tbody>
-                     </table>
+    </span>
+    <div  class="col-md-4">
+                 <div class="col-md-4">
+                     <h3> Name </h3>
+                     <p> Currency : {{money}}</p>
                  </div>
             </div>
-    </div>
-</div>
-
-<div class="tab-content">
-    <div class="panel panel-default tab-pane active"  id="rankings">
-        <div class="panel-heading">
-            <h3>Individual Server Rankings
-                <span>Select A Server</span>
-            </h3>
+            </div>
         </div>
-        <ul class="list-group">
-            <li class="list-group-item list-guild-item">
-                <a href="/serverRankings/307230041748668426">
-                    <div class="guild-item">
-                        <div class="guild-icon ms-image list-ms-image">
-                            <span>Ah</span>
-                        </div>
-                        <span>Arys home</span>
-                    </div>
-                </a></li>
-        </ul>
     </div>
-    <div class="panel panel-default tab-pane" role="tabpanel" id="settings">
+
+
+
+      <div class="panel panel-default tab-pane" role="tabpanel" id="settings">
         <div class="well well-lg" id="noRecords" style="margin:0px;">
             <h3>Server Settings</h3>
             <span>You don’t have permissions on any server. </span>Create you own Discord Server!
         </div>
-    </div>
+     </div>
 </div>
