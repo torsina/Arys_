@@ -1,5 +1,5 @@
 // create the module and name it scotchApp
-var app = angular.module('app', ['ngRoute']);
+var app = angular.module('app', ['ngRoute', "ngResource"]);
 
 // configure our routes
 app.config(function($routeProvider) {
@@ -22,6 +22,26 @@ app.config(function($routeProvider) {
         });
 });
 
+app.factory("API", function($http, $q) {
+    return {
+        data: function() {
+            var deferred = $q.defer();
+            $resource('/api/servers').get({}, function(r) {
+                deferred.resolve(r);
+            }, deferred.reject);
+
+            return deferred.promise;
+        },
+        servers: function() {
+            var deferred = $q.defer();
+            $http.get('/api/servers').then((data) => {
+                deferred.resolve(data.data);
+            }, deferred.reject);
+            return deferred.promise;
+        }
+    };
+});
+
 // create the controller and inject Angular's $scope
 app.controller('mainController', function($scope) {
     // create a message to display in our view
@@ -33,16 +53,14 @@ app.controller('serverController', function($scope) {
 });
 
 
-app.controller('serversController', function($scope, $http) {
-    $http.get('/api/servers').then((data) => {
-        const response = data.data;
-        $scope.$apply(() => {
-            console.log(response[0].guildID);
-            $scope.message = response[0].guildID;
-        });
-    }, (err) => console.error(err));
-    //$scope.money = '200';
-});
+app.controller('serversController', ["$scope", "API", function($scope, API) {
+    //console.log(API.servers());
+    //$scope.message = API.servers();
+    API.servers().then(function (data) {
+        console.log(data[0]);
+        $scope.message = data[0].guildID;
+    });
+}]);
 
 
 /*
