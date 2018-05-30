@@ -6,26 +6,32 @@
 <span>{{ money }}</span>
 <div class="container">
     <div class="row">
-       <div class="col-md-7 col-md-push-4">
-        <div class="tab-content">
-            <div id="rankings" class="panel panel-defaukt tab-pane active" role="tabpanel">
-             <div class="panel-heading" style=" border-style: solid; border-width: 2px; border-color: #4e4e4e;">
-                <h1>Servers list</h1>
-             </div>
+       <div class="col-md-8 col-md-push-2">
+           <div class="panel-heading" style=" border-style: solid; border-width: 4px 4px 0px 4px; border-color: #4e4e4e; ">
+           <h1>Select A Server</h1>
+                 </div>
+            <div class="panel panel-primary">
+                <table class="table table-striped table-condensed" style="  background-color: #dbdbdb; border-style: solid; border-width: 4px; border-color: #4e4e4e;" >
 
-            <ul class="list-group" style=" border-style: solid; border-width: 2px; border-color: #4e4e4e;">
+
+            <ul id="tab" class="list-group" >
                 <li class="list-group-item list-guild-item">
-                   <div href="#" >
-                       <div class="guild-icon ms-image list-ms-image">
-                            <span> nom du chat</span>
-                       </div>
-                    </div>
-                   </a>
+                      <tr id="id_server1" onclick="document.location='#server'">
+                          <td> <img class="roundedImage" src="index.png "/></td>
+                          <td><h2 id="nom_serveur" > nom serveur</h2></td>
+                      </tr>
+                       <tr id="id_server2">
+                           <td> <img class="roundedImage" src="index.png "/></td>
+                           <td><h2 id="nom_serveur" > coco serveur</h2></td>
+                       </tr>
+                    </a>
+
                 </li>
             </ul>
-                </div>
-                 </div>
+
             </div>
+        </div>
        </div>
     </div>
+</div>
 

@@ -1,3 +1,8 @@
+body{
+    background-image: url("fond.jpg");
+    backgroung-repeat: no-repeat;
+    background-size: 100%;
+}
 footer {
     position: absolute; bottom: 0; left: 0; right: 0
 }
@@ -17,6 +22,7 @@ footer {
 #text-navbar{
     color: #7e7e7e !important;
     border-bottom: red 1px;
+    font-family: Tahoma, Geneva, sans-serif;
 }
 
 #navbar-btn{
@@ -27,7 +33,7 @@ footer {
     padding: 8px 13px 8px 13px;
     width: 98.5%;
     box-sizing: border-box;
-    font-family: "Times New Roman";
+    font-family: Tahoma, Geneva, sans-serif;
     font-size: 16px;
     font-weight: normal;
     letter-spacing: 2px;
@@ -42,16 +48,51 @@ footer {
 
 /* severs*/
     /* liste servers*/
-.panel-heading {
-    border-style: solid;
-    border-width: 2px;
-    border-color: #4e4e4e;
-}
 
+div.panel-heading{
+    background-color: #dbdbdb;
+}
 .panel-heading {
-    background-color: #4e4e4e;
+    background-color: rgba(228, 243, 255,0);
 }
 
 h1 {
-    color: black;
+    color: #e80100;
+    font-size: 40px; !important;
+    font-family:Tahoma, Geneva, sans-serif;
+    text-align: center;
+    font-weight: bold;
+}
+
+
+.nom_serveur {
+
+    font-family:Tahoma, Geneva, sans-serif;
+    line-height: 22.85px;
+    position: static;
+}
+
+.roundedImage{
+    overflow:hidden;
+    -webkit-border-radius:50px;
+    -moz-border-radius:50px;
+    border-radius:50px;
+    width:90px;
+    height:90px;
+    margin: 10px auto 10px 10px;
+}
+
+h2 {
+    display: inline;
+    text-align: right;
+    padding: 0 0 5px 0;
+}
+
+/*server*/
+    /*profile*/
+#profile_container {
+    background-color: #dbdbdb;
+    border-style: solid;
+    border-width: 4px;
+    border-color: #4e4e4e;
 }
