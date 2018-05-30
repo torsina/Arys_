@@ -21,6 +21,7 @@ class APIRouter {
         // appeler les donnée pour la liste des serveurs
         this.router.get("/servers/:server", async (req, res) => {
             const guildID = req.params.server;
+            let guild;
             const UUID = uuid();
             const sentMessage = {
                 UUID,
@@ -30,7 +31,10 @@ class APIRouter {
             };
             const { guilds } = req.session.passport.user;
             for (let i = 0, n = guilds.length; i < n; i++) {
-                if (guilds[i].id === guildID) break;
+                if (guilds[i].id === guildID) {
+                    guild = guilds[i];
+                    break;
+                }
                 if (i === n - 1) {
                     return res.status(401).send("guild is not in user scope");
                 }
@@ -52,6 +56,8 @@ class APIRouter {
 
                             const response = {
                                 guildID,
+                                guildName: guild.name,
+                                iconURL: `https://cdn.discordapp.com/icons/${guildID}/${guild.icon}.webp`,
                                 access: {
                                     permEdit: bitField.checkBuilt("settings.perms.edit", permissionFields, isOwner),
                                     currencyEdit: bitField.checkBuilt("settings.currency.edit", permissionFields, isOwner),
@@ -71,4 +77,4 @@ class APIRouter {
         }); // fonction qui est executée quand la route est appellée
     }
 }
-module.exports = APIRouter; // pour qu'on importe un donnée en node.js
+module.exports = APIRouter; // pour qu'on importe une donnée en node.js

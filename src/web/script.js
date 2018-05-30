@@ -47,9 +47,11 @@ app.controller('mainController', function($scope) {
     $scope.message = 'Everyone come and see how good I look!';
 });
 
-app.controller('serverController', function($scope) {
-    $scope.money = '200';
-});
+app.controller('serverController', ["$scope", "$routeParams", "API", function($scope, $routeParams, API) {
+    API.server($routeParams.guildID).then(function (data) {
+        $scope.server = data;
+    });
+}]);
 
 
 app.controller('serversController', ["$scope", "API", function($scope, API) {
