@@ -17,7 +17,8 @@ class APIRouter {
                 responseArray.push({ guildID, iconURL, guildName: guild.name });
             }
             res.json(responseArray);
-        }); // appeler les donnée pour la liste des serveurs
+        });
+        // appeler les donnée pour la liste des serveurs
         this.router.get("/servers/:server", async (req, res) => {
             const guildID = req.params.server;
             const UUID = uuid();
