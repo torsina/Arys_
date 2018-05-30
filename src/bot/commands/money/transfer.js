@@ -12,20 +12,16 @@ module.exports = {
             .setTimestamp()
             .setFooter(context.t("wiggle.embed.footer", { tag: context.author.tag }))
             .setColor("#93ef1f");
-        if (transferedMoney < 0) {
-            if (!isOwner) {
-                canNagativeTransfer = BitField.checkBuilt("money.transfer.force", context.message.permissionFields);
-                if (!canNagativeTransfer) {
-                    const { embed } = new context.command.EmbedError(context, {
-                        error: "permission.denied",
-                        data: { node: "money.transfer.force" }
-                    });
-                    return context.channel.send(embed);
-                }
-            } else {
-                canNagativeTransfer = true;
+        if (!isOwner) {
+            canNagativeTransfer = BitField.checkBuilt("money.transfer.force", context.message.permissionFields);
+            if (!canNagativeTransfer) {
+                const { embed } = new context.command.EmbedError(context, {
+                    error: "permission.denied",
+                    data: { node: "money.transfer.force" }
+                });
+                return context.channel.send(embed);
             }
-        }
+        } else canNagativeTransfer = true;
         debtor = await db.getGuildMember(debtor.id, context.guild.id, guildSetting);
         creditor = await db.getGuildMember(creditor.id, context.guild.id, guildSetting);
         try {

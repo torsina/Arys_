@@ -4,7 +4,6 @@ const session = require("express-session");
 const passport = require("passport");
 const { Strategy } = require("passport-discord");
 const AuthRouter = require("./routes/auth-routes");
-const ProfileRouter = require("./routes/profile-routes");
 const APIRouter = require("./routes/api-routes");
 const config = require("../../config");
 const { db, webSocket } = config;
@@ -33,7 +32,6 @@ class API {
         // on place les routeurs qui sont des objets dans l'instantiation de la classe
         this.authRouter = new AuthRouter(routerOptions);
         this.APIRouter = new APIRouter(routerOptions);
-        this.profileRouter = new ProfileRouter(routerOptions);
         // on créer une variable "app" pour évité d'avoir à appeler "this.app" à chaque fois
         const { app } = this;
 
@@ -80,7 +78,6 @@ class API {
 
         // on lie les routeurs à leur routes
         app.use("/auth", this.authRouter.router);
-        app.use("/profile", this.profileRouter.router);
         app.use("/api", this.checkAuth, this.APIRouter.router);
 
         // on utilise le serveur express également comme serveur de fichier statiques
@@ -97,6 +94,9 @@ class API {
             res.sendFile(`${__dirname}/fond.jpg`);
         });
         app.use("/pages", express.static(`${__dirname}/pages`));
+        app.get("/", (req, res) => {
+            res.redirect("/index.html");
+        });
 
         app.get("/logout", (req, res) => {
             req.session.destroy((err) => {

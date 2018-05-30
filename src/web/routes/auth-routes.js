@@ -9,7 +9,7 @@ class authRouter {
         this.router.get("/discord", passport.authenticate("discord", { scope: this.oAuthScopes }));
         this.router.get("/discord/redirect",
             passport.authenticate("discord", { failureRedirect: "/" }), (req, res) => {
-                res.redirect("/info");
+                res.redirect("/");
             }
             // auth success
         );

@@ -23,7 +23,7 @@
     <div class="container-fluid">
 
 
-        <nav class="navbar navbar-default row-md-1 " role="navigation" Id="navbar">
+        <nav class="navbar navbar-default row-md-1" role="navigation" Id="navbar">
             <div class="navbar-header col-md-1 col-md-offset-1">
                 <a class="navbar-brand col-md-1" style="color: red;">
                     <b class="brand">Arys</b>
@@ -31,33 +31,24 @@
             </div>
             <ul  class="nav navbar-nav col-md-5  ">
                 <li class=" col-md-4 navbar-right"> <a id="text-navbar" href="#servers">Servers</a> </li>
-                <li class=" col-md-4 navbar-right "> <a id="text-navbar" href="#home">Home </a> </li>
+                <li class=" col-md-4 navbar-right"> <a id="text-navbar" href="#home">Home </a> </li>
             </ul>
             <form class=" row-md-1 navbar-form navbar-right">
-                <button id="navbar-btn" type="button" class="btn btn-default navbar-btn">login with Discord</button>
+                <a href="/auth/discord">
+                    <button id="navbar-btn" type="button" class="btn btn-default navbar-btn">login with Discord</button>
+                </a>
             </form>
         </nav>
-
         <div class="jumbotron" style=" opacity: 0">
             <div class="container">
             </div>
         </div>
-
-
-
-
-        <!-- angular templating -->
-        <!-- this is where content will be injected -->
         <div ng-view ></div>
 
     <footer class="text-center">
-         <p>View the tutorial on <a href="http://scotch.io/tutorials/javascript/single-page-apps-with-angularjs-routing-and-templating">Scotch.io</a></p>
-
-         <p>View a tutorial on <a href="http://scotch.io/tutorials/javascript/animating-angularjs-apps-ngview">Animating Your Angular Single Page App</a></p>
+         <p>For any question, please contact torsina#2441 on discord</p>
     </footer>
     </div>
 </html>
 
 </body>
-
-</html>
