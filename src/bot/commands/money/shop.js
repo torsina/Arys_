@@ -5,7 +5,7 @@ const { RichEmbed } = require("discord.js");
 const ImageHandling = require("../../../image/ImageHandling");
 module.exports = {
     run: async (context) => { // eslint-disable-line complexity
-        const { guildSetting, guildMember } = context.message;
+        const { args, message: { guildSetting, guildMember } } = context;
         const { shop } = guildSetting;
         const currency = guildSetting.money.name;
         const successEmbed = new RichEmbed()
@@ -14,208 +14,46 @@ module.exports = {
             .setColor("GREEN");
         let errorCategory, errorItem, errorPrice;
         try {
-            switch (context.args[0]) {
+            switch (args[0]) {
                 case "add": {
-                    switch (context.args[1]) {
-                        case "category": {
-                            switch (context.args[2]) {
-                                case "role": {
-                                    const type = context.args[2];
-                                    errorCategory = context.args[3];
-                                    shop.addCategory(type, errorCategory);
-                                    successEmbed.setDescription(context.t("shop.category.success.add", {
-                                        type,
-                                        category: errorCategory
-                                    }));
-                                    context.channel.send(successEmbed);
-                                    await db.editGuildSetting(guildSetting.guildID, guildSetting);
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                        case "item": {
-                            // check le type de la category et faire en fonction de sa
-                            // add item <category> <price> <item>
-                            errorCategory = context.args[2];
-                            const resolvedCategory = shop.checkCategory(context.args[2], true);
-                            errorCategory = resolvedCategory.category.name;
-                            switch (resolvedCategory.category.type) {
-                                case "role": {
-                                    const role = context.args[4];
-                                    errorItem = role.name;
-                                    errorPrice = context.args[3];
-                                    shop.addItem(resolvedCategory.index, { id: role.id, price: errorPrice });
-                                    successEmbed.setDescription(context.t("shop.item.success.add.role", {
-                                        role: role.name,
-                                        category: resolvedCategory.category.name,
-                                        price: errorPrice,
-                                        currency
-                                    }));
-                                    context.channel.send(successEmbed);
-                                    await db.editGuildSetting(guildSetting.guildID, guildSetting);
-                                    break;
-                                }
-                            }
+                    switch (args[1]) {
+                        case "role": {
+
                         }
                     }
                     break;
                 }
                 case "edit": {
-                    errorCategory = context.args[2];
-                    const resolvedCategory = shop.checkCategory(context.args[2], true);
-                    errorCategory = resolvedCategory.category.name;
-                    switch (context.args[1]) {
-                        case "category": {
-                            // edit category <category> <flag options...>
-                            const item = shop.editCategory(resolvedCategory.index, context.flags);
-                            const optionsKeys = Object.keys(item.options);
-                            successEmbed.addField("name", item.name)
-                                .addField("type", item.type);
-                            for (let i = 0, n = optionsKeys.length; i < n; i++) {
-                                const optionKey = optionsKeys[i];
-                                const optionValue = context.flags[optionKey];
-                                successEmbed.addField(optionKey, optionValue);
-                            }
-                            successEmbed.setDescription(context.t("shop.category.success.edit", {
-                                category: resolvedCategory.category.name
-                            }));
-                            break;
-                        }
-                        case "item": {
-                            // edit item <category> <item> <flag options...>
-                            switch (resolvedCategory.category.type) {
-                                case "role": {
-                                    const role = await resolver.role(context.args[3], context.message);
-                                    errorItem = role.name;
-                                    errorPrice = context.args[3];
-                                    const item = shop.editItem(errorCategory, role.id, context.flags);
-                                    successEmbed.addField("name", role.toString());
-                                    const optionsKeys = Object.keys(item);
-                                    for (let i = 0, n = optionsKeys.length; i < n; i++) {
-                                        const optionKey = optionsKeys[i];
-                                        if (optionKey === "id") continue;
-                                        const optionValue = context.flags[optionKey];
-                                        successEmbed.addField(optionKey, optionValue);
-                                    }
-                                    successEmbed.setDescription(context.t("shop.item.success.edit.role", {
-                                        role: role.name,
-                                        category: resolvedCategory.category.name
-                                    }));
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                    await db.editGuildSetting(guildSetting.guildID, guildSetting);
-                    context.channel.send(successEmbed);
-                    break;
-                }
-                case "remove": {
-                    switch (context.args[1]) {
-                        case "category": {
-                            errorCategory = context.args[2];
-                            const result = shop.deleteCategory(errorCategory);
-                            successEmbed.setDescription(context.t("shop.category.success.remove", {
-                                type: result,
-                                category: errorCategory
-                            }));
-                            context.channel.send(successEmbed);
-                            await db.editGuildSetting(guildSetting.guildID, guildSetting);
-                            break;
-                        }
-                        case "item": {
-                            // delete item <category> <item>
-                            errorCategory = context.args[2];
-                            const resolvedCategory = shop.checkCategory(context.args[2], true);
-                            errorCategory = resolvedCategory.category.name;
-                            switch (resolvedCategory.category.type) {
-                                case "role": {
-                                    const role = await resolver.role(context.args[3], context.message);
-                                    errorItem = role.name;
-                                    errorPrice = context.args[3];
-                                    shop.deleteItem(resolvedCategory.index, role.id);
-                                    successEmbed.setDescription(context.t("shop.item.success.remove.role", {
-                                        role: role.name,
-                                        category: resolvedCategory.category.name,
-                                        price: errorPrice,
-                                        currency
-                                    }));
-                                    break;
-                                }
-                            }
-                            context.channel.send(successEmbed);
-                            await db.editGuildSetting(guildSetting.guildID, guildSetting);
-                            break;
-                        }
-                    }
-                    break;
-                }
-                case undefined: {
-                    const balanceString = context.t("money.balance", { user: context.message.author.toString(), amount: guildMember.money.amount, currency });
-                    if (shop.shopArray.length > 0) {
-                        for (let i = 0, n = shop.shopArray.length; i < n; i++) {
-                            const _shop = shop.shopArray[i];
-                            const fieldTitle = _shop.options.header ? _shop.options.header : _shop.name;
-                            let fieldDesc = "";
-                            if (_shop.options.desc) fieldDesc += `${_shop.options.desc}\n`;
-                            fieldDesc += context.t("shop.list.desc", { name: _shop.name, type: _shop.type });
-                            successEmbed.addField(fieldTitle, fieldDesc)
-                                .setDescription(balanceString);
-                        }
-                    } else {
-                        throw new context.message.FriendlyError("shop.noCategory", { currencyDisplay: balanceString });
-                    }
-                    context.channel.send(successEmbed);
-                    break;
-                }
-                default: {
-                    errorCategory = context.args[0];
-                    const resolvedCategory = shop.checkCategory(errorCategory, true);
-                    errorCategory = resolvedCategory.category.name; // eslint-disable-line prefer-destructuring
-                    const maxItems = SHOP.maxPerPage;
-                    const pages = Math.ceil(resolvedCategory.category.items.length / maxItems);
-                    const allItems = resolvedCategory.category.items.slice();
-                    resolvedCategory.category.items = sort(allItems, resolvedCategory.category.options.order);
-                    const requests = [];
-                    const promises = [];
-                    const results = [];
-                    switch (resolvedCategory.category.type) {
+                    switch (args[1]) {
                         case "role": {
-                            if (resolvedCategory.category.url.length === 0 && pages !== 0) {
-                                for (let i = 0; i < pages; i++) {
-                                    const items = allItems.slice(i * maxItems, (i + 1) * maxItems);
-                                    const itemsCopy = [];
-                                    for (let j = 0; j < items.length; j++) {
-                                        const _item = items[j];
-                                        itemsCopy[j] = {};
-                                        const _itemCopy = itemsCopy[j];
-                                        Object.assign(itemsCopy[j], _item);
-                                        const role = context.guild.roles.get(_item.id);
-                                        _itemCopy.hex = role.hexColor === "#000000" ? "#FFFFFF" : role.hexColor;
-                                        _itemCopy.name = role.name;
-                                    }
-                                    requests[i] = {
-                                        type: resolvedCategory.category.type,
-                                        items: itemsCopy
-                                    };
-                                }
-                                for (let i = 0; i < pages; i++) {
-                                    promises[i] = ImageHandling.startProcess(requests[i]);
-                                }
-                                Promise.all(promises).then(async (images) => {
-                                    results.push(...images);
-                                    await send(context, resolvedCategory, successEmbed, results);
-                                });
-                            } else if (pages !== 0) {
-                                await send(context, resolvedCategory, successEmbed, resolvedCategory.category.url);
-                            } else {
-                                throw new context.message.FriendlyError("shop.noItems");
-                            }
+
                         }
                     }
+                    break;
+                }
+                case "delete": {
+                    switch (args[1]) {
+                        case "role": {
 
+                        }
+                    }
+                    break;
+                }
+                case "buy": {
+                    switch (args[1]) {
+                        case "role": {
+
+                        }
+                    }
+                    break;
+                }
+                case "sell": {
+                    switch (args[1]) {
+                        case "role": {
+
+                        }
+                    }
+                    break;
                 }
             }
         } catch (err) {
@@ -260,74 +98,60 @@ module.exports = {
     ],
     argParser: async (message, args) => {
         try {
+            const { length } = args;
             switch (args[0]) {
-                default: {
-                    return args;
-                }
                 case "add": {
                     switch (args[1]) {
-                        default: {
-                            throw new Error();
-                        }
-                        case "category": {
-                            switch (args[2]) {
-                                default: {
-                                    throw new Error();
-                                }
-                                case "role": {
-                                    return args.slice(0, 4);
-                                }
-                            }
-                        }
-                        case "item": {
-                            // category name 2, price 3, item name 4+
-                            args[3] = await message.command.resolver.int(args[3], message, { min: 0 });
-                            args[4] = await message.command.resolver.role(args.slice(4).join(" "), message);
-                            return args.slice(0, 5);
+                        case "role": {
+                            // 2 to length - 2 = role name; length - 1 = price
+                            args[2] = args.slice(2, length - 2);
+                            args[2] = await message.command.resolver.role(args[2], message);
+                            args[3] = await message.command.resolver.int(args[length - 1], message, { min: 0, max: 999999999 });
+                            return args.slice(0, 3);
                         }
                     }
+                    break;
                 }
                 case "edit": {
                     switch (args[1]) {
-                        default: {
-                            throw new Error();
-                        }
-                        case "category": {
+                        case "role": {
+                            args[2] = args.slice(2, length - 2);
+                            args[2] = await message.command.resolver.role(args[2], message);
+                            args[3] = await message.command.resolver.int(args[length - 1], message, { min: 0, max: 999999999 });
                             return args.slice(0, 3);
                         }
-                        case "item": {
-                            const lastArg = args.slice(3);
-                            // category name 2, item name 3
-                            try {
-                                args[3] = await message.command.resolver.role(lastArg, message);
-                                return args.slice(0, 4);
-                            } catch (err) {
-                                args[3] = lastArg;
-                                return args.slice(0, 4);
-                            }
-                        }
                     }
+                    break;
                 }
-                case "remove": {
+                case "delete": {
                     switch (args[1]) {
-                        default: {
-                            throw new Error();
-                        }
-                        case "category": {
-                            return args.slice(0, 3);
-                        }
-                        case "item": {
-                            const lastArg = args.slice(3);
-                            // category name 2, item name 3
-                            try {
-                                args[3] = await message.command.resolver.role(lastArg, message);
-                                return args.slice(0, 4);
-                            } catch (err) {
-                                args[3] = lastArg;
-                                return args.slice(0, 4);
-                            }
+                        case "role": {
+                            args[2] = args.slice(2, length - 1);
+                            args[2] = await message.command.resolver.role(args[2], message);
+                            return args.slice(0, 2);
                         }
                     }
+                    break;
+                }
+                case "buy": {
+                    switch (args[1]) {
+                        case "role": {
+                            args[2] = args.slice(2, length - 1);
+                            args[2] = await message.command.resolver.role(args[2], message);
+                            return args.slice(0, 2);
+                        }
+                    }
+                    break;
+                }
+                case "sell": {
+                    switch (args[1]) {
+                        case "role": {
+                            args[2] = args.slice(2, length - 1);
+                            args[2] = await message.command.resolver.role(args[2], message);
+                            return args.slice(0, 2);
+                        }
+                    }
+                    break;
                 }
             }
         } catch (err) {
