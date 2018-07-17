@@ -55,17 +55,17 @@ db.setGuildSetting = async (data) => {
         guildID: data.guildID,
         permission: data.permission,
         money: data.money._data,
-        shop: data.shop
+        shop: data.shop._data
     };
     return await r.table("guild").insert(query).run();
 };
 
-db.initGuildSetting = async (client, storedGuildArray) => {
+db.initGuildSetting = async (client, storedGuildSettings) => {
     const guildArray = Array.from(client.discordClient.guilds.keys());
     for (let i = 0, n = guildArray.length; i < n; i++) {
         const guildID = guildArray[i];
         // loop through the guilds to check that no one is missing from the database
-        if (!storedGuildArray.get(guildID)) {
+        if (!storedGuildSettings.get(guildID)) {
             const { name } = client.discordClient.guilds.get(guildID);
             await db.setGuildSetting({ guildID: guildID });
             console.log(`added the guild "${name}" to the database`);
@@ -84,9 +84,10 @@ db.editGuildSetting = async (guildID, data, force = false) => {
     const query = {
         guildID: data.guildID,
         permission: data.permission,
-        money: data.money._data,
-        shop: data.shop
+        money: data.money,
+        shop: data.shop._data
     };
+    //console.log(util.inspect(query, false, null));
     if (force) return await r.table("guild").get(guildID).replace(query).run();
     return await r.table("guild").get(guildID).update(query).run();
 };
@@ -181,7 +182,7 @@ db.deleteGuildChannel = async (_channelID) => {
 // guildMember getter/setter
 
 db.setGuildMember = async (data) => {
-    if (!(data instanceof GuildMember)) data = new GuildMember(data);
+    if (!(data instanceof GuildMember)) throw new Error("data is not an instance of GuildMember");
     const guildSettingSave = data.money._deleteGuildSetting();
     await r.table("guildMember").insert(data).run();
     data.money._reloadGuildSetting(guildSettingSave);
@@ -200,7 +201,7 @@ db.getGuildMember = async (memberID, guildID, guildSetting) => {
 };
 
 db.editGuildMember = async (data, force = false) => {
-    if (!(data instanceof GuildMember)) data = new GuildMember(data);
+    if (!(data instanceof GuildMember)) throw new Error("data is not an instance of GuildMember");
     if (!data.id) {
         await db.setGuildMember(data);
         return;

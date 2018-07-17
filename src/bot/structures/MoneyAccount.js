@@ -11,12 +11,7 @@ class MoneyAccount {
         } else {
             this.daily.lastGet = 0;
         }
-        Object.defineProperty(this.daily, "isAvailable", {
-            get: () => {
-                return (this.daily.lastGet + 86400000) < new Date().getTime();
-            }
-        });
-
+        this.daily.isAvailable = (this.daily.lastGet + 86400000) < new Date().getTime();
         this.bet = {};
         if (data.bet) {
             this.bet.amount = data.bet.amount || 0;
@@ -34,7 +29,7 @@ class MoneyAccount {
     }
     editMoney(value, force = false) {
         const result = this.amount + value;
-        if (value < 0 && force === false) throw new Error("money.tooPoor");
+        if ((result < 0) && force === false) throw new FriendlyError("money.tooPoor");
         this.amount = result;
         return result;
     }

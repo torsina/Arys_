@@ -13,8 +13,6 @@
   "perms.error.notNeededSubField": "You used the argument `allow/deny`, however it is not needed for this permission.",
   "perms.error.wrongType": "The value `{{value}}` couldn't be resolved to a {{expectedType}}",
   "perms.error.notFollowingNumberRule": "The value `{{value}}` is too `{{rule}}` compared to the limit `{{limit}}`",
-  "words.low": "low",
-  "words.high": "high",
   "currency.success": "You successfully set the {{option}} to {{value}}",
   "currency.option.name": "currency name",
   "currency.option.accounts.amount": "base amount for members",
@@ -48,7 +46,16 @@
   "daily.other": "{{user}}, you gave your {{value}} {{currency}} to {{taggedUser}}",
   "daily.tooSoon": "{{user}}, you can get your next dailies in {{time}}",
   "daily.timeDisplay": "{{h}} hours, {{m}} minutes and {{s}} seconds",
-  "shop.role.delete.notFound": "The role you wanted to remove from the shop couldn't be found",
+  "shop.delete.role.notFound": "The role you wanted to remove from the shop couldn't be found",
+  "shop.delete.role.success": "The role `{{roleName}}` was successfully deleted.",
+  "shop.add.role.success": "The role `{{roleName}}` was successfully added for {{price}} {{currency}}.",
+  "shop.edit.role.success": "The role `{{roleName}}` was successfully edited to the price of {{price}} {{currency}}.",
+  "shop.display.noRoles": "The role shop is currently empty\nYou can add roles to it using `{{roleAddUsage}}`",
+  "shop.display.roleShopTitle": "Role shop",
+  "shop.role.notInShop": "The role `{{roleName}}` is not in the shop.",
+  "shop.buy.alreadyHaveRole": "You already have the role `{{roleName}}`.",
+  "shop.buy.role.success": "You successfully bought the role `{{roleName}}` for {{price}} {{currency}}.",
+  "shop.sell.role.success": "You successfully sold the role `{{roleName}}` for {{price}} {{currency}}.",
   "kick.success": "{{member}} was successfully kicked from the server.",
   "kick.botTooLow": "The member {{member}} has higher roles than me, I can't kick him.",
   "ban.success": "{{member}} was successfully banned from the server.",
@@ -61,9 +68,7 @@
   "words.oldValue": "Old value",
   "words.newValue": "New value",
   "words.page": "Page {{current}}/{{total}}",
-  "shop.usage.add.category.role": "`{{prefix}}shop add category role rainbow` will create a shop category nammed `rainbow`",
-  "shop.usage.add.item": "`{{prefix}}shop add item rainbow 1500 A Rainbowy role` will add the role `A Rainbowy role` to the shop category `rainbow` and set it's price at `1500` `{{currency}}`",
-  "shop.usage.edit.category": "`{{prefix}}shop edit category rainbow --header :rainbow:` will set the header name of the `rainbow` category in `{{prefix}}shop display` to :rainbow:",
-  "shop.usage.edit.item": "`{{prefix}}shop edit item --price`"
+  "words.low": "low",
+  "words.high": "high"
 
 }

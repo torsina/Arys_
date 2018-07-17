@@ -187,7 +187,7 @@ constants.GUILDSETTING_DEFAULT = {
             max: 30
         }
     },
-    moneyNameLength: 40,
+    moneyNameLength: 40
 };
 
 constants.IMAGE_TYPES = ["role"];

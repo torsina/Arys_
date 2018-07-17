@@ -6,7 +6,8 @@ class ShopSetting {
     constructor(data) {
         if (data) {
             this._data = data;
-            this.roles = this._data.roles;
+            this.roles = this._data.roles || [];
+            this.rolesURL = this._data.rolesURL;
             this.rolesMap = new Map();
             for (let i = 0, n = this.roles.length; i < n; i++) {
                 const item = this.roles[i];
@@ -19,8 +20,9 @@ class ShopSetting {
             }
 
         } else {
-            this._data = { roles: [] };
+            this._data = { roles: [], rolesURL: [] };
             this.roles = this._data.roles;
+            this.rolesURL = this._data.rolesURL;
             this.rolesMap = new Map();
         }
     }
@@ -29,6 +31,8 @@ class ShopSetting {
     }
     addRole(role, price) {
         if (this.hasRole(role)) return this.editRole(role, price);
+        // delete image links since outdated
+        this._data.rolesURL = [];
         const item = {
             id: role.id,
             price
@@ -41,16 +45,22 @@ class ShopSetting {
             index
         };
         this.rolesMap.set(role.id, itemMap);
+        return "add";
     }
     editRole(role, price) {
         if (!this.hasRole(role)) return this.addRole(role, price);
+        // delete image links since outdated
+        this._data.rolesURL = [];
         const itemMap = this.rolesMap.get(role.id);
         const item = this.roles[itemMap.index];
         itemMap.price = price;
         item.price = price;
+        return "edit";
     }
     deleteRole(role) {
-        if (!this.hasRole(role)) return new FriendlyError("shop.role.delete.notFound");
+        if (!this.hasRole(role)) throw new FriendlyError("shop.role.delete.notFound");
+        // delete image links since outdated
+        this._data.rolesURL = [];
         const itemMap = this.rolesMap.get(role.id);
         this.roles.splice(itemMap.index, 1);
         for (let i = itemMap.index, n = this.roles.length; i < n; i++) {
@@ -58,6 +68,7 @@ class ShopSetting {
             iteratedItem.index = i;
         }
         this.rolesMap.delete(role.id);
+        return "delete";
     }
     getRole(role) {
         return this.rolesMap.get(role.id);

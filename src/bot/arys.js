@@ -29,10 +29,12 @@ class Arys {
             this.settings = await db.getGuildSetting(guilds.keys());
             // start setting stream to stay in sync
             this.settingStream.on("data", update => {
+                const { guildID } = update.new_val;
                 // cache update snippet
-                if (this.client.discordClient.guilds.get(update.new_val.guildID)) {
+                if (this.client.discordClient.guilds.has(guildID)) {
                     const updated = new GuildSetting(update.new_val);
-                    this.settings.set(update.new_val.guildID, updated);
+                    console.log(updated.shop);
+                    this.settings.set(guildID, updated);
                 }
             });
             // add every guild that would have join while the bot was offline
@@ -99,7 +101,7 @@ class Arys {
                 await this.client.init();
                 next();
             })
-            .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler, async (message, next) => { await middlewares.argParser(message, next); })
+            .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler)
             .use("message", async (message, next) => {
                 // check for non-guild channel
                 if (message.guild) {
@@ -155,7 +157,7 @@ class Arys {
                 }
                 return next();
             })
-            .use("message", middlewares.activity, middlewares.permission)
+            .use("message", async (message, next) => { await middlewares.argParser(message, next); }, middlewares.activity, middlewares.permission)
             .set("commands", "./bot/commands")
             .set("locales", "./bot/locales")
             .set("listeners", "./bot/events");
