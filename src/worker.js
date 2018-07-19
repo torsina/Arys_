@@ -42,9 +42,9 @@ switch (workerConfig.type) {
 
 process.on("unhandledRejection", err => {
     if (config.sentry) Raven.captureException(err);
-    else console.error(`${moment().format("Y-M-D H:m:s Z")} Uncaught Promise Error: \n ${err.stack}`);
+    console.error(`${moment().format("Y-M-D H:m:s Z")} Uncaught Promise Error: \n ${err.stack}`);
 });
 
 process.on("uncaughtException", err => {
-    if (!config.sentry) console.error(`${moment().format("Y-M-D H:m:s Z")} Uncaught Exception Error: \n ${err.stack}`);
+    console.error(`${moment().format("Y-M-D H:m:s Z")} Uncaught Exception Error: \n ${err.stack}`);
 });
