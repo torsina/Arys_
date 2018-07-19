@@ -1,6 +1,6 @@
 // libs
 const wiggle = require("discord.js-wiggle");
-const fs = require("fs");
+const { ResolverError } = require("discord.js-wiggle/lib/resolver");
 const util = require("util");
 const WebSocket = require("ws");
 // utils
@@ -125,6 +125,7 @@ class Arys {
                 }
                 message.constants = constants;
                 message.FriendlyError = FriendlyError;
+                message.ResolverError = ResolverError;
                 message.BitField = BitField;
                 message.isOwner = (this.client.locals.options.owner === message.author.id);
                 return next();

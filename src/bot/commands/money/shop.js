@@ -117,7 +117,6 @@ module.exports = {
                             const pageArraySent = [];
                             for (let j = 0; j < pageArray.length; j++) {
                                 const item = pageArray[j];
-                                console.log(item);
                                 const role = message.guild.roles.get(item.id);
                                 pageArraySent.push({
                                     name: role.name,
@@ -192,41 +191,78 @@ module.exports = {
         // price
     ],
     argParser: async (message, args) => {
+        const { length } = args;
+        const { ResolverError, FriendlyError } = message;
         try {
-            const { length } = args;
             switch (args[0]) {
                 case "add": {
                     switch (args[1]) {
                         case "role": {
-                            // 2 to length - 2 = role name; length - 1 = price
-                            args[2] = args.slice(2, length - 1).join(" ");
-                            args[2] = await message.command.resolver.role(args[2], message);
-                            args[3] = await message.command.resolver.int(args[length - 1], message, { min: 0, max: 999999999 });
-                            return args.slice(0, 4);
+                            try {
+                                if (args.length >= 4) throw new TypeError;
+                                args[2] = args.slice(2, length - 1).join(" ");
+                                args[2] = await message.command.resolver.role(args[2], message);
+                                args[3] = await message.command.resolver.int(args[length - 1], message, { min: 0, max: 999999999 });
+                                return args.slice(0, 4);
+                            } catch (innerError) {
+                                if (innerError instanceof ResolverError) {
+                                    throw new FriendlyError(innerError.message);
+                                } else if (innerError instanceof TypeError) {
+                                    throw new FriendlyError("shop.add.role.usage");
+                                } else {
+                                    throw innerError;
+                                }
+                            }
+                        }
+                        default: {
+                            throw new FriendlyError("shop.add.usage");
                         }
                     }
-                    break;
                 }
                 case "edit": {
                     switch (args[1]) {
                         case "role": {
-                            args[2] = args.slice(2, length - 1).join(" ");
-                            args[2] = await message.command.resolver.role(args[2], message);
-                            args[3] = await message.command.resolver.int(args[length - 1], message, { min: 0, max: 999999999 });
-                            return args.slice(0, 4);
+                            try {
+                                args[2] = args.slice(2, length - 1).join(" ");
+                                args[2] = await message.command.resolver.role(args[2], message);
+                                args[3] = await message.command.resolver.int(args[length - 1], message, { min: 0, max: 999999999 });
+                                return args.slice(0, 4);
+                            } catch (innerError) {
+                                if (innerError instanceof ResolverError) {
+                                    throw new FriendlyError(innerError.message);
+                                } else if (innerError instanceof TypeError) {
+                                    throw new FriendlyError("shop.edit.role.usage");
+                                } else {
+                                    throw innerError;
+                                }
+                            }
+                        }
+                        default: {
+                            throw new FriendlyError("shop.edit.usage");
                         }
                     }
-                    break;
                 }
                 case "delete": {
                     switch (args[1]) {
                         case "role": {
-                            args[2] = args.slice(2, length).join(" ");
-                            args[2] = await message.command.resolver.role(args[2], message);
-                            return args.slice(0, 3);
+                            try {
+                                args[2] = args.slice(2, length).join(" ");
+                                args[2] = await message.command.resolver.role(args[2], message);
+                                return args.slice(0, 3);
+                            } catch (innerError) {
+                                if (innerError instanceof ResolverError) {
+                                    throw new FriendlyError(innerError.message);
+                                } else if (innerError instanceof TypeError) {
+                                    throw new FriendlyError("shop.delete.role.usage");
+                                } else {
+                                    throw innerError;
+                                }
+                            }
+                        }
+                        default: {
+                            throw new FriendlyError("shop.delete.usage");
                         }
                     }
-                    break;
                 }
                 case "roles": {
                     return args.slice(0, 1);
@@ -234,29 +270,52 @@ module.exports = {
                 case "buy": {
                     switch (args[1]) {
                         case "role": {
-                            args[2] = args.slice(2, length).join(" ");
-                            args[2] = await message.command.resolver.role(args[2], message);
-                            return args.slice(0, 3);
+                            try {
+                                args[2] = args.slice(2, length).join(" ");
+                                args[2] = await message.command.resolver.role(args[2], message);
+                                return args.slice(0, 3);
+                            } catch (innerError) {
+                                if (innerError instanceof ResolverError) {
+                                    throw new FriendlyError(innerError.message);
+                                } else if (innerError instanceof TypeError) {
+                                    throw new FriendlyError("shop.buy.role.usage");
+                                } else {
+                                    throw innerError;
+                                }
+                            }
+                        }
+                        default: {
+                            throw new FriendlyError("shop.buy.usage");
                         }
                     }
-                    break;
                 }
                 case "sell": {
                     switch (args[1]) {
                         case "role": {
-                            args[2] = args.slice(2, length).join(" ");
-                            args[2] = await message.command.resolver.role(args[2], message);
-                            return args.slice(0, 3);
+                            try {
+                                args[2] = args.slice(2, length).join(" ");
+                                args[2] = await message.command.resolver.role(args[2], message);
+                                return args.slice(0, 3);
+                            } catch (innerError) {
+                                if (innerError instanceof ResolverError) {
+                                    throw new FriendlyError(innerError.message);
+                                } else if (innerError instanceof TypeError) {
+                                    throw new FriendlyError("shop.sell.role.usage");
+                                } else {
+                                    throw innerError;
+                                }
+                            }
+                        }
+                        default: {
+                            throw new FriendlyError("shop.sell.usage");
                         }
                     }
-                    break;
                 }
                 default: {
-                    return [];
+                    throw new FriendlyError("shop.usage");
                 }
             }
         } catch (err) {
-            console.error(err);
             throw err;
         }
     }

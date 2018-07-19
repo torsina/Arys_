@@ -1,6 +1,6 @@
 class FriendlyError extends Error {
-    constructor(message, data) {
-        super(message);
+    constructor(error, data = {}) {
+        super(error);
         this.data = data;
     }
 }
