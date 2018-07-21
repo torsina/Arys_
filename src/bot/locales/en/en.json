@@ -56,6 +56,7 @@
   "shop.buy.alreadyHaveRole": "You already have the role `{{roleName}}`.",
   "shop.buy.role.success": "You successfully bought the role `{{roleName}}` for {{price}} {{currency}}.",
   "shop.sell.role.success": "You successfully sold the role `{{roleName}}` for {{price}} {{currency}}.",
+  ""
   "kick.success": "{{member}} was successfully kicked from the server.",
   "kick.botTooLow": "The member {{member}} has higher roles than me, I can't kick him.",
   "ban.success": "{{member}} was successfully banned from the server.",
@@ -63,6 +64,7 @@
   "prune.success": "Successfully deleted {{amount}} messages",
   "prune.messageTooOld": "Successfully deleted {{deletedAmount}} messages, however I couldn't delete {{notDeletedAmount}} because they were too old",
   "arys.lackPermission": "I need the permission `{{permission}} to perform this action`",
+  "arys.usageWithError": "{{error}}\n",
   "member.lackPermission": "You need the permission `{{permission}} to use this command`",
   "words.value": "Value",
   "words.oldValue": "Old value",

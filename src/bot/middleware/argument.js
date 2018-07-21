@@ -11,10 +11,6 @@ module.exports = async (message, next) => {
                 error: err.message,
                 data: err.data
             };
-            if (!error.error) {
-                error.error = "wiggle.missingArgs";
-                error.data = { command: message.command.name, usage: "" };
-            }
             const { embed } = new message.command.EmbedError(message, error);
             message.channel.send(embed);
             return;

@@ -199,15 +199,15 @@ module.exports = {
                     switch (args[1]) {
                         case "role": {
                             try {
-                                if (args.length >= 4) throw new TypeError;
+                                if (args.length < 4) throw new FriendlyError;
                                 args[2] = args.slice(2, length - 1).join(" ");
                                 args[2] = await message.command.resolver.role(args[2], message);
                                 args[3] = await message.command.resolver.int(args[length - 1], message, { min: 0, max: 999999999 });
                                 return args.slice(0, 4);
                             } catch (innerError) {
                                 if (innerError instanceof ResolverError) {
-                                    throw new FriendlyError(innerError.message);
-                                } else if (innerError instanceof TypeError) {
+                                    throw new FriendlyError("arys.usageWithError", { usage: "shop.add.role.usage", error: innerError.message });
+                                } else if (innerError instanceof FriendlyError) {
                                     throw new FriendlyError("shop.add.role.usage");
                                 } else {
                                     throw innerError;
@@ -223,13 +223,14 @@ module.exports = {
                     switch (args[1]) {
                         case "role": {
                             try {
+                                if (args.length < 4) throw new FriendlyError;
                                 args[2] = args.slice(2, length - 1).join(" ");
                                 args[2] = await message.command.resolver.role(args[2], message);
                                 args[3] = await message.command.resolver.int(args[length - 1], message, { min: 0, max: 999999999 });
                                 return args.slice(0, 4);
                             } catch (innerError) {
                                 if (innerError instanceof ResolverError) {
-                                    throw new FriendlyError(innerError.message);
+                                    throw new FriendlyError("arys.usageWithError", { usage: "shop.edit.role.usage", error: innerError.message });
                                 } else if (innerError instanceof TypeError) {
                                     throw new FriendlyError("shop.edit.role.usage");
                                 } else {
@@ -246,12 +247,13 @@ module.exports = {
                     switch (args[1]) {
                         case "role": {
                             try {
+                                if (args.length < 3) throw new FriendlyError;
                                 args[2] = args.slice(2, length).join(" ");
                                 args[2] = await message.command.resolver.role(args[2], message);
                                 return args.slice(0, 3);
                             } catch (innerError) {
                                 if (innerError instanceof ResolverError) {
-                                    throw new FriendlyError(innerError.message);
+                                    throw new FriendlyError("arys.usageWithError", { usage: "shop.delete.role.usage", error: innerError.message });
                                 } else if (innerError instanceof TypeError) {
                                     throw new FriendlyError("shop.delete.role.usage");
                                 } else {
@@ -271,12 +273,13 @@ module.exports = {
                     switch (args[1]) {
                         case "role": {
                             try {
+                                if (args.length < 3) throw new FriendlyError;
                                 args[2] = args.slice(2, length).join(" ");
                                 args[2] = await message.command.resolver.role(args[2], message);
                                 return args.slice(0, 3);
                             } catch (innerError) {
                                 if (innerError instanceof ResolverError) {
-                                    throw new FriendlyError(innerError.message);
+                                    throw new FriendlyError("arys.usageWithError", { usage: "shop.buy.role.usage", error: innerError.message });
                                 } else if (innerError instanceof TypeError) {
                                     throw new FriendlyError("shop.buy.role.usage");
                                 } else {
@@ -293,12 +296,13 @@ module.exports = {
                     switch (args[1]) {
                         case "role": {
                             try {
+                                if (args.length < 3) throw new FriendlyError;
                                 args[2] = args.slice(2, length).join(" ");
                                 args[2] = await message.command.resolver.role(args[2], message);
                                 return args.slice(0, 3);
                             } catch (innerError) {
                                 if (innerError instanceof ResolverError) {
-                                    throw new FriendlyError(innerError.message);
+                                    throw new FriendlyError("arys.usageWithError", { usage: "shop.sell.role.usage", error: innerError.message });
                                 } else if (innerError instanceof TypeError) {
                                     throw new FriendlyError("shop.sell.role.usage");
                                 } else {
