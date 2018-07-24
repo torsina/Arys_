@@ -1,0 +1,4 @@
+{
+  "ban.success": "{{member}} was successfully banned from the server.",
+  "ban.botTooLow": "The member {{member}} has higher roles than me, I can't ban him."
+}

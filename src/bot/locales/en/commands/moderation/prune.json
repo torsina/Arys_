@@ -1,0 +1,4 @@
+{
+  "prune.success": "Successfully deleted {{amount}} messages",
+  "prune.messageTooOld": "Successfully deleted {{deletedAmount}} messages, however I couldn't delete {{notDeletedAmount}} because they were too old"
+}

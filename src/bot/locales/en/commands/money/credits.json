@@ -1,0 +1,4 @@
+{
+  "credits.self": "{{user}}, you have {{value}} {{currency}}",
+  "credits.other": "{{user}}'s balance: {{value}} {{currency}}"
+}

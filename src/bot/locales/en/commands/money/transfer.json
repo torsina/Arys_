@@ -1,0 +1,5 @@
+{
+  "transfer.success": "{{debtor}} transfered {{value}} {{currency}} to {{creditor}}",
+  "transfer.fail": "{{debtor}} you don't have enough {{currency}} to perform this transaction",
+  "transfer.negativeError": "{{debtor}}, you can't transfer negative number"
+}

@@ -1,0 +1,6 @@
+{
+  "daily.self": "{{user}}, you received your {{value}} {{currency}}",
+  "daily.other": "{{user}}, you gave your {{value}} {{currency}} to {{taggedUser}}",
+  "daily.tooSoon": "{{user}}, you can get your next dailies in {{time}}",
+  "daily.timeDisplay": "{{h}} hours, {{m}} minutes and {{s}} seconds"
+}

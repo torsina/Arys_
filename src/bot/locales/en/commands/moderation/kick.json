@@ -1,0 +1,4 @@
+{
+  "kick.success": "{{member}} was successfully kicked from the server.",
+  "kick.botTooLow": "The member {{member}} has higher roles than me, I can't kick him."
+}

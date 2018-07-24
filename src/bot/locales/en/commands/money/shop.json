@@ -1,0 +1,12 @@
+{
+  "shop.delete.role.notFound": "The role you wanted to remove from the shop couldn't be found",
+  "shop.delete.role.success": "The role `{{roleName}}` was successfully deleted.",
+  "shop.add.role.success": "The role `{{roleName}}` was successfully added for {{price}} {{currency}}.",
+  "shop.edit.role.success": "The role `{{roleName}}` was successfully edited to the price of {{price}} {{currency}}.",
+  "shop.display.noRoles": "The role shop is currently empty\nYou can add roles to it using `{{roleAddUsage}}`",
+  "shop.display.roleShopTitle": "Role shop",
+  "shop.role.notInShop": "The role `{{roleName}}` is not in the shop.",
+  "shop.buy.alreadyHaveRole": "You already have the role `{{roleName}}`.",
+  "shop.buy.role.success": "You successfully bought the role `{{roleName}}` for {{price}} {{currency}}.",
+  "shop.sell.role.success": "You successfully sold the role `{{roleName}}` for {{price}} {{currency}}."
+}

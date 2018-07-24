@@ -1,0 +1,8 @@
+{
+  "words.value": "Value",
+  "words.oldValue": "Old value",
+  "words.newValue": "New value",
+  "words.page": "Page {{current}}/{{total}}",
+  "words.low": "low",
+  "words.high": "high"
+}

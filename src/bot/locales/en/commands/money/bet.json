@@ -1,0 +1,5 @@
+{
+  "bet.tooLow": "Your bet is too low, min: `{{min}}`",
+  "bet.win": "{{user}}, you won {{value}} {{currency}}!",
+  "bet.lost": "{{user}}, you lost {{value}} {{currency}}!"
+}
