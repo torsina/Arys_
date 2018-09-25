@@ -93,14 +93,14 @@ module.exports = {
                     return args.slice(0, 1);
                 }
                 case "set": {
-                    if (args[4]) {
-                        switch (args[4]) {
-                            default: {
-                                throw new Error();
-                            }
+                    if (args[3]) {
+                        switch (args[3]) {
                             case "allow":
                             case "deny": {
                                 return args.slice(0, 5);
+                            }
+                            default: {
+                                throw new Error();
                             }
                         }
                     } else {

@@ -2,6 +2,6 @@
   "money.tooPoor": "You don't have enough {{currency}} for that!",
   "money.balance": "{{user}}, you have {{amount}} {{currency}}",
   "arys.lackPermission": "I need the permission `{{permission}} to perform this action`",
-  "arys.usageWithError": "{{error}}\n",
+  "arys.usageWithError": "{{error}}\n\nUsage: ```css\n{{usage}}```",
   "member.lackPermission": "You need the permission `{{permission}} to use this command`"
 }

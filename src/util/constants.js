@@ -97,11 +97,13 @@ constants.PERMISSION_BITFIELD = {
         shop: {
             visible: 1 << 0,
             edit: 1 << 1,
-            see: 1 << 2
+            buy: 1 << 2,
+            sell: 1 << 3
         },
         daily: {
             visible: 1 << 0,
-            base: 1 << 1
+            self: 1 << 1,
+            other: 1 << 2
         },
         transfer: {
             visible: 1 << 0,
@@ -145,10 +147,12 @@ constants.PERMISSION_NODE = {
         shop: {
             add: "money.shop.edit",
             edit: "money.shop.edit",
-            remove: "money.shop.edit"
+            remove: "money.shop.edit",
+            buy: "money.shop.buy",
+            sell: "money.shop.sell"
         },
         daily: {
-            base: "money.daily.base"
+            base: "money.daily.self"
         },
         transfer: {
             base: "money.transfer.base"

@@ -316,7 +316,12 @@ module.exports = {
                     }
                 }
                 default: {
-                    throw new FriendlyError("shop.usage");
+                    const permission = await message.BitField.check("money.shop.edit", message, message.guildSetting);
+                    if (permission.result) {
+                        throw new FriendlyError("shop.usageWithEdit");
+                    } else {
+                        throw new FriendlyError("shop.usageWithoutEdit");
+                    }
                 }
             }
         } catch (err) {
