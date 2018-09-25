@@ -33,7 +33,6 @@ class Arys {
                 // cache update snippet
                 if (this.client.discordClient.guilds.has(guildID)) {
                     const updated = new GuildSetting(update.new_val);
-                    console.log(updated.shop);
                     this.settings.set(guildID, updated);
                 }
             });
@@ -94,19 +93,30 @@ class Arys {
             })
         };
         this.client.set("owner", "306418399242747906")
-            .set("prefixes", ["mention", `"`])
+            .set("prefixes", [`"`])
             .set("token", config.token)
             .set("commandOptions", { sendTyping: true, embedError: true })
+            .set("getPrefixes", (message) => {
+                // function that will return the prefix of the guild based on the message object
+                const guildPrefix = message.guildSetting.prefix;
+                const botPrefix = this.client.get("prefixes");
+                const prefix = guildPrefix ? guildPrefix : botPrefix;
+                message.prefix = prefix;
+                return prefix;
+            })
             .use("ready", async (next) => {
                 await this.client.init();
                 next();
+            })
+            .use("message", (message, next) => {
+                if (message.guild) message.guildSetting = this.settings.get(message.guild.id);
+                return next();
             })
             .use("message", wiggle.middleware.commandParser(), wiggle.middleware.argHandler)
             .use("message", async (message, next) => {
                 // check for non-guild channel
                 if (message.guild) {
                     const guildID = message.guild.id;
-                    message.guildSetting = this.settings.get(guildID);
                     if (message.command) {
                         // additional data command-specific
                         switch (message.command.name) {

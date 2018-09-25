@@ -9,16 +9,9 @@
   "shop.buy.alreadyHaveRole": "You already have the role `{{roleName}}`.",
   "shop.buy.role.success": "You successfully bought the role `{{roleName}}` for {{price}} {{currency}}.",
   "shop.sell.role.success": "You successfully sold the role `{{roleName}}` for {{price}} {{currency}}.",
-  "shop.usageWithEdit" : "{{ShopaddUsage}}\n{{editUsage}}\n{{deleteUsage}}\n{{buyUsage}}\n{{sellUsage}}",
-  "shop.usageWithoutEdit": "{{deleteUsage}}\n{{buyUsage}}\n{{sellUsage}}",
-  "shop.add.usage" : "{{addRoleUsage}}",
   "shop.add.role.usage": "{{prefix}}shop add role <role> <price> - Add a role to the role shop for the users to buy",
-  "shop.edit.usage": "{{editRoleUsage}}",
   "shop.edit.role.usage": "{{prefix}}shop edit role <role> <price> - Edit a role in the role shop",
-  "shop.delete.usage": "{{deleteRoleUsage}}",
   "shop.delete.role.usage": "{{prefix}}shop delete role <role> - Delete a role from the role shop",
-  "shop.buy.usage": "{{buyRoleUsage}}",
   "shop.buy.role.usage": "{{prefix}}shop buy role <role> - Buy a role from the role shop",
-  "shop.sell.usage": "{{buyRoleUsage}}",
   "shop.sell.role.usage": "{{prefix}}shop buy role <role> - Buy a role from the role shop, will give you back half the price of the role"
 }

@@ -9,6 +9,7 @@ class guildSetting {
          */
         this.guildID = data.guildID;
         if (!this.guildID) throw new TypeError("guildID is undefined");
+        this.prefix = data.prefix;
 
         if (data.permission) {
             this.permission = {
