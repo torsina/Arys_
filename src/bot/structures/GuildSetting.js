@@ -1,6 +1,6 @@
 const MoneySetting = require("./MoneySetting");
 const ShopLists = require("./ShopSetting");
-const misc = require("../../util/misc");
+const FriendlyError = require("./FriendlyError");
 class guildSetting {
     constructor(data) {
         /**
@@ -9,7 +9,7 @@ class guildSetting {
          */
         this.guildID = data.guildID;
         if (!this.guildID) throw new TypeError("guildID is undefined");
-        this.prefix = data.prefix;
+        this.prefixes = data.prefixes || [];
 
         if (data.permission) {
             this.permission = {
@@ -22,6 +22,14 @@ class guildSetting {
         }
         this.money = new MoneySetting(data.money);
         this.shop = new ShopLists(data.shop);
+    }
+    addPrefix(prefix) {
+        if (!this.prefixes.includes(prefix)) this.prefixes.push(prefix);
+        else throw new FriendlyError("setting.prefix.alreadyExists");
+    }
+    deletePrefix(prefix) {
+        const index = this.prefixes.indexOf(prefix);
+        if (index === 0) throw new FriendlyError("setting.prefix.notExists");
     }
 }
 module.exports = guildSetting;

@@ -101,7 +101,7 @@ class Arys {
                 const guildPrefix = message.guildSetting.prefix;
                 const botPrefix = this.client.get("prefixes");
                 const prefix = guildPrefix ? guildPrefix : botPrefix;
-                message.prefix = prefix;
+                message.prefixes = botPrefix.unshift(guildPrefix);
                 return prefix;
             })
             .use("ready", async (next) => {

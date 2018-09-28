@@ -10,7 +10,7 @@ module.exports = async (message, next) => {
             const error = {
                 error: err.message
             };
-            Object.assign(error.data = {}, err.data, { prefix: message.prefix[0]});
+            Object.assign(error.data = {}, err.data, { prefix: message.prefixes[0]});
             console.log(error);
             const { embed } = new message.command.EmbedError(message, error);
             message.channel.send(embed);
