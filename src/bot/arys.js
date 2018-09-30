@@ -98,11 +98,10 @@ class Arys {
             .set("commandOptions", { sendTyping: true, embedError: true })
             .set("getPrefixes", (message) => {
                 // function that will return the prefix of the guild based on the message object
-                const guildPrefix = message.guildSetting.prefix;
+                const guildPrefix = message.guildSetting.prefixes;
                 const botPrefix = this.client.get("prefixes");
-                const prefix = guildPrefix ? guildPrefix : botPrefix;
-                message.prefixes = botPrefix.unshift(guildPrefix);
-                return prefix;
+                message.prefixes = guildPrefix.slice(0).concat(botPrefix);
+                return message.prefixes;
             })
             .use("ready", async (next) => {
                 await this.client.init();
