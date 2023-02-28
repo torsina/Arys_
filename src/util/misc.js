@@ -25,6 +25,11 @@ class Misc {
      * @param usedPath
      * @param index
      */
+    // From what I remember this is an extremely janky way to form a permission field from a bitfield, you need to keep
+    // track of value and reference values and never cross the 2. As you can see I already did this 6 years agon when I was in highschool
+    // who would do that in hs now ? 
+    // In hindsight this would have been wayyyyy shorter which a language closer to memory (C:C++/Rust) come to mind, 
+    //but then it would have been even harder to integrate even if it was on a different thread
     setup(endObject = {}, dataObject = {}, defaultObject = {}, start = true, usedPath, index) {
         if (start) {
             const varKeys = this.iterate(defaultObject);
